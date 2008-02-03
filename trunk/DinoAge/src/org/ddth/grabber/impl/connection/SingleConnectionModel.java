@@ -20,13 +20,17 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.ddth.grabber.core.connection.ConnectionModel;
+import org.ddth.grabber.core.connection.Request;
 import org.ddth.grabber.core.connection.Session;
 import org.ddth.grabber.core.handler.ConnectionListener;
-import org.ddth.grabber.core.handler.NavigationHandler;
+import org.ddth.grabber.core.handler.Processor;
 
 public class SingleConnectionModel implements ConnectionModel {
 
-	HttpClient httpClient;
+	/**
+	 * Sub-class use for directly requesting
+	 */
+	private HttpClient httpClient;
 	
 	private Log logger = LogFactory.getLog(Session.class);
 	private List<ConnectionListener> listeners;
@@ -35,12 +39,16 @@ public class SingleConnectionModel implements ConnectionModel {
 		this.httpClient = httpClient;
 		this.listeners = new ArrayList<ConnectionListener>();
 	}
+
+	public void sendRequest(final Request request) {
+		String sURL = request.getURL();
+		Processor contentHandler = request.getProcessor();
 	
-	public void sendRequest(String sURL, NavigationHandler contentHandler) {
 		HttpEntity entity = null;
 		boolean isSuccess = false;
 		try {
 			HttpGet httpGet = new HttpGet(sURL);
+			// Prefer gzip for optimizing bandwidth
 			httpGet.addHeader("Accept-Encoding", "gzip");
 			printHeader(httpGet.getAllHeaders());
 			notifyRequesting(sURL);
@@ -62,8 +70,6 @@ public class SingleConnectionModel implements ConnectionModel {
 		finally {
 			// If we could be sure that the stream of the entity has been
 			// closed, we wouldn't need this code to release the connection.
-			// However, EntityUtils.toString(...) can throw an exception.
-
 			// If there is no entity, the connection is already released
 			if (entity != null && !entity.isStreaming()) {
 				try {
@@ -78,7 +84,7 @@ public class SingleConnectionModel implements ConnectionModel {
 		}
 	}
 
-	void printHeader(Header[] headers) {
+	private void printHeader(Header[] headers) {
 		logger.debug("----------------------------------------");
 		for (int i = 0; i < headers.length; i++) {
 			logger.debug(headers[i]);

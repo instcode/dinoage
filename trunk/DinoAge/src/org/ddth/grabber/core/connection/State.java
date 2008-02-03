@@ -7,11 +7,7 @@
  **************************************************/
 package org.ddth.grabber.core.connection;
 
-import java.util.Map;
-
-import org.ddth.grabber.core.handler.NavigationHandler;
-
 public interface State {
-	public Map<String, Boolean> getCompletedMap();
-	public Map<String, NavigationHandler> getOutgoingMap();
+	public boolean queue(Request request);
+	public Request poll();
 }

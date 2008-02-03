@@ -8,110 +8,156 @@
 package org.ddth.dinoage.model;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
-import java.nio.channels.OverlappingFileLockException;
-import java.util.Properties;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ddth.dinoage.ResourceManager;
 
-public class Workspace implements Runnable {
+public class Workspace {
+	private static final String LOCK_FILE = ".lock";
+	
 	private Log logger = LogFactory.getLog(Workspace.class);
-	private Properties map;
+	private Map<String, Profile> map = new HashMap<String, Profile>();
 	private File workspaceFolder;
+	private Profile activeProfile;
+	private FileLock lock;
 	
 	public Workspace(File workspaceFolder) {
 		this.workspaceFolder = workspaceFolder;
-		Thread monitor = new Thread(this);
-		monitor.setDaemon(true);
 	}
 	
 	public void loadWorkspace() throws IOException {
-		map = new Properties();
-		File resumeFile = new File(workspaceFolder, ResourceManager.RESUME_FILE_NAME);
-		if (resumeFile.canRead()) {
-			InputStream inputStream = null;
-			try {
-				inputStream = new FileInputStream(resumeFile);
-				map.load(inputStream);
+		lock = aqquireExclusiveAccess();
+		if (lock == null) {
+			throw new IOException("Workspace is in used.");
+		}
+		File[] children = workspaceFolder.listFiles();
+		for (File child : children) {
+			if (!child.isDirectory()) {
+				continue;
 			}
-			finally {
-				if (inputStream != null) {
-					inputStream.close();
+			Profile profile = new Profile();
+			try {
+				File resumeFile = new File(child, ResourceManager.RESUME_FILE_NAME);
+				profile.load(resumeFile);
+				map.put(profile.getProfileName(), profile);
+				if (activeProfile == null) {
+					activeProfile = profile;
 				}
 			}
-		}
-		else {
-			resumeFile.createNewFile();
+			catch (IOException e) {
+				logger.debug(child.getName() + " appears not a valid profile storage", e);
+			}
 		}
 	}
-
-	public void saveWorkspace() throws IOException {
-		FileOutputStream outputStream = null;
+	
+	public void savePoint() {
+		OutputStream outputStream = null;
 		try {
-			outputStream = new FileOutputStream(new File(ResourceManager.RESUME_FILE_NAME));
-			map.store(outputStream, ResourceManager.getMessage(ResourceManager.KEY_WORKSPACE_RESUME_FILE_HEADER));
+			File resumeFile = new File(
+					new File(workspaceFolder, activeProfile.getProfileName()),
+					ResourceManager.RESUME_FILE_NAME);
+			activeProfile.store(resumeFile);
+		}
+		catch (IOException e) {
+			logger.debug("Can not save active profile", e);
 		}
 		finally {
-			if (outputStream != null) {
-				outputStream.close();
+			try {
+				if (outputStream != null) {
+					outputStream.close();
+				}
+			}
+			catch (IOException e) {
+				logger.debug(e);
 			}
 		}
 	}
 
 	public void closeWorkspace() {
+		releaseExclusiveAccess();
 	}
 	
-	public void lock() {
+	private void releaseExclusiveAccess() {
 		try {
-			RandomAccessFile workspaceFile = new RandomAccessFile(new File(workspaceFolder, ".lock"), "rw");
-			FileChannel channel = workspaceFile.getChannel();
-			// Use the file channel to create a lock on the file.
-			// This method blocks until it can retrieve the lock.
-			FileLock lock = channel.lock();
-
-			// Try acquiring the lock without blocking. This method returns
-			// null or throws an exception if the file is already locked.
-			try {
-				lock = channel.tryLock();
-			}
-			catch (OverlappingFileLockException e) {
-				// File is already locked in this thread or virtual machine
-			}
-
-			// Release the lock
 			lock.release();
-
-			// Close the file
-			channel.close();
+			lock.channel().close();
+			new File(workspaceFolder, LOCK_FILE).delete();
 		}
 		catch (IOException e) {
 			logger.debug(e);
 		}
 	}
 	
-	public File getFolder() {
-		return workspaceFolder;
+	private FileLock aqquireExclusiveAccess() {
+		FileLock lock = null;
+		try {
+			File lockFile = new File(workspaceFolder, LOCK_FILE);
+			lockFile.deleteOnExit();
+			RandomAccessFile workspaceFile = new RandomAccessFile(lockFile, "rw");
+			FileChannel channel = workspaceFile.getChannel();
+			lock = channel.tryLock();
+		}
+		catch (IOException e) {
+			logger.debug(e);
+		}
+		return lock;
+	}
+	
+	public String getWorkspaceLocation() {
+		return workspaceFolder.getAbsolutePath();
 	}
 
-	public void addProfile(String profileId, String profilePath) {
-		map.put(profileId, profilePath);
+	public void addProfile(String profileName, Profile profile) {
+		map.put(profileName, profile);
 	}
 
-	public String getProfilePath(String profileId) {
-		return map.getProperty(profileId);
+	public Profile removeProfile(String profileName) {
+		return map.remove(profileName);
+	}
+	
+	public Profile getProfile(String profileName) {
+		return map.get(profileName);
 	}
 
-	@Override
-	public void run() {
-		// TODO Auto-generated method stub
-		
+	public Profile[] getProfiles() {
+		return map.values().toArray(new Profile[map.size()]);
+	}
+	
+	public Profile getActiveProfile() {
+		return activeProfile;
+	}
+
+	public void setActiveProfile(Profile profile) {
+		// Add the given profile in the map (if it doesn't exist)
+		map.put(profile.getProfileName(), profile);
+		activeProfile = profile;
+	}
+	
+	public static void main(String[] args) throws Exception {
+		final Workspace workspace = new Workspace(new File("."));
+		workspace.loadWorkspace();
+		new Thread(new Runnable() {
+
+			public void run() {
+				try {
+					Thread.sleep(5000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				workspace.releaseExclusiveAccess();
+				
+			}
+			
+		}).start();
+		Thread.sleep(10000);
 	}
 }

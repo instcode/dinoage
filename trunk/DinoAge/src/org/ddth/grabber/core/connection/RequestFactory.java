@@ -1,16 +1,13 @@
 /****************************************************
  * $Project: DinoAge                     $
- * $Date:: Jan 5, 2008 1:36:31 PM                  $
+ * $Date:: Jan 6, 2008 12:24:03 PM                  $
  * $Revision: $	
  * $Author:: khoanguyen                           $
  * $Comment::                                      $
  **************************************************/
-package org.ddth.grabber.core.handler;
+package org.ddth.grabber.core.connection;
 
-import java.io.IOException;
-import java.io.InputStream;
-
-public interface NavigationHandler {
-
-	public boolean handleContent(InputStream inputStream) throws IOException;
+public interface RequestFactory<T extends State> {
+	
+	public Request createRequest(String link, Session<T> session);
 }

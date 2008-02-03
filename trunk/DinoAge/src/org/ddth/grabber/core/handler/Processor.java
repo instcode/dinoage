@@ -7,14 +7,15 @@
  **************************************************/
 package org.ddth.grabber.core.handler;
 
-public interface SessionListener {
+import java.io.IOException;
+import java.io.InputStream;
+
+public interface Processor {
+
 	/**
-	 * Notify session is started
+	 * @param inputStream
+	 * @return
+	 * @throws IOException
 	 */
-	public void sessionStarted();
-	
-	/**
-	 * Notify session is stopped
-	 */
-	public void sessionStopped();
+	public boolean handleContent(InputStream inputStream) throws IOException;
 }

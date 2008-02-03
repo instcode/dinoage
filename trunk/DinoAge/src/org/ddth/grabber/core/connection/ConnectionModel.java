@@ -8,17 +8,13 @@
 package org.ddth.grabber.core.connection;
 
 import org.ddth.grabber.core.handler.ConnectionListener;
-import org.ddth.grabber.core.handler.NavigationHandler;
 
 public interface ConnectionModel {
 	
 	/**
-	 * Request the content of the given URL.
-	 * 
-	 * @param sURL
-	 * @param contentHandler
+	 * @param request
 	 */
-	public void sendRequest(String sURL, NavigationHandler contentHandler);
+	public void sendRequest(Request request);
 	
 	/**
 	 * @param listener

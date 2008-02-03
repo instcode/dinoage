@@ -10,15 +10,15 @@ package org.ddth.dinoage.grabber.yahoo.handler;
 import java.io.ByteArrayInputStream;
 
 import org.ddth.dinoage.ResourceManager;
+import org.ddth.dinoage.grabber.yahoo.YBackupState;
 import org.ddth.dinoage.model.Persistence;
 import org.ddth.grabber.core.connection.Session;
-import org.ddth.grabber.impl.handler.RegExpNavigationHandler;
+import org.ddth.grabber.impl.handler.RegExpProcessor;
 
-public class GuestbookNavigationHandler extends RegExpNavigationHandler {
-	private Session session;
-	private Persistence persistence;
+public class GuestbookProcessor extends RegExpProcessor {
+	private Session<YBackupState> session;
 	
-	public GuestbookNavigationHandler(Persistence persistence, Session session) {
+	public GuestbookProcessor(Session<YBackupState> session) {
 		super(ResourceManager.KEY_ENCODING, new String[] {
 					"DIV[2]/DIV/DIV[2]/SPAN[2]/SPAN"
 				},
@@ -27,17 +27,16 @@ public class GuestbookNavigationHandler extends RegExpNavigationHandler {
         );
 		
 		this.session = session;
-		this.persistence = persistence;
 	}
 
 
 	@Override
 	protected void handleContent(byte[] buffer) {
-		persistence.write(new ByteArrayInputStream(buffer), Persistence.GUESTBOOK);
+		session.getState().write(new ByteArrayInputStream(buffer), Persistence.GUESTBOOK);
 	}
 	
 	@Override
 	protected void handleLink(String link) {
-		session.queueRequest(link, new GuestbookNavigationHandler(persistence, session));
+		session.queueRequest(link);
 	}
 }

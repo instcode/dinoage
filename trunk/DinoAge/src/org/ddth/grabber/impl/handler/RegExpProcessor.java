@@ -19,12 +19,12 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathFactory;
 
-import org.ddth.grabber.core.handler.NavigationHandler;
+import org.ddth.grabber.core.handler.Processor;
 import org.ddth.grabber.impl.parser.ContentParser;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 
-public class RegExpNavigationHandler implements NavigationHandler {
+public class RegExpProcessor implements Processor {
 	public static final int PATTERN_TYPE_EXCLUSIVE_LINK = 0;
 	public static final int PATTERN_TYPE_INCLUSIVE_LINK = 1;
 	private static final ContentParser HTML_PARSER = new ContentParser();
@@ -35,7 +35,7 @@ public class RegExpNavigationHandler implements NavigationHandler {
 	private boolean isExclusive;
 	private String encoding;
 
-	public RegExpNavigationHandler(String encoding, String[] linkPaths, int patternType, String[] regExps) {
+	public RegExpProcessor(String encoding, String[] linkPaths, int patternType, String[] regExps) {
 		this.encoding = encoding;
 		this.nodePaths = new XPathExpression[linkPaths.length];
 		try {
