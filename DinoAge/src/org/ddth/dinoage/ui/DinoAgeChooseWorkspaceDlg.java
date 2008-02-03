@@ -114,14 +114,14 @@ public class DinoAgeChooseWorkspaceDlg {
 		});
 		final GridData gd_browseButton = new GridData();
 		browseButton.setLayoutData(gd_browseButton);
-		browseButton.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_BROWSE_BUTTON));
+		browseButton.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_BROWSE_ELLIPSIS));
 		new Label(composite, SWT.NONE);
 
 		okButton = new Button(composite, SWT.PUSH);
 		final GridData gd_okButton = new GridData(SWT.RIGHT, SWT.CENTER, false, false);
 		gd_okButton.widthHint = 60;
 		okButton.setLayoutData(gd_okButton);
-		okButton.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_OK_BUTTON));
+		okButton.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_OK));
 		okButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
 				answer = SWT.OK;
@@ -132,7 +132,7 @@ public class DinoAgeChooseWorkspaceDlg {
 		final Button cancelButton = new Button(composite, SWT.NONE);
 		final GridData gd_cancelButton = new GridData(SWT.FILL, SWT.CENTER, false, false);
 		cancelButton.setLayoutData(gd_cancelButton);
-		cancelButton.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_CANCEL_BUTTON));
+		cancelButton.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_CANCEL));
 		cancelButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
 				answer = SWT.CANCEL;

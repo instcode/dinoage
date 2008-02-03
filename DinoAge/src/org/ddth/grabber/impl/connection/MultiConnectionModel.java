@@ -11,11 +11,16 @@ import java.util.concurrent.SynchronousQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-
 import org.apache.http.client.HttpClient;
-import org.ddth.grabber.core.handler.NavigationHandler;
+import org.ddth.grabber.core.connection.Request;
 
 public class MultiConnectionModel extends SingleConnectionModel {
+	/**
+	 * Make sure we don't flood the server continuously :D...
+	 * We should appear as an "well-educated" grabber ;-) 
+	 */
+	private static final long TIME_INTERVAL_BETWEEN_TWO_REQUESTS = 5000;
+	
 	private ThreadPoolExecutor executor;
 
 	public MultiConnectionModel(HttpClient httpClient, int poolSize) {
@@ -29,14 +34,14 @@ public class MultiConnectionModel extends SingleConnectionModel {
 				new ThreadPoolExecutor.AbortPolicy());
 	}
 	
-	public void sendRequest(final String sURL, final NavigationHandler contentHandler) {
+	public void sendRequest(final Request request) {
 		executor.execute(new Runnable() {
 			public void run() {
+				MultiConnectionModel.super.sendRequest(request);
 				try {
-					MultiConnectionModel.super.sendRequest(sURL, contentHandler);
+					Thread.sleep(TIME_INTERVAL_BETWEEN_TWO_REQUESTS);
 				}
-				catch (Exception e) {
-					e.printStackTrace();
+				catch (InterruptedException e) {
 				}
 			}
 		});

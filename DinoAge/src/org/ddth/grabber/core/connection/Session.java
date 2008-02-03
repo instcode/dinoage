@@ -7,8 +7,6 @@
  **************************************************/
 package org.ddth.grabber.core.connection;
 
-import java.util.Iterator;
-
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpVersion;
@@ -24,23 +22,26 @@ import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
-import org.ddth.grabber.core.handler.ConnectionListener;
-import org.ddth.grabber.core.handler.NavigationHandler;
 import org.ddth.grabber.core.handler.SessionListener;
 
-public class Session implements Runnable, ConnectionListener {
-	private static final long DELAY_TIME = 1000;
+public class Session<T extends State> implements Runnable {
+	private static final long DELAY_TIME_BETWEEN_TWO_REQUESTS = 1000;
 
 	private Log logger = LogFactory.getLog(Session.class);
-	private HttpClient httpClient;
-	private ConnectionModel connectionModel;
-	private SessionListener listener;
-	private State state;
 
 	private boolean isRunning;
 	private Thread workerThread;
+	
+	private HttpClient httpClient;
+	private T state;
+	private ConnectionModel connectionModel;
+	private SessionListener listener;
 
-	public Session(String charsetEncoding, CookieStore cookieStore) {
+	private RequestFactory<T> requestFactory;
+
+	public Session(String charsetEncoding, CookieStore cookieStore, RequestFactory<T> handlerFactory) {
+		this.requestFactory = handlerFactory;
+		
 		SchemeRegistry supportedSchemes = new SchemeRegistry();
 
 		supportedSchemes.register(new Scheme("http", PlainSocketFactory.getSocketFactory(), 80));
@@ -61,39 +62,40 @@ public class Session implements Runnable, ConnectionListener {
 		return httpClient;
 	}
 
-	public void queueRequest(String sURL, NavigationHandler contentHandler) {
-		if (state == null) {
-			throw new RuntimeException("Unknown session state. Should start/resume the session first.");
-		}
-
-		if (!state.getCompletedMap().containsKey(sURL)) {
-			if (!state.getOutgoingMap().containsKey(sURL)) {
-				logger.info(sURL + "... Queued!");
-			}
-			state.getOutgoingMap().put(sURL, contentHandler);
-		}
-	}
-
-	public void setConnectionModel(ConnectionModel connectionModel) {
-		if (connectionModel != null) {
-			this.connectionModel = connectionModel;
-			this.connectionModel.registerConnectionListener(this);
-		}
-	}
-	
-	public ConnectionModel getConnectionModel() {
-		return connectionModel;
+	public T getState() {
+		return state;
 	}
 
 	/**
 	 * Resume to the given state
 	 * @param state
 	 */
-	public void resume(State state) {
+	public void setState(T state) {
 		if (isRunning) {
 			throw new IllegalStateException("You have to stop the current state first.");
 		}
 		this.state = state;
+	}
+
+	public void queueRequest(String link) {
+		if (state == null) {
+			throw new IllegalStateException("Unknown session state");
+		}
+		state.queue(requestFactory.createRequest(link, this));
+	}
+	
+	public void registerSessionListener(SessionListener listener) {
+		this.listener = listener;
+	}
+	
+	public void setConnectionModel(ConnectionModel connectionModel) {
+		if (connectionModel != null) {
+			this.connectionModel = connectionModel;
+		}
+	}
+	
+	public ConnectionModel getConnectionModel() {
+		return connectionModel;
 	}
 
 	public boolean isRunning() {
@@ -113,12 +115,22 @@ public class Session implements Runnable, ConnectionListener {
 	}
 
 	/**
-	 * Stop the current worker thread with waiting...
+	 * Stop the current worker thread without blocking...
 	 * 
 	 * @see #stop()
 	 */
 	public void pause() {
 		isRunning = false;
+	}
+	
+	/**
+	 * Stop the current worker thread and block until the
+	 * thread is completely exited
+	 * 
+	 * @see #pause()
+	 */
+	public void stop() {
+		pause();
 	}
 
 	public void run() {
@@ -126,17 +138,17 @@ public class Session implements Runnable, ConnectionListener {
 			listener.sessionStarted();
 		}
 		while (isRunning) {
-			Iterator<String> links = state.getOutgoingMap().keySet().iterator();
-			while (isRunning && links.hasNext()) {
-				String sURL = links.next();
-				NavigationHandler contentHandler = state.getOutgoingMap().get(sURL);
-				state.getCompletedMap().put(sURL, Boolean.FALSE);
-				connectionModel.sendRequest(sURL, contentHandler);
-				try {
-					Thread.sleep(DELAY_TIME);
-				}
-				catch (InterruptedException e) {
-				}
+			Request request = state.poll();
+			if (request != null) {
+				connectionModel.sendRequest(request);
+			}
+			else {
+				logger.debug("Couldn't make '" + request + "' request");
+			}
+			try {
+				Thread.sleep(DELAY_TIME_BETWEEN_TWO_REQUESTS);
+			}
+			catch (InterruptedException e) {
 			}
 		}
 		// Wake up all waiting threads on this thread
@@ -146,23 +158,5 @@ public class Session implements Runnable, ConnectionListener {
 		if (listener != null) {
 			listener.sessionStopped();
 		}
-	}
-
-	public void notifyFinished(String sURL, boolean isCompletedWithoutError) {
-		logger.debug(sURL + "... Done!");
-		if (isCompletedWithoutError) {
-			state.getCompletedMap().put(sURL, Boolean.TRUE);
-			state.getOutgoingMap().remove(sURL);
-		}
-		else {
-			state.getCompletedMap().remove(sURL);
-		}
-	}
-
-	public void notifyRequesting(String sURL) {
-	}
-
-	public void registerSessionListener(SessionListener listener) {
-		this.listener = listener;
 	}
 }

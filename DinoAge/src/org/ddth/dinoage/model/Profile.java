@@ -32,6 +32,15 @@ public class Profile {
 	private String outgoingURLs;
 	private String completedURLs;
 
+	public void populate(Profile profile) {
+		setProfileName(profile.getProfileName());
+		setProfileURL(profile.getProfileURL());
+		setBackupEntry(profile.isBackupEntry());
+		setBackupGuestbook(profile.isBackupGuestbook());
+		setCompletedURLs(profile.getCompletedURLs());
+		setOutgoingURLs(profile.getOutgoingURLs());
+	}
+	
 	public void load(File profileFile) throws IOException {
 		InputStream inputStream = new FileInputStream(profileFile);
 		
