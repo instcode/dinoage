@@ -19,7 +19,6 @@ import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ddth.dinoage.ResourceManager;
 
 public class Workspace {
 	private static final String LOCK_FILE = ".lock";
@@ -28,6 +27,8 @@ public class Workspace {
 	private Map<String, Profile> map = new HashMap<String, Profile>();
 	private File workspaceFolder;
 	private FileLock lock;
+
+	public static final String PROFILE_FILE_NAME = ".profile";
 	
 	public Workspace(File workspaceFolder) {
 		this.workspaceFolder = workspaceFolder;
@@ -47,7 +48,7 @@ public class Workspace {
 		
 		for (File directory : children) {
 			try {
-				File resumeFile = new File(directory, ResourceManager.RESUME_FILE_NAME);
+				File resumeFile = new File(directory, Workspace.PROFILE_FILE_NAME);
 				Profile profile = new Profile();
 				profile.load(resumeFile);
 				map.put(profile.getProfileName(), profile);
@@ -63,7 +64,7 @@ public class Workspace {
 		try {
 			File resumeFile = new File(
 					new File(workspaceFolder, profile.getProfileName()),
-					ResourceManager.RESUME_FILE_NAME);
+					Workspace.PROFILE_FILE_NAME);
 			profile.store(resumeFile);
 		}
 		catch (IOException e) {
