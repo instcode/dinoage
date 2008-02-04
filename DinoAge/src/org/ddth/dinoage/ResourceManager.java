@@ -28,12 +28,9 @@ public class ResourceManager {
 		"A resumable backup for ''{0}'' is found in ''{1}'' folder.\n" +
 		"\n" +
 		"Would you like to resume it? (Choose *No* to start from beginning)";
-	public static final String KEY_CONFLICT_RESUMABLE_FILE =
-		"A resumable backup for ''{0}'' is found in ''{1}'' folder.\n" +
-		"However, its content seems to be a backup of another profile ''{2}''.\n" +
-		"\n" +
-		"{3} now starts a backup for ''{0}'' from beginning.\n" +
-		"Remember to choose another profile name plz!";
+	public static final String KEY_MESSAGE_EXISTED_PROFILE =
+		"A profile name ''{0}'' is found in current workspace.\n" +
+		"Please select it from the drop down list and click ''{1}'' to edit!";
 	public static final String KEY_CONFIRM_EXIT_WHEN_RUNNING =
 		"The current backup for {0} is running.\n" +
 		"Do you want to exit now?";

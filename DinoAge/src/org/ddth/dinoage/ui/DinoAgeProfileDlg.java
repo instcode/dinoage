@@ -34,6 +34,7 @@ public class DinoAgeProfileDlg extends Dialog {
 	private Button backupEntryButton;
 	private Text profileText;
 	private Button okButton; 
+	private Workspace workspace;
 	private Profile profile = new Profile();
 	
 	private int answer;
@@ -47,6 +48,7 @@ public class DinoAgeProfileDlg extends Dialog {
 	 */
 	public DinoAgeProfileDlg(Shell parent, Workspace workspace) {
 		super(parent, SWT.NONE);
+		this.workspace = workspace;
 	}
 
 	/**
@@ -83,9 +85,7 @@ public class DinoAgeProfileDlg extends Dialog {
 	private boolean checkInputs() {
 		String profileName = profileText.getText();
 		String profileURL = profileURLText.getText();
-		boolean isValid = (profileName.trim().length() > 0 && profileURL.trim().length() > 0);
-		isValid = isValid && (backupEntryButton.getSelection() || backupGuestbookButton.getSelection());
-		return isValid;
+		return (profileName.trim().length() > 0 && profileURL.trim().length() > 0);
 	}
 	
 	/**
@@ -100,19 +100,25 @@ public class DinoAgeProfileDlg extends Dialog {
 		
 		saveListener = new SelectionAdapter() {
 			public void widgetSelected(final SelectionEvent arg0) {
+				String profileName = profileText.getText();
+				if (profileText.isEnabled()) {
+					if (workspace.getProfile(profileName) != null) {
+						String message = ResourceManager.getMessage(
+								ResourceManager.KEY_MESSAGE_EXISTED_PROFILE,
+									new String[] {"profileId", profile.getProfileName(), "getProfileId", ResourceManager.KEY_PRODUCT_NAME}
+						);
+						UniversalUtil.showMessageBox(shell, shell.getText(), message);
+						return;
+					}
+				}		
+				profile.setProfileName(profileName);
+				profile.setProfileURL(profileURLText.getText());
 				profile.setBackupEntry(backupEntryButton.getSelection());
 				profile.setBackupGuestbook(backupGuestbookButton.getSelection());
-				profile.setProfileName(profileText.getText());
-				profile.setProfileURL(profileURLText.getText());
-				
-				String message = ResourceManager.getMessage(
-						ResourceManager.KEY_CONFLICT_RESUMABLE_FILE,
-							new String[] {"profileId", profile.getProfileName(), "getProfileId", ResourceManager.KEY_PRODUCT_NAME}
-				);
-				
-				UniversalUtil.showMessageBox(shell, shell.getText(), message);
-				answer = SWT.OK;
-				shell.close();
+				if (workspace.saveProfile(profile)) {
+					answer = SWT.OK;
+					shell.close();
+				}
 			}
 		};
 	}

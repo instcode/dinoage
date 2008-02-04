@@ -48,10 +48,12 @@ public class Workspace {
 		
 		for (File directory : children) {
 			try {
-				File resumeFile = new File(directory, Workspace.PROFILE_FILE_NAME);
+				File profileFile = new File(directory, Workspace.PROFILE_FILE_NAME);
 				Profile profile = new Profile();
-				profile.load(resumeFile);
-				map.put(profile.getProfileName(), profile);
+				profile.load(profileFile);
+				// Override the name in profile
+				profile.setProfileName(directory.getName());
+				map.put(profile.getProfileName().toLowerCase(), profile);
 			}
 			catch (Exception e) {
 				logger.debug("'" + directory.getName() + "' directory doesn't appear as a valid profile storage", e);
@@ -59,13 +61,17 @@ public class Workspace {
 		}
 	}
 	
-	public void saveProfile(Profile profile) {
+	public boolean saveProfile(Profile profile) {
+		boolean success = false;
 		OutputStream outputStream = null;
 		try {
+			File profileFolder = new File(workspaceFolder, profile.getProfileName());
+			profileFolder.mkdirs();
 			File resumeFile = new File(
-					new File(workspaceFolder, profile.getProfileName()),
+					profileFolder,
 					Workspace.PROFILE_FILE_NAME);
 			profile.store(resumeFile);
+			success = true;
 		}
 		catch (IOException e) {
 			logger.error("Can not save profile '" + profile.getProfileName() + "'", e);
@@ -80,6 +86,7 @@ public class Workspace {
 				logger.error(e);
 			}
 		}
+		return success;
 	}
 
 	public void closeWorkspace() {
@@ -117,38 +124,18 @@ public class Workspace {
 	}
 
 	public void putProfile(Profile profile) {
-		map.put(profile.getProfileName(), profile);
+		map.put(profile.getProfileName().toLowerCase(), profile);
 	}
 
 	public Profile removeProfile(String profileName) {
-		return map.remove(profileName);
+		return map.remove(profileName.toLowerCase());
 	}
 	
 	public Profile getProfile(String profileName) {
-		return map.get(profileName);
+		return map.get(profileName.toLowerCase());
 	}
 
 	public Profile[] getProfiles() {
 		return map.values().toArray(new Profile[map.size()]);
-	}
-
-	public static void main(String[] args) throws Exception {
-		final Workspace workspace = new Workspace(new File("."));
-		workspace.loadWorkspace();
-		new Thread(new Runnable() {
-
-			public void run() {
-				try {
-					Thread.sleep(5000);
-				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				workspace.releaseExclusiveAccess();
-				
-			}
-			
-		}).start();
-		Thread.sleep(10000);
 	}
 }
