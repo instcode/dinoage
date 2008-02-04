@@ -16,8 +16,6 @@ public class ResourceManager {
 	public static final String KEY_PRODUCT_VERSION = "1.0.0";
 	public static final String KEY_PRODUCT_AUTHOR = "instcode";
 	public static final String KEY_PRODUCT_DIALOG_TITLE = KEY_PRODUCT_NAME + " " + KEY_PRODUCT_VERSION;
-	public static final String RESUME_FILE_NAME = ".resume";
-	
 	public static final String KEY_ENCODING = "UTF-8";
 	public static final String KEY_GUESTBOOK_URL = "http://360.yahoo.com/guestbook-";
 	public static final String KEY_PROFILE_URL = "http://360.yahoo.com/profile-";
