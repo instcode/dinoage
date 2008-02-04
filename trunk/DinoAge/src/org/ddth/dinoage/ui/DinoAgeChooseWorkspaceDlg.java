@@ -125,8 +125,8 @@ public class DinoAgeChooseWorkspaceDlg {
 		okButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
 				answer = SWT.OK;
-				shell.close();
 				workspaces.setWorkspaces(workspacesCombo.getItems());
+				shell.close();
 			}
 		});
 

@@ -68,20 +68,23 @@ public class Profile {
 		properties.put(BACKUP_ENTRY_ENABLE, String.valueOf(isBackupEntry));
 		properties.put(BACKUP_GUESTBOOK_ENABLE, String.valueOf(isBackupGuestbook));
 
-		StringBuilder completedURL = new StringBuilder(completedURLs.length * 16);
-		for (int i = 0; i < completedURLs.length; i++) {
-			String sURL = completedURLs[i];
-			completedURL.append("\t" + sURL + (i < completedURLs.length - 1 ? ",\\\n" : "\n"));
+		if (completedURLs != null && completedURLs.length > 0) {
+			StringBuilder completedURL = new StringBuilder(completedURLs.length * 16);
+			for (int i = 0; i < completedURLs.length; i++) {
+				String sURL = completedURLs[i];
+				completedURL.append("\t" + sURL + (i < completedURLs.length - 1 ? ",\\\n" : "\n"));
+			}
+			properties.put(BACKUP_URLS_COMPLETED, completedURL.toString());
 		}
-		properties.put(BACKUP_URLS_COMPLETED, completedURL.toString());
 		
-		StringBuilder outgoingURL = new StringBuilder(outgoingURLs.length * 16);
-		for (int i = 0; i < outgoingURLs.length; i++) {
-			String sURL = outgoingURLs[i];
-			outgoingURL.append("\t" + sURL + (i < outgoingURLs.length - 1 ? ",\\\n" : "\n"));
+		if (outgoingURLs != null && outgoingURLs.length > 0) {
+			StringBuilder outgoingURL = new StringBuilder(outgoingURLs.length * 16);
+			for (int i = 0; i < outgoingURLs.length; i++) {
+				String sURL = outgoingURLs[i];
+				outgoingURL.append("\t" + sURL + (i < outgoingURLs.length - 1 ? ",\\\n" : "\n"));
+			}
+			properties.put(BACKUP_URLS_OUTGOING, outgoingURL.toString());
 		}
-		properties.put(BACKUP_URLS_OUTGOING, outgoingURL.toString());
-		
 		// Store all properties
 		properties.store(outputStream, ResourceManager.getMessage(
 				ResourceManager.KEY_PROFILE_RESUME_FILE_HEADER, new String [] {profileName, profileURL}));
@@ -95,7 +98,7 @@ public class Profile {
 		if (profile == null || profile.trim().length() == 0) {
 			throw new IllegalArgumentException("Profile cannot be empty!");
 		}
-		this.profileName = profile;
+		this.profileName = profile.trim();
 	}
 
 	public String getProfileURL() {
