@@ -8,6 +8,7 @@
 package org.ddth.dinoage.model;
 
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.RandomAccessFile;
@@ -37,19 +38,22 @@ public class Workspace {
 		if (lock == null) {
 			throw new IOException("Workspace is in used.");
 		}
-		File[] children = workspaceFolder.listFiles();
-		for (File child : children) {
-			if (!child.isDirectory()) {
-				continue;
+		File[] children = workspaceFolder.listFiles(new FileFilter() {
+			@Override
+			public boolean accept(File pathname) {
+				return pathname.isDirectory();
 			}
-			Profile profile = new Profile();
+		});
+		
+		for (File directory : children) {
 			try {
-				File resumeFile = new File(child, ResourceManager.RESUME_FILE_NAME);
+				File resumeFile = new File(directory, ResourceManager.RESUME_FILE_NAME);
+				Profile profile = new Profile();
 				profile.load(resumeFile);
 				map.put(profile.getProfileName(), profile);
 			}
-			catch (IOException e) {
-				logger.debug(child.getName() + " appears not a valid profile storage", e);
+			catch (Exception e) {
+				logger.debug("'" + directory.getName() + "' directory doesn't appear as a valid profile storage", e);
 			}
 		}
 	}
@@ -63,7 +67,7 @@ public class Workspace {
 			profile.store(resumeFile);
 		}
 		catch (IOException e) {
-			logger.debug("Can not save profile '" + profile.getProfileName() + "'", e);
+			logger.error("Can not save profile '" + profile.getProfileName() + "'", e);
 		}
 		finally {
 			try {
@@ -72,7 +76,7 @@ public class Workspace {
 				}
 			}
 			catch (IOException e) {
-				logger.debug(e);
+				logger.error(e);
 			}
 		}
 	}
@@ -88,7 +92,7 @@ public class Workspace {
 			new File(workspaceFolder, LOCK_FILE).delete();
 		}
 		catch (IOException e) {
-			logger.debug(e);
+			logger.error(e);
 		}
 	}
 	
@@ -102,7 +106,7 @@ public class Workspace {
 			lock = channel.tryLock();
 		}
 		catch (IOException e) {
-			logger.debug(e);
+			logger.error(e);
 		}
 		return lock;
 	}

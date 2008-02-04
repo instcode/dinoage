@@ -25,7 +25,7 @@ public class WorkspaceManager {
 	private static final String WORKSPACE_SEPARATOR = "\n";
 	private static final String PROPERTY_WORKSPACE_RECENTS = "workspace.recents";
 	
-	private List<String> workspaces = new ArrayList<String>();
+	private String[] workspaces;
 	private String selection;
 	private String configureFile;
 	
@@ -47,12 +47,14 @@ public class WorkspaceManager {
 			
 			String recentWorkspaces = props.getProperty(PROPERTY_WORKSPACE_RECENTS, "");
 			StringTokenizer tokenizer = new StringTokenizer(recentWorkspaces, WORKSPACE_SEPARATOR);
+			List<String> workspaces = new ArrayList<String>();
 			while (tokenizer.hasMoreElements()) {
 				String directory = tokenizer.nextToken();
 				File workspaceFolder = new File(directory);
 				workspaces.add(workspaceFolder.getAbsolutePath());
 			}
 			selection = workspaces.size() > 0 ? workspaces.get(0) : null;
+			setWorkspaces(workspaces.toArray(new String[workspaces.size()]));
 		}
 		finally {
 			if (inputStream != null) {
@@ -94,9 +96,13 @@ public class WorkspaceManager {
 	}
 
 	public String[] getWorkspaces() {
-		return workspaces.toArray(new String[workspaces.size()]);
+		return workspaces;
 	}
 
+	public void setWorkspaces(String[] workspaces) {
+		this.workspaces = workspaces;
+	}
+	
 	public String setWorkspace(String workspacePath) {
 		File workspaceFolder = new File(workspacePath);
 		if (!workspaceFolder.exists() || !workspaceFolder.isDirectory()) {
