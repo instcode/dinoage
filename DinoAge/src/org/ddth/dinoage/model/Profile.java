@@ -18,19 +18,19 @@ import java.util.Properties;
 import org.ddth.dinoage.ResourceManager;
 
 public class Profile {
+	private static final String BACKUP_URLS_COMPLETED = "backup.urls.completed";
 	private static final String BACKUP_URLS_OUTGOING = "backup.urls.outgoing";
 	private static final String BACKUP_GUESTBOOK_ENABLE = "backup.guestbook.enable";
 	private static final String BACKUP_ENTRY_ENABLE = "backup.entry.enable";
 	private static final String PROFILE_URL = "profile.url";
 	private static final String PROFILE_NAME = "profile.name";
-	private static final String BACKUP_URLS_COMPLETED = "backup.urls.completed";
 	
 	private String profileURL;
 	private String profileName;
 	private boolean isBackupGuestbook;
 	private boolean isBackupEntry;
-	private String outgoingURLs;
-	private String completedURLs;
+	private String[] outgoingURLs;
+	private String[] completedURLs;
 
 	public void populate(Profile profile) {
 		setProfileName(profile.getProfileName());
@@ -51,8 +51,12 @@ public class Profile {
 		setProfileURL(properties.getProperty(PROFILE_URL, ""));
 		setBackupEntry(Boolean.parseBoolean(properties.getProperty(BACKUP_ENTRY_ENABLE, "false")));
 		setBackupGuestbook(Boolean.parseBoolean(properties.getProperty(BACKUP_GUESTBOOK_ENABLE, "false")));
-		setCompletedURLs(properties.getProperty(BACKUP_URLS_COMPLETED, ""));
-		setOutgoingURLs(properties.getProperty(BACKUP_URLS_OUTGOING, ""));
+		
+		String[] completedURLs = properties.getProperty(BACKUP_URLS_COMPLETED, "").split(",");
+		setCompletedURLs(completedURLs);
+		
+		String[] outgoingURLs = properties.getProperty(BACKUP_URLS_OUTGOING, "").split(",");
+		setOutgoingURLs(outgoingURLs);
 	}
 
 	public void store(File profileFile) throws IOException {
@@ -61,11 +65,24 @@ public class Profile {
 		Properties properties = new Properties();
 		properties.put(PROFILE_NAME, profileName);
 		properties.put(PROFILE_URL, profileURL);
-		properties.put(BACKUP_ENTRY_ENABLE, isBackupEntry);
-		properties.put(BACKUP_GUESTBOOK_ENABLE, isBackupGuestbook);
-		properties.put(BACKUP_URLS_COMPLETED, completedURLs);
-		properties.put(BACKUP_URLS_OUTGOING, outgoingURLs);
+		properties.put(BACKUP_ENTRY_ENABLE, String.valueOf(isBackupEntry));
+		properties.put(BACKUP_GUESTBOOK_ENABLE, String.valueOf(isBackupGuestbook));
+
+		StringBuilder completedURL = new StringBuilder(completedURLs.length * 16);
+		for (int i = 0; i < completedURLs.length; i++) {
+			String sURL = completedURLs[i];
+			completedURL.append("\t" + sURL + (i < completedURLs.length - 1 ? ",\\\n" : "\n"));
+		}
+		properties.put(BACKUP_URLS_COMPLETED, completedURL.toString());
 		
+		StringBuilder outgoingURL = new StringBuilder(outgoingURLs.length * 16);
+		for (int i = 0; i < outgoingURLs.length; i++) {
+			String sURL = outgoingURLs[i];
+			outgoingURL.append("\t" + sURL + (i < outgoingURLs.length - 1 ? ",\\\n" : "\n"));
+		}
+		properties.put(BACKUP_URLS_OUTGOING, outgoingURL.toString());
+		
+		// Store all properties
 		properties.store(outputStream, ResourceManager.getMessage(
 				ResourceManager.KEY_PROFILE_RESUME_FILE_HEADER, new String [] {profileName, profileURL}));
 	}
@@ -108,19 +125,19 @@ public class Profile {
 		return isBackupGuestbook;
 	}
 
-	public String getOutgoingURLs() {
+	public String[] getOutgoingURLs() {
 		return outgoingURLs;
 	}
 	
-	public void setOutgoingURLs(String sOutgoingURLs) {
-		this.outgoingURLs = sOutgoingURLs;
+	public void setOutgoingURLs(String[] outgoingURLs) {
+		this.outgoingURLs = outgoingURLs;
 	}
 	
-	public String getCompletedURLs() {
+	public String[] getCompletedURLs() {
 		return completedURLs;
 	}
 	
-	public void setCompletedURLs(String sCompletedURLs) {
-		this.completedURLs = sCompletedURLs;
+	public void setCompletedURLs(String[] completedURLs) {
+		this.completedURLs = completedURLs;
 	}
 }

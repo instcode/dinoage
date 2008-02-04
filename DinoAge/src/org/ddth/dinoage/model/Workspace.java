@@ -26,7 +26,6 @@ public class Workspace {
 	private Log logger = LogFactory.getLog(Workspace.class);
 	private Map<String, Profile> map = new HashMap<String, Profile>();
 	private File workspaceFolder;
-	private Profile activeProfile;
 	private FileLock lock;
 	
 	public Workspace(File workspaceFolder) {
@@ -48,9 +47,6 @@ public class Workspace {
 				File resumeFile = new File(child, ResourceManager.RESUME_FILE_NAME);
 				profile.load(resumeFile);
 				map.put(profile.getProfileName(), profile);
-				if (activeProfile == null) {
-					activeProfile = profile;
-				}
 			}
 			catch (IOException e) {
 				logger.debug(child.getName() + " appears not a valid profile storage", e);
@@ -58,16 +54,16 @@ public class Workspace {
 		}
 	}
 	
-	public void savePoint() {
+	public void saveProfile(Profile profile) {
 		OutputStream outputStream = null;
 		try {
 			File resumeFile = new File(
-					new File(workspaceFolder, activeProfile.getProfileName()),
+					new File(workspaceFolder, profile.getProfileName()),
 					ResourceManager.RESUME_FILE_NAME);
-			activeProfile.store(resumeFile);
+			profile.store(resumeFile);
 		}
 		catch (IOException e) {
-			logger.debug("Can not save active profile", e);
+			logger.debug("Can not save profile '" + profile.getProfileName() + "'", e);
 		}
 		finally {
 			try {
@@ -115,8 +111,8 @@ public class Workspace {
 		return workspaceFolder.getAbsolutePath();
 	}
 
-	public void addProfile(String profileName, Profile profile) {
-		map.put(profileName, profile);
+	public void putProfile(Profile profile) {
+		map.put(profile.getProfileName(), profile);
 	}
 
 	public Profile removeProfile(String profileName) {
@@ -130,17 +126,7 @@ public class Workspace {
 	public Profile[] getProfiles() {
 		return map.values().toArray(new Profile[map.size()]);
 	}
-	
-	public Profile getActiveProfile() {
-		return activeProfile;
-	}
 
-	public void setActiveProfile(Profile profile) {
-		// Add the given profile in the map (if it doesn't exist)
-		map.put(profile.getProfileName(), profile);
-		activeProfile = profile;
-	}
-	
 	public static void main(String[] args) throws Exception {
 		final Workspace workspace = new Workspace(new File("."));
 		workspace.loadWorkspace();

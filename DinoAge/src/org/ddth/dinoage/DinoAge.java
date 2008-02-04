@@ -14,6 +14,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.client.CookieStore;
 import org.ddth.dinoage.grabber.yahoo.YBackupState;
+import org.ddth.dinoage.grabber.yahoo.YahooRequestFactory;
 import org.ddth.dinoage.model.Profile;
 import org.ddth.dinoage.model.Workspace;
 import org.ddth.dinoage.model.WorkspaceManager;
@@ -31,7 +32,6 @@ public class DinoAge {
 	private Log logger = LogFactory.getLog(DinoAge.class);
 	private Session<YBackupState> session;
 	private Workspace workspace;
-	private YBackupState state;
 
 	public static final void main(String[] args) throws IOException {
 		DinoAge dinoage = new DinoAge();
@@ -45,8 +45,8 @@ public class DinoAge {
 		dinoage.initialize(yLoginDlg.getCookieStore());
 
 		DinoAgeWindow mainWindow = new DinoAgeWindow(dinoage);
-		dinoage.getSession().getConnectionModel().registerConnectionListener(mainWindow);
-		dinoage.getSession().registerSessionListener(mainWindow);
+		dinoage.session.getConnectionModel().registerConnectionListener(mainWindow);
+		dinoage.session.registerSessionListener(mainWindow);
 		mainWindow.open();
  	}
 
@@ -72,66 +72,62 @@ public class DinoAge {
 		return success;
 	}
 
-	public Workspace getWorkspace() {
-		return workspace;
-	}
-	
-	/**
-	 * Stop current job and store resumable information..
-	 */
-	public void stop() {
-		session.pause();
-	}
-
 	public void initialize(CookieStore cookieStore) throws IOException {
-		session = new Session<YBackupState>(ResourceManager.getMessage(ResourceManager.KEY_ENCODING), cookieStore, null);
+		session = new Session<YBackupState>(
+				ResourceManager.getMessage(ResourceManager.KEY_ENCODING), cookieStore,
+				new YahooRequestFactory());
 		session.setConnectionModel(new SingleConnectionModel(session.getHttpClient()));
 	}
 
 	/**
-	 * Start backup the profile at the given state
+	 * Start backup the profile from the given state
 	 * @param state 
 	 */
 	public void backup(YBackupState state) {
-		Profile profile = state.getProfile();
-		workspace.setActiveProfile(profile);
+		session.setState(state);
+		state.initialize(session);
 		
 		String profileId = state.getProfileId();
-		session.setState(state);
-
-		if (profile.isBackupEntry()) {
-			String blogURL = ResourceManager.KEY_BLOG_URL + profileId + ResourceManager.KEY_BLOG_LIST_PARAMETER_VALUE;
-			session.queueRequest(blogURL);
-		}
-		if (profile.isBackupGuestbook()) {
-			String guestbookURL = ResourceManager.KEY_GUESTBOOK_URL + profileId;
-			session.queueRequest(guestbookURL);
-		}
+		session.queueRequest(ResourceManager.KEY_BLOG_URL + profileId + ResourceManager.KEY_BLOG_LIST_PARAMETER_VALUE);
+		session.queueRequest(ResourceManager.KEY_GUESTBOOK_URL + profileId);
 		
+		workspace.putProfile(state.getProfile());
+		
+		// Start crawling..
 		session.start();
-		this.state = state;
 	}
 
 	public boolean isRunning() {
 		return session.isRunning();
 	}
 	
-	public Session<YBackupState> getSession() {
-		return session;
+	/**
+	 * Inform the current request to stop
+	 */
+	public void stop() {
+		session.pause();
 	}
 
-	public YBackupState getActiveState() {
-		return state;
+	public Workspace getWorkspace() {
+		return workspace;
+	}
+
+	public Profile getActiveProfile() {
+		YBackupState state = session.getState();
+		return state != null ? state.getProfile() : null;
 	}
 	
-	public YBackupState getState(String profileName) {
+	public YBackupState createState(String profileName) {
 		Profile profile = workspace.getProfile(profileName);
-		if (profile == null) {
-			return null;
-		}
+		return (profile != null) ? new YBackupState(profile) : null;
+	}
 
-		YBackupState state = new YBackupState(profile);
-		state.initialize(session);
-		return state;
+	/**
+	 *  Save all resumable information of the current state
+	 */
+	public void saveState() {
+		YBackupState activeState = session.getState();
+		activeState.syncState();
+		workspace.saveProfile(activeState.getProfile());
 	}
 }

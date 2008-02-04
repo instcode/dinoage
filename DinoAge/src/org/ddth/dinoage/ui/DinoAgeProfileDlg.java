@@ -61,7 +61,8 @@ public class DinoAgeProfileDlg extends Dialog {
 		createListeners();
 		createContents();
 
-		shell.setSize(380, 220);
+		shell.pack();
+		//shell.setSize(380, 230);
 		UniversalUtil.centerWindow(shell);
 		
 		answer = SWT.CANCEL;
