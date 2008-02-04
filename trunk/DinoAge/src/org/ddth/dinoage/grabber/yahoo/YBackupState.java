@@ -8,6 +8,9 @@
 package org.ddth.dinoage.grabber.yahoo;
 
 import java.io.ByteArrayInputStream;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,11 +31,26 @@ public class YBackupState implements State, ConnectionListener {
 	/**
 	 * The boolean value is used to mark whether a URL is completed or not
 	 */
-	private Map<String, Boolean> requestedMap = new ConcurrentHashMap<String, Boolean>();
+	private Map<String, Boolean> requestMap = new ConcurrentHashMap<String, Boolean>();
 	private Queue<Request> queue = new ConcurrentLinkedQueue<Request>();
 
 	private String profileId;
+	private Profile profile;
 
+	public YBackupState(Profile profile) {
+		this.profile = profile;
+		this.profileId = getProfileId(profile.getProfileURL());
+		
+		String[] completedURLs = profile.getCompletedURLs();
+		for (String completedURL : completedURLs) {
+			requestMap.put(completedURL, Boolean.TRUE);
+		}
+		String[] outgoingURLs = profile.getOutgoingURLs();
+		for (String outgoingURL : outgoingURLs) {
+			requestMap.put(outgoingURL, Boolean.FALSE);
+		}
+	}
+	
 	private String getProfileId(String profileURL) {
 		int begin = ResourceManager.KEY_PROFILE_URL.length();
 		int end = profileURL.indexOf("?", begin);
@@ -40,54 +58,27 @@ public class YBackupState implements State, ConnectionListener {
 		return profileURL.substring(begin, end);
 	}
 
-	public void initialize(Session<YBackupState> session, Profile profile) {
-		this.profileId = getProfileId(profile.getProfileURL());
-		String[] completedURLs = profile.getCompletedURLs().split(",");
-		for (String completedURL : completedURLs) {
-			requestedMap.put(completedURL, Boolean.TRUE);
-		}
-		
-		String[] outgoingURLs = profile.getOutgoingURLs().split(",");
-		
+	public void initialize(Session<YBackupState> session) {
+		String[] outgoingURLs = profile.getOutgoingURLs();
 		for (String outgoingURL : outgoingURLs) {
 			session.queueRequest(outgoingURL);
-			requestedMap.put(outgoingURL, Boolean.FALSE);
 		}
 	}
 
-	public void notifyFinished(String sURL, boolean isCompletedWithoutError) {
-		logger.debug(sURL + "... Done!");
-		requestedMap.put(sURL, Boolean.TRUE);
+	public Profile getProfile() {
+		return profile;
 	}
-
-	public void notifyRequesting(String sURL) {
-		logger.debug(sURL + " <-- Requesting...");
+	
+	public void write(ByteArrayInputStream byteArrayInputStream, int id) {
 	}
-
-//	public String a() {
-//		Iterator<String> completedURLs = completedURLMap.keySet().iterator();
-//		while (completedURLs.hasNext()) {
-//			String sURL = completedURLs.next();
-//			// Only "real" completed URL
-//			if (completedURLMap.get(sURL).booleanValue()) {
-//				writer.write("\t" + sURL + (completedURLs.hasNext() ? ",\\\n" : "\n"));
-//			}
-//		}
-//
-//		Iterator<String> outgoingURLs = outgoingURLMap.keySet().iterator();
-//		while (outgoingURLs.hasNext()) {
-//			String sURL = outgoingURLs.next();
-//			writer.write("\t" + sURL + (outgoingURLs.hasNext() ? ",\\\n" : "\n"));
-//		}
-//	}
 
 	public void reset() {
 		queue.clear();
-		requestedMap.clear();
+		requestMap.clear();
 	}
 
 	public boolean isNewlyCreated() {
-		return (requestedMap.size() == 0);
+		return (requestMap.size() == 0);
 	}
 
 	public void setProfileId(String profileId) {
@@ -97,6 +88,15 @@ public class YBackupState implements State, ConnectionListener {
 	public String getProfileId() {
 		return profileId;
 	}
+	
+	public void notifyFinished(String sURL, boolean isCompletedWithoutError) {
+		logger.debug(sURL + "... Done!");
+		requestMap.put(sURL, Boolean.TRUE);
+	}
+
+	public void notifyRequesting(String sURL) {
+		logger.debug("Requesting: " + sURL + "...");
+	}
 
 	public Request poll() {
 		return queue.poll();
@@ -104,15 +104,30 @@ public class YBackupState implements State, ConnectionListener {
 
 	public boolean queue(Request request) {
 		boolean isQueued = false;
-		if (!requestedMap.containsKey(request.getURL())) {
-			isQueued = queue.offer(request);
-			requestedMap.put(request.getURL(), Boolean.TRUE);
+		if (!requestMap.containsKey(request.getURL())) {
+			if (request.getProcessor() != null) {
+				isQueued = queue.offer(request);
+			}
+			requestMap.put(request.getURL(), Boolean.FALSE);
 		}
 		return isQueued;
 	}
 
-	public void write(ByteArrayInputStream byteArrayInputStream, int guestbook) {
-		// TODO Auto-generated method stub
-		
+	public void syncState() {
+		List<String> completedURLs = new ArrayList<String>();
+		List<String> outgoingURLs = new ArrayList<String>();
+		Iterator<String> iterator = requestMap.keySet().iterator();
+		while (iterator.hasNext()) {
+			String sURL = iterator.next();
+			Boolean requested = requestMap.get(sURL);
+			if (requested.booleanValue()) {
+				completedURLs.add(sURL);
+			}
+			else {
+				outgoingURLs.add(sURL);
+			}
+		}
+		profile.setCompletedURLs(completedURLs.toArray(new String[completedURLs.size()]));
+		profile.setOutgoingURLs(outgoingURLs.toArray(new String[outgoingURLs.size()]));
 	}
 }

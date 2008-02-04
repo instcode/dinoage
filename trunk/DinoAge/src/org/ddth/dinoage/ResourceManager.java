@@ -27,16 +27,18 @@ public class ResourceManager {
 	public static final String KEY_RELAX_URL = "http://360.yahoo.com/profile-n75YJ78_fL5JcEVFlIE1";
 	
 	public static final String KEY_RESUME_RETRIEVING_CONFIRM =
-		"A resumable backup for \"{0}\" is found in [{1}] folder.\n" +
+		"A resumable backup for ''{0}'' is found in ''{1}'' folder.\n" +
 		"\n" +
 		"Would you like to resume it? (Choose *No* to start from beginning)";
 	public static final String KEY_CONFLICT_RESUMABLE_FILE =
-		"A resumable backup for \"{0}\" is found in [{1}] folder.\n" +
-		"However, its content seems to be a backup of another profile \"{2}\".\n" +
+		"A resumable backup for ''{0}'' is found in ''{1}'' folder.\n" +
+		"However, its content seems to be a backup of another profile ''{2}''.\n" +
 		"\n" +
-		"{3} now starts a backup for \"{0}\" from beginning.\n" +
+		"{3} now starts a backup for ''{0}'' from beginning.\n" +
 		"Remember to choose another profile name plz!";
-	public static final String KEY_CONFIRM_EXIT_WHEN_RUNNING = "The current backup for {0} is running.\nDo you want to exit now?";
+	public static final String KEY_CONFIRM_EXIT_WHEN_RUNNING =
+		"The current backup for {0} is running.\n" +
+		"Do you want to exit now?";
 	public static final String KEY_MESSAGE_FULL_URL_HREF = "<a href=\"{0}\">{0}</a>";
 	public static final String KEY_WAIT_FOR_EXITING = "<a href=\"{0}\">Plz wait!... {1} is now exiting...</a>";
 	public static final String KEY_WAIT_FOR_STOPPING = "<a href=\"{0}\">Waiting for the current request to finish...</a>";
@@ -53,11 +55,11 @@ public class ResourceManager {
 	public static final String KEY_BACKUP_SETTINGS_DIALOG_TITLE = "Backup Settings";
 	public static final String KEY_READ_WARNING_CONFIRM_MESSAGE = "I warned you already, ok!!??";
 	public static final String KEY_DUPLICATE_PROFILE_NAME_DETECTED_MESSAGE =
-		"The profile you entered is already existed in {0} home folder. If you\n" +
+		"The profile you entered is already existed in {0} workspace. If you\n" +
 		"continue, plz makesure you have a backup of that profile folder already,\n" +
 		"otherwise, all existing information will be overwritten and not restorable!\n" +
 		"\n" +
-		"The [{1}] profile folder: [{2}]\n" +
+		"The ''{1}'' profile folder: ''{2}''\n" +
 		"\n" +
 		"Do you want to continue? :-??";
 	public static final String KEY_PLZ_CHOOSE_BACKUP_OPTION_MESSAGE = "Please choose at least one backup option!!";
@@ -110,7 +112,7 @@ public class ResourceManager {
 	public static final String KEY_DIRECTORY_DIALOG_TITLE = "Select Workspace Folder";
 	public static final String KEY_CONFIRM_REMOVE_WORKSPACE_PROFILE =
 		"Remove the ''{0}'' profile in the profile list only.\n" +
-		"This won't delete the backup data on your disk :-)\n" +
+		"This won''t delete the backup data on your disk :-)\n" +
 		"\n" +
 		"Do you want to continue?";
 	public static final String KEY_LABEL_SWITCH_WORKSPACE_ELLIPSIS = "Switch Workspace...";

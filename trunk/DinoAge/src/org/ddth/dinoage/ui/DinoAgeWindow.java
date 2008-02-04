@@ -80,10 +80,10 @@ public class DinoAgeWindow implements ConnectionListener, SessionListener {
 		shell.addShellListener(new ShellAdapter() {
 			public void shellClosed(ShellEvent event) {
 				int answer = SWT.YES;
-				if (!shouldClose && dinoage.getSession().isRunning()) {
+				if (!shouldClose && dinoage.isRunning()) {
 					String sMessage = ResourceManager.getMessage(
 							ResourceManager.KEY_CONFIRM_EXIT_WHEN_RUNNING,
-							new String[] {dinoage.getWorkspace().getActiveProfile().getProfileName()});
+							new String[] {dinoage.getActiveProfile().getProfileName()});
 					answer = UniversalUtil.showConfirmDlg(shell, shell.getText(), sMessage);
 					if (answer == SWT.YES) {
 						shouldClose = true;
@@ -146,7 +146,7 @@ public class DinoAgeWindow implements ConnectionListener, SessionListener {
 						profilesCombo.add(profileName);						
 					}
 					profilesCombo.setText(profileName);
-					workspace.addProfile(profileName, dlg.getProfile());
+					workspace.putProfile(dlg.getProfile());
 				}
 			}
 		};
@@ -175,7 +175,7 @@ public class DinoAgeWindow implements ConnectionListener, SessionListener {
 					return;
 				}
 				Profile profile = dinoage.getWorkspace().getProfile(profileName);
-				YBackupState state = dinoage.getState(profile.getProfileName());
+				YBackupState state = dinoage.createState(profile.getProfileName());
 				
 				int answer = SWT.YES;
 				if (state != null && !state.isNewlyCreated()) {
@@ -192,6 +192,7 @@ public class DinoAgeWindow implements ConnectionListener, SessionListener {
 				
 				// Update backupButton action
 				if (dinoage.isRunning()) {
+					enableButtons(true);
 					backupButton.removeSelectionListener(backupListener);
 					backupButton.addSelectionListener(stopListener);
 					backupButton.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_STOP_BACKUP));
@@ -311,7 +312,7 @@ public class DinoAgeWindow implements ConnectionListener, SessionListener {
 		}
 		
 		String selection = CREATE_NEW_PROFILE_TEXT;
-		Profile activeProfile = workspace.getActiveProfile();
+		Profile activeProfile = dinoage.getActiveProfile();
 		if (activeProfile != null) {
 			selection = activeProfile.getProfileName();
 			profileURLText.setText(
@@ -329,7 +330,7 @@ public class DinoAgeWindow implements ConnectionListener, SessionListener {
 			public void run() {
 				if (!shouldClose) {
 					setStatusText(ResourceManager.getMessage(ResourceManager.KEY_MESSAGE_DONE_HREF, new String[] {sURL}));
-					dinoage.getWorkspace().savePoint();
+					dinoage.saveState();
 				}
 			}
 		});
