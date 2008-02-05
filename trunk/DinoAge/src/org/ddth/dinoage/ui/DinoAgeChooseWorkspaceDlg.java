@@ -51,7 +51,7 @@ public class DinoAgeChooseWorkspaceDlg {
 		
 		createContent();
 		
-		shell.setSize(440, 130);
+		shell.setSize(500, 130);
 
 		// Center the shell
 		UniversalUtil.centerWindow(shell);
@@ -70,11 +70,11 @@ public class DinoAgeChooseWorkspaceDlg {
 	private void createContent() {
 		final Composite composite = new Composite(shell, SWT.NONE);
 		final GridLayout gridLayout = new GridLayout();
-		gridLayout.numColumns = 3;
+		gridLayout.numColumns = 4;
 		composite.setLayout(gridLayout);
 
 		final Label messageLabel = new Label(composite, SWT.NONE);
-		final GridData gd_messageLabel = new GridData(SWT.LEFT, SWT.CENTER, false, true, 3, 1);
+		final GridData gd_messageLabel = new GridData(SWT.LEFT, SWT.CENTER, false, true, 4, 1);
 		messageLabel.setLayoutData(gd_messageLabel);
 		messageLabel.setText(ResourceManager.getMessage(
 				ResourceManager.KEY_LABEL_CHOOSE_WORKSPACE_MESSAGE,
@@ -84,7 +84,7 @@ public class DinoAgeChooseWorkspaceDlg {
 				}));
 
 		final Label horizontalLine = new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
-		final GridData gd_horizontalLine = new GridData(SWT.FILL, SWT.CENTER, false, false, 3, 1);
+		final GridData gd_horizontalLine = new GridData(SWT.FILL, SWT.CENTER, false, false, 4, 1);
 		horizontalLine.setLayoutData(gd_horizontalLine);
 
 		final Label workspaceLabel = new Label(composite, SWT.NONE);
@@ -115,10 +115,28 @@ public class DinoAgeChooseWorkspaceDlg {
 		final GridData gd_browseButton = new GridData();
 		browseButton.setLayoutData(gd_browseButton);
 		browseButton.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_BROWSE_ELLIPSIS));
-		new Label(composite, SWT.NONE);
+		
+		Button removeWorkspaceButton = new Button(composite, SWT.NONE);
+		final GridData gd_removeProfileButton = new GridData(60, SWT.DEFAULT);
+		removeWorkspaceButton.setLayoutData(gd_removeProfileButton);
+		removeWorkspaceButton.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_REMOVE));
+		removeWorkspaceButton.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent arg0) {
+				String workspaceName = workspacesCombo.getText();
+				if (workspaceName.length() > 0) {
+					String message = ResourceManager.getMessage(
+							ResourceManager.KEY_CONFIRM_REMOVE_WORKSPACE, new Object[] {workspaceName});
+					int answer = UniversalUtil.showConfirmDlg(shell, shell.getText(), message);
+					if (answer == SWT.YES) {
+						workspacesCombo.remove(workspaceName);
+						workspacesCombo.setText("");
+					}
+				}
+			}
+		});
 
 		okButton = new Button(composite, SWT.PUSH);
-		final GridData gd_okButton = new GridData(SWT.RIGHT, SWT.CENTER, false, false);
+		final GridData gd_okButton = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 3, 1);
 		gd_okButton.widthHint = 60;
 		okButton.setLayoutData(gd_okButton);
 		okButton.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_OK));

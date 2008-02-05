@@ -29,8 +29,9 @@ public class ResourceManager {
 		"\n" +
 		"Would you like to resume it? (Choose *No* to start from beginning)";
 	public static final String KEY_MESSAGE_EXISTED_PROFILE =
-		"A profile name ''{0}'' is found in current workspace.\n" +
-		"Please select it from the drop down list and click ''{1}'' to edit!";
+		"The profile ''{0}'' you entered can not be saved!\n" +
+		"It has been existed in the current workspace.\n" +
+		"You can only modify it by selecting from the drop down list.";
 	public static final String KEY_CONFIRM_EXIT_WHEN_RUNNING =
 		"The current backup for {0} is running.\n" +
 		"Do you want to exit now?";
@@ -105,12 +106,19 @@ public class ResourceManager {
 	public static final String KEY_LABEL_BROWSE_ELLIPSIS = "Browse...";
 	public static final String KEY_DIRECTORY_DIALOG_MESSAGE = "Choose a workspace folder to use for this session.";
 	public static final String KEY_DIRECTORY_DIALOG_TITLE = "Select Workspace Folder";
+	public static final String KEY_CONFIRM_REMOVE_WORKSPACE =
+		"You gonna remove the ''{0}'' location in workspace list.\n" +
+		"However, this won''t delete the backup data on your disk :-)\n" +
+		"\n" +
+		"Do you want to continue?";
 	public static final String KEY_CONFIRM_REMOVE_WORKSPACE_PROFILE =
-		"Remove the ''{0}'' profile in the profile list only.\n" +
-		"This won''t delete the backup data on your disk :-)\n" +
+		"You gonna remove the ''{0}'' profile in profile list.\n" +
+		"However, this won''t delete the backup data on your disk :-)\n" +
 		"\n" +
 		"Do you want to continue?";
 	public static final String KEY_LABEL_SWITCH_WORKSPACE_ELLIPSIS = "Switch Workspace...";
+	public static final String KEY_LABEL_EDIT_ELLIPSIS = "Edit...";
+	public static final String KEY_LABEL_REMOVE = "Remove";
 	
 	public static ResourceBundle resources;
 

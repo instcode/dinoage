@@ -15,6 +15,7 @@ import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -39,7 +40,7 @@ public class DinoAgeProfileDlg extends Dialog {
 	
 	private int answer;
 	
-	private SelectionAdapter saveListener;
+	private SelectionListener saveListener;
 	private ModifyListener checkModifyListener;
 
 	/**
@@ -64,7 +65,6 @@ public class DinoAgeProfileDlg extends Dialog {
 		createContents();
 
 		shell.pack();
-		//shell.setSize(380, 230);
 		UniversalUtil.centerWindow(shell);
 		
 		answer = SWT.CANCEL;
@@ -101,11 +101,11 @@ public class DinoAgeProfileDlg extends Dialog {
 		saveListener = new SelectionAdapter() {
 			public void widgetSelected(final SelectionEvent arg0) {
 				String profileName = profileText.getText();
-				if (profileText.isEnabled()) {
+				if (profileText.getEditable()) {
 					if (workspace.getProfile(profileName) != null) {
 						String message = ResourceManager.getMessage(
 								ResourceManager.KEY_MESSAGE_EXISTED_PROFILE,
-									new String[] {"profileId", profile.getProfileName(), "getProfileId", ResourceManager.KEY_PRODUCT_NAME}
+									new String[] { profileName }
 						);
 						UniversalUtil.showMessageBox(shell, shell.getText(), message);
 						return;

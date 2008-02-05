@@ -104,11 +104,12 @@ public class YBackupState implements State, ConnectionListener {
 
 	public boolean queue(Request request) {
 		boolean isQueued = false;
-		if (!requestMap.containsKey(request.getURL())) {
+		String sURL = request.getURL();
+		if (!requestMap.containsKey(sURL)) {
 			if (request.getProcessor() != null) {
 				isQueued = queue.offer(request);
 			}
-			requestMap.put(request.getURL(), Boolean.FALSE);
+			requestMap.put(sURL, Boolean.FALSE);
 		}
 		return isQueued;
 	}
