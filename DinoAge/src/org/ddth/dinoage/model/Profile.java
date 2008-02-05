@@ -72,7 +72,9 @@ public class Profile {
 			StringBuilder completedURL = new StringBuilder(completedURLs.length * 16);
 			for (int i = 0; i < completedURLs.length; i++) {
 				String sURL = completedURLs[i];
-				completedURL.append("\t" + sURL + (i < completedURLs.length - 1 ? ",\\\n" : "\n"));
+				if (sURL.startsWith("http")) {
+					completedURL.append(sURL + (i < completedURLs.length - 1 ? "," : ""));
+				}
 			}
 			properties.put(BACKUP_URLS_COMPLETED, completedURL.toString());
 		}
@@ -81,7 +83,9 @@ public class Profile {
 			StringBuilder outgoingURL = new StringBuilder(outgoingURLs.length * 16);
 			for (int i = 0; i < outgoingURLs.length; i++) {
 				String sURL = outgoingURLs[i];
-				outgoingURL.append("\t" + sURL + (i < outgoingURLs.length - 1 ? ",\\\n" : "\n"));
+				if (sURL.startsWith("http")) {
+					outgoingURL.append(sURL + (i < outgoingURLs.length - 1 ? "," : ""));
+				}
 			}
 			properties.put(BACKUP_URLS_OUTGOING, outgoingURL.toString());
 		}

@@ -17,6 +17,7 @@ import org.ddth.grabber.core.handler.SessionListener;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.layout.FillLayout;
@@ -28,8 +29,6 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.ExpandBar;
-import org.eclipse.swt.widgets.ExpandItem;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
@@ -46,14 +45,13 @@ public class DinoAgeWindow implements ConnectionListener, SessionListener {
 	private Button backupButton;
 	private Link profileURLText;
 	private Link statusLabel;
-	private ExpandBar expandBar;
-	private ExpandItem progressExpandItem;
 	
-	private SelectionAdapter backupListener;
-	private SelectionAdapter stopListener;
-	private SelectionAdapter switchWorkspaceListener;
-	private SelectionAdapter editProfileListener;
-	private SelectionAdapter removeProfileListener;
+	private SelectionListener backupListener;
+	private SelectionListener stopListener;
+	private SelectionListener switchWorkspaceListener;
+	private SelectionListener editProfileListener;
+	private SelectionListener removeProfileListener;
+	private SelectionListener launchSelection;
 	
 	private DinoAge dinoage;
 	private boolean shouldClose = false;
@@ -109,6 +107,12 @@ public class DinoAgeWindow implements ConnectionListener, SessionListener {
 	}
 	
 	private void createListeners() {
+		launchSelection = new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent event) {
+				Program.launch(event.text);
+			}
+		};
+		
 		stopListener = new SelectionAdapter() {
 			public void widgetSelected(final SelectionEvent arg0) {
 				if (dinoage.isRunning()) {
@@ -242,26 +246,28 @@ public class DinoAgeWindow implements ConnectionListener, SessionListener {
 		editProfileButton = new Button(composite, SWT.NONE);
 		final GridData gd_editProfileButton = new GridData(60, SWT.DEFAULT);
 		editProfileButton.setLayoutData(gd_editProfileButton);
-		editProfileButton.setText("Edit...");
+		editProfileButton.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_EDIT_ELLIPSIS));
 		editProfileButton.addSelectionListener(editProfileListener);
 
 		removeProfileButton = new Button(composite, SWT.NONE);
 		final GridData gd_removeProfileButton = new GridData(60, SWT.DEFAULT);
 		removeProfileButton.setLayoutData(gd_removeProfileButton);
-		removeProfileButton.setText("Remove");
+		removeProfileButton.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_REMOVE));
 		removeProfileButton.addSelectionListener(removeProfileListener);
 		
 		final Label profileURLLabel = new Label(composite, SWT.NONE);
 		profileURLLabel.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_Y360_PROFILE));
 		GridData gd_profileURLLabel = new GridData(SWT.LEFT, SWT.CENTER, false, true);
 		gd_profileURLLabel.heightHint = 15;
-		gd_profileURLLabel.widthHint = 82;
+		gd_profileURLLabel.widthHint = 85;
 		profileURLLabel.setLayoutData(gd_profileURLLabel);
 
 		profileURLText = new Link(composite, SWT.NONE | SWT.NO_FOCUS);
 		profileURLText.setText(
 				ResourceManager.getMessage(ResourceManager.KEY_MESSAGE_FULL_URL_HREF,
 						new String [] {ResourceManager.getMessage(ResourceManager.KEY_RELAX_URL)}));
+		profileURLText.addSelectionListener(launchSelection);
+		
 		GridData gd_profileURLText = new GridData(SWT.FILL, SWT.CENTER, true, true, 2, 1);
 		gd_profileURLText.heightHint = 15;
 		profileURLText.setLayoutData(gd_profileURLText);
@@ -272,26 +278,14 @@ public class DinoAgeWindow implements ConnectionListener, SessionListener {
 		backupButton.setLayoutData(gd_backupButton);
 		backupButton.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_BACKUP_BUTTON_TITLE));
 
-		expandBar = new ExpandBar(composite, SWT.V_SCROLL);
-		expandBar.setSpacing(0);
-		final GridData gd_expandBar = new GridData(SWT.LEFT, SWT.CENTER, false, false, 4, 1);
-		expandBar.setLayoutData(gd_expandBar);
-
-		progressExpandItem = new ExpandItem(expandBar, SWT.NONE);
-		progressExpandItem.setText("Progress...");
-		
 		statusLabel = new Link(composite, SWT.NONE | SWT.NO_FOCUS);
 		statusLabel.setForeground(shell.getDisplay().getSystemColor(SWT.COLOR_BLUE));
-		statusLabel.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent event) {
-				Program.launch(event.text);
-			}
-		});
+		statusLabel.addSelectionListener(launchSelection);
 		GridData gd_status = new GridData(SWT.FILL, SWT.CENTER, false, true, 4, 1);
 		statusLabel.setLayoutData(gd_status);
 		
 		shell.setTabList(new Control[] {composite});
-		composite.setTabList(new Control[] {workspaceText, switchWorkspaceButton, profilesCombo, editProfileButton, removeProfileButton, profileURLText, backupButton, expandBar, statusLabel, workspaceLabel, profileLabel, profileURLLabel});
+		composite.setTabList(new Control[] {workspaceText, switchWorkspaceButton, profilesCombo, editProfileButton, removeProfileButton, backupButton, workspaceText});
 		
 		initializeValues();
 	}
@@ -362,13 +356,13 @@ public class DinoAgeWindow implements ConnectionListener, SessionListener {
 				}
 				else {
 					shell.close();
+					dinoage.getWorkspace().closeWorkspace();
 				}
 			}
 		});
 	}
 	
 	private void setStatusText(String statusText) {
-		progressExpandItem.setText(statusText);
 		statusLabel.setText(statusText);
 	}
 }
