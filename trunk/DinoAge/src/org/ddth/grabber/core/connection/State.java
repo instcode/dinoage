@@ -8,6 +8,14 @@
 package org.ddth.grabber.core.connection;
 
 public interface State {
+	/**
+	 * @param request
+	 * @return
+	 */
 	public boolean queue(Request request);
+	
+	/**
+	 * @return
+	 */
 	public Request poll();
 }

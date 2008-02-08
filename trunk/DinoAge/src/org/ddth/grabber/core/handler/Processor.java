@@ -11,6 +11,12 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public interface Processor {
+	public static final Processor NULL = new Processor() {
+		@Override
+		public boolean handleContent(InputStream inputStream) throws IOException {
+			return false;
+		}
+	};
 
 	/**
 	 * @param inputStream
