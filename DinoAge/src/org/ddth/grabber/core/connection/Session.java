@@ -81,7 +81,10 @@ public class Session<T extends State> implements Runnable {
 		if (state == null) {
 			throw new IllegalStateException("Unknown session state");
 		}
-		state.queue(requestFactory.createRequest(link, this));
+		Request request = requestFactory.createRequest(link, this);
+		if (request != null) {
+			state.queue(request);
+		}
 	}
 	
 	public void registerSessionListener(SessionListener listener) {
@@ -144,6 +147,7 @@ public class Session<T extends State> implements Runnable {
 			}
 			else {
 				logger.debug("Couldn't make '" + request + "' request");
+				break;
 			}
 			try {
 				Thread.sleep(DELAY_TIME_BETWEEN_TWO_REQUESTS);
@@ -151,6 +155,7 @@ public class Session<T extends State> implements Runnable {
 			catch (InterruptedException e) {
 			}
 		}
+		isRunning = false;
 		// Wake up all waiting threads on this thread
 		if (workerThread != null) {
 			workerThread = null;
