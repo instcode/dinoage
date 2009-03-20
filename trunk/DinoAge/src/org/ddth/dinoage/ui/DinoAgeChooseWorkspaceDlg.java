@@ -10,6 +10,7 @@ package org.ddth.dinoage.ui;
 import java.io.File;
 
 import org.ddth.dinoage.ResourceManager;
+import org.ddth.dinoage.model.Workspace;
 import org.ddth.dinoage.model.WorkspaceManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -40,10 +41,6 @@ public class DinoAgeChooseWorkspaceDlg {
 		this.workspaces = workspaces;
 	}
 	
-	protected String getWorkspaceLocation() {
-		return workspacesCombo.getText();
-	}
-
 	public int open() {
 		shell = new Shell(parent, SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.CENTER);
 		shell.setText(ResourceManager.getMessage(ResourceManager.KEY_CHOOSE_WORKSPACE_DIALOG_TITLE));
@@ -79,8 +76,8 @@ public class DinoAgeChooseWorkspaceDlg {
 		messageLabel.setText(ResourceManager.getMessage(
 				ResourceManager.KEY_LABEL_CHOOSE_WORKSPACE_MESSAGE,
 				new String[] {
-						ResourceManager.KEY_PRODUCT_NAME,
-						ResourceManager.getMessage(ResourceManager.KEY_DIRECTORY_DIALOG_MESSAGE)
+					ResourceManager.KEY_PRODUCT_NAME,
+					ResourceManager.getMessage(ResourceManager.KEY_DIRECTORY_DIALOG_MESSAGE)
 				}));
 
 		final Label horizontalLine = new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
@@ -95,8 +92,7 @@ public class DinoAgeChooseWorkspaceDlg {
 		workspacesCombo.setLayoutData(gd_workspacesCombo);
 		workspacesCombo.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent event) {
-				boolean isEnabled = (workspaces.setWorkspace(getWorkspaceLocation()) != null);
-				okButton.setEnabled(isEnabled);
+				okButton.setEnabled(Workspace.checkWorkspace(workspacesCombo.getText()));
 			}
 		});
 
@@ -104,6 +100,7 @@ public class DinoAgeChooseWorkspaceDlg {
 		browseButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
 				DirectoryDialog dialog = new DirectoryDialog(shell);
+				dialog.setFilterPath(System.getProperty("user.dir"));
 				dialog.setText(ResourceManager.getMessage(ResourceManager.KEY_DIRECTORY_DIALOG_TITLE));
 				dialog.setMessage(ResourceManager.getMessage(ResourceManager.KEY_DIRECTORY_DIALOG_MESSAGE));
 				String dir = dialog.open();
@@ -143,6 +140,7 @@ public class DinoAgeChooseWorkspaceDlg {
 		okButton.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
 				answer = SWT.OK;
+				workspaces.setWorkspace(workspacesCombo.getText());
 				workspaces.setWorkspaces(workspacesCombo.getItems());
 				shell.close();
 			}

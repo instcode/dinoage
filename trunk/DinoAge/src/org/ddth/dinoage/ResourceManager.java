@@ -17,11 +17,6 @@ public class ResourceManager {
 	public static final String KEY_PRODUCT_AUTHOR = "instcode";
 	public static final String KEY_PRODUCT_DIALOG_TITLE = KEY_PRODUCT_NAME + " " + KEY_PRODUCT_VERSION;
 	public static final String KEY_ENCODING = "UTF-8";
-	public static final String KEY_GUESTBOOK_URL = "http://360.yahoo.com/guestbook-";
-	public static final String KEY_PROFILE_URL = "http://360.yahoo.com/profile-";
-	public static final String KEY_BLOG_URL = "http://blog.360.yahoo.com/blog-";
-	public static final String KEY_BLOG_LIST_PARAMETER_VALUE = "&list=1";
-	public static final String KEY_BLOG_ENTRY_REGEXP = KEY_BLOG_URL + ".*p=[\\d+].*";
 	public static final String KEY_RELAX_URL = "http://360.yahoo.com/profile-n75YJ78_fL5JcEVFlIE1";
 	
 	public static final String KEY_RESUME_RETRIEVING_CONFIRM =
@@ -32,20 +27,14 @@ public class ResourceManager {
 		"The profile ''{0}'' you entered can not be saved!\n" +
 		"It has been existed in the current workspace.\n" +
 		"You can only modify it by selecting from the drop down list.";
-	public static final String KEY_CONFIRM_EXIT_WHEN_RUNNING =
-		"The current backup for {0} is running.\n" +
-		"Do you want to exit now?";
-	public static final String KEY_MESSAGE_FULL_URL_HREF = "<a href=\"{0}\">{0}</a>";
-	public static final String KEY_WAIT_FOR_EXITING = "<a href=\"{0}\">Plz wait!... {1} is now exiting...</a>";
-	public static final String KEY_WAIT_FOR_STOPPING = "<a href=\"{0}\">Waiting for the current request to finish...</a>";
-	public static final String KEY_MESSAGE_READY_HREF = "<a href=\"{0}\">I''m ready!... Hehehe...</a>";
-	public static final String KEY_MESSAGE_DONE_HREF = "<a href=\"{0}\">{0}... Done!</a>";
-	public static final String KEY_MESSAGE_REQUESTING_HREF = "<a href=\"{0}\">{0}... Requesting...</a>";
+	public static final String KEY_MESSAGE_EXIT_WHEN_RUNNING =
+		"Plz stop the current backup for {0} first.";
+	public static final String KEY_MESSAGE_FULL_HREF = "<a href=\"{0}\">{1}</a>";
+	public static final String KEY_MESSAGE_READY_HREF = "<a href=\"{0}\">I''m ready! Click here to visit my homepage!...</a>";
+	public static final String KEY_MESSAGE_REQUESTING_HREF = "<a href=\"{0}\">{1}... Requesting...</a>";
+	public static final String KEY_MESSAGE_DONE_HREF = "<a href=\"{0}\">{1}... Done!</a>";
 	public static final String KEY_LABEL_Y360_PROFILE = "Y360 Profile URL";
-	public static final String KEY_LABEL_BACKUP_BUTTON_TITLE = "Backup...";
-	public static final String KEY_LABEL_STOP_BACKUP = "Stop";
-	public static final String KEY_LABEL_PROFILE_NAME = "Profile Name";
-	public static final String KEY_LABEL_START = "Start";
+	public static final String KEY_WAIT_FOR_STOPPING = "Waiting for the current request to finish...";
 	public static final String KEY_LABEL_GUESTBOOK = "Backup all Yahoo 360 guestbooks";
 	public static final String KEY_LABEL_BLOG_ENTRY = "Backup all Yahoo 360 entries";
 	public static final String KEY_BACKUP_SETTINGS_DIALOG_TITLE = "Backup Settings";
@@ -58,7 +47,6 @@ public class ResourceManager {
 		"The ''{1}'' profile folder: ''{2}''\n" +
 		"\n" +
 		"Do you want to continue? :-??";
-	public static final String KEY_PLZ_CHOOSE_BACKUP_OPTION_MESSAGE = "Please choose at least one backup option!!";
 	public static final String KEY_BACKUP_SETTING_INFORMATION_MESSAGE =
 		"Enter, paste or drag && drop the profile URL from any source then select\n" +
 		"which options you want the {0} to backup.\n" +
@@ -108,17 +96,21 @@ public class ResourceManager {
 	public static final String KEY_DIRECTORY_DIALOG_TITLE = "Select Workspace Folder";
 	public static final String KEY_CONFIRM_REMOVE_WORKSPACE =
 		"You gonna remove the ''{0}'' location in workspace list.\n" +
-		"However, this won''t delete the backup data on your disk :-)\n" +
+		"Don''t worry, this makes no change to your existing data.\n" +
 		"\n" +
 		"Do you want to continue?";
 	public static final String KEY_CONFIRM_REMOVE_WORKSPACE_PROFILE =
 		"You gonna remove the ''{0}'' profile in profile list.\n" +
-		"However, this won''t delete the backup data on your disk :-)\n" +
+		"This deletes *only* resume information (but cannot be undone).\n" +
 		"\n" +
 		"Do you want to continue?";
 	public static final String KEY_LABEL_SWITCH_WORKSPACE_ELLIPSIS = "Switch Workspace...";
 	public static final String KEY_LABEL_EDIT_ELLIPSIS = "Edit...";
+	public static final String KEY_LABEL_NEW_ELLIPSIS = "New...";
 	public static final String KEY_LABEL_REMOVE = "Remove";
+	public static final String KEY_LABEL_BACKUP_BUTTON_TITLE = "Backup";
+	public static final String KEY_LABEL_STOP_BACKUP = "Stop";
+	public static final String KEY_LABEL_PROFILE_NAME = "Profile Name";
 	
 	public static ResourceBundle resources;
 

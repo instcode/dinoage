@@ -5,10 +5,27 @@
  * $Author:: khoanguyen                           $
  * $Comment::                                      $
  **************************************************/
-package org.ddth.grabber.core.handler;
+package org.ddth.http.core;
 
+
+/**
+ * @author khoa.nguyen
+ *
+ */
 public interface ConnectionListener {
 
-	public void notifyRequesting(String sURL);
-	public void notifyFinished(String sURL, boolean isCompletedWithoutError);
+	/**
+	 * @param event
+	 */
+	public void notifyRequesting(ConnectionEvent event);
+	
+	/**
+	 * @param event
+	 */
+	public void notifyResponding(ConnectionEvent event);
+
+	/**
+	 * @param event
+	 */
+	public void notifyFinished(ConnectionEvent event);
 }

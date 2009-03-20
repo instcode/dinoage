@@ -24,7 +24,7 @@ public class Workspace {
 	private static final String LOCK_FILE = ".lock";
 	private static final String PROFILE_FILE_NAME = ".profile";
 		
-	private Log logger = LogFactory.getLog(Workspace.class);
+	private static final Log logger = LogFactory.getLog(Workspace.class);
 	private Map<String, Profile> map = new HashMap<String, Profile>();
 	private File workspaceFolder;
 	private FileLock lock;
@@ -33,8 +33,26 @@ public class Workspace {
 		this.workspaceFolder = workspaceFolder;
 	}
 	
+	/**
+	 * Check if the given workspace by its path is available for using
+	 *  
+	 * @param workspacePath
+	 * @return
+	 */
+	public static boolean checkWorkspace(String workspacePath) {
+		File workspaceFolder = new File(workspacePath);
+		if (!workspaceFolder.exists() || !workspaceFolder.isDirectory()) {
+			return false;
+		}
+		File lockFile = new File(workspaceFolder, LOCK_FILE);
+		if (!lockFile.exists() || lockFile.delete()) {
+			return true;
+		}
+		return false;
+	}
+	
 	public void loadWorkspace() throws IOException {
-		lock = aqquireExclusiveAccess();
+		lock = aqquireExclusiveAccess(workspaceFolder);
 		if (lock == null) {
 			throw new IOException("Workspace is in used.");
 		}
@@ -64,12 +82,11 @@ public class Workspace {
 		boolean success = false;
 		OutputStream outputStream = null;
 		try {
-			File profileFolder = new File(workspaceFolder, profile.getProfileName());
+			File profileFolder = getProfileFolder(profile);
 			profileFolder.mkdirs();
-			File resumeFile = new File(
-					profileFolder,
-					Workspace.PROFILE_FILE_NAME);
+			File resumeFile = new File(profileFolder, Workspace.PROFILE_FILE_NAME);
 			profile.store(resumeFile);
+			map.put(profile.getProfileName().toLowerCase(), profile);
 			success = true;
 		}
 		catch (IOException e) {
@@ -103,7 +120,7 @@ public class Workspace {
 		}
 	}
 	
-	private FileLock aqquireExclusiveAccess() {
+	private FileLock aqquireExclusiveAccess(File workspaceFolder) {
 		FileLock lock = null;
 		try {
 			File lockFile = new File(workspaceFolder, LOCK_FILE);
@@ -121,12 +138,14 @@ public class Workspace {
 	public String getWorkspaceLocation() {
 		return workspaceFolder.getAbsolutePath();
 	}
-
-	public void putProfile(Profile profile) {
-		map.put(profile.getProfileName().toLowerCase(), profile);
+	
+	public File getProfileFolder(Profile profile) {
+		return new File(workspaceFolder, profile.getProfileName());
 	}
 
 	public Profile removeProfile(String profileName) {
+		File profileFile = new File(new File(workspaceFolder, profileName), Workspace.PROFILE_FILE_NAME);
+		profileFile.delete();
 		return map.remove(profileName.toLowerCase());
 	}
 	
