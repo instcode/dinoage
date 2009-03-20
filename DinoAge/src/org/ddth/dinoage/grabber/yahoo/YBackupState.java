@@ -7,7 +7,7 @@
  **************************************************/
 package org.ddth.dinoage.grabber.yahoo;
 
-import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -18,14 +18,15 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ddth.dinoage.ResourceManager;
+import org.ddth.blogging.yahoo.YahooBlog;
+import org.ddth.dinoage.model.Persistence;
 import org.ddth.dinoage.model.Profile;
-import org.ddth.grabber.core.connection.Request;
-import org.ddth.grabber.core.connection.Session;
-import org.ddth.grabber.core.connection.State;
-import org.ddth.grabber.core.handler.ConnectionListener;
+import org.ddth.http.core.ConnectionEvent;
+import org.ddth.http.core.ConnectionListener;
+import org.ddth.http.core.Session;
+import org.ddth.http.core.connection.Request;
 
-public class YBackupState implements State, ConnectionListener {
+public class YBackupState implements ConnectionListener {
 	private Log logger = LogFactory.getLog(YBackupState.class);
 	
 	/**
@@ -36,10 +37,12 @@ public class YBackupState implements State, ConnectionListener {
 
 	private String profileId;
 	private Profile profile;
+	private Persistence persistence;
 
-	public YBackupState(Profile profile) {
+	public YBackupState(Profile profile, Persistence persistence) {
 		this.profile = profile;
 		this.profileId = getProfileId(profile.getProfileURL());
+		this.persistence = persistence;
 		
 		String[] completedURLs = profile.getCompletedURLs();
 		for (String completedURL : completedURLs) {
@@ -51,17 +54,10 @@ public class YBackupState implements State, ConnectionListener {
 		}
 	}
 	
-	private String getProfileId(String profileURL) {
-		int begin = ResourceManager.KEY_PROFILE_URL.length();
-		int end = profileURL.indexOf("?", begin);
-		end = (end == -1) ? profileURL.length() : end;
-		return profileURL.substring(begin, end);
-	}
-
-	public void initialize(Session<YBackupState> session) {
+	public void initialize(Session session) {
 		String[] outgoingURLs = profile.getOutgoingURLs();
 		for (String outgoingURL : outgoingURLs) {
-			session.queueRequest(outgoingURL);
+			session.queue(new Request(outgoingURL));
 		}
 	}
 
@@ -69,7 +65,8 @@ public class YBackupState implements State, ConnectionListener {
 		return profile;
 	}
 	
-	public void write(ByteArrayInputStream byteArrayInputStream, int id) {
+	public void save(InputStream inputStream, int category, String tail) {
+		persistence.write(inputStream, category, tail);
 	}
 
 	public void reset() {
@@ -88,32 +85,35 @@ public class YBackupState implements State, ConnectionListener {
 	public String getProfileId() {
 		return profileId;
 	}
-	
-	public void notifyFinished(String sURL, boolean isCompletedWithoutError) {
-		logger.debug(sURL + "... Done!");
-		requestMap.put(sURL, Boolean.TRUE);
+
+	@Override
+	public void notifyFinished(ConnectionEvent event) {
+		logger.debug(event.getRequest().getURL() + "... Done!");
+		requestMap.put(event.getRequest().getURL(), Boolean.TRUE);		
 	}
 
-	public void notifyRequesting(String sURL) {
-		logger.debug("Requesting: " + sURL + "...");
+	@Override
+	public void notifyRequesting(ConnectionEvent event) {
+		logger.debug("Requesting: " + event.getRequest().getURL() + "...");
 	}
 
-	public Request poll() {
-		return queue.poll();
+	@Override
+	public void notifyResponding(ConnectionEvent event) {
 	}
 
 	public boolean queue(Request request) {
 		boolean isQueued = false;
 		String sURL = request.getURL();
 		if (!requestMap.containsKey(sURL)) {
-			if (request.getProcessor() != null) {
-				isQueued = queue.offer(request);
-			}
+			isQueued = queue.offer(request);
 			requestMap.put(sURL, Boolean.FALSE);
 		}
 		return isQueued;
 	}
 
+	/**
+	 * Synchronize between the state and its profile 
+	 */
 	public void syncState() {
 		List<String> completedURLs = new ArrayList<String>();
 		List<String> outgoingURLs = new ArrayList<String>();
@@ -130,5 +130,12 @@ public class YBackupState implements State, ConnectionListener {
 		}
 		profile.setCompletedURLs(completedURLs.toArray(new String[completedURLs.size()]));
 		profile.setOutgoingURLs(outgoingURLs.toArray(new String[outgoingURLs.size()]));
+	}
+
+	private String getProfileId(String profileURL) {
+		int begin = YahooBlog.YAHOO_360_PROFILE_URL.length();
+		int end = profileURL.indexOf("?", begin);
+		end = (end < 0) ? profileURL.length() : end;
+		return end <= begin ? "" : profileURL.substring(begin, end);
 	}
 }

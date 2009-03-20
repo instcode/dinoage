@@ -5,17 +5,21 @@
  * $Author:: khoanguyen                           $
  * $Comment::                                      $
  **************************************************/
-package org.ddth.grabber.core.connection;
+package org.ddth.http.core.content;
 
-public interface State {
-	/**
-	 * @param request
-	 * @return
-	 */
-	public boolean queue(Request request);
+
+
+public class ContentAdapter<T> implements Content<T> {
+
+	private T content;
 	
-	/**
-	 * @return
-	 */
-	public Request poll();
+	@Override
+	public void setContent(T content) {
+		this.content = content;
+	}
+	
+	@Override
+	public T getContent() {
+		return content;
+	}
 }

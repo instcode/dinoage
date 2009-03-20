@@ -9,7 +9,9 @@ package org.ddth.blogging.yahoo;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.StringWriter;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -21,21 +23,22 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
+import org.cyberneko.html.parsers.DOMParser;
 import org.ddth.blogging.Blog;
 import org.ddth.blogging.BlogEntry;
 import org.ddth.blogging.BlogProvider;
-import org.ddth.grabber.impl.parser.ContentParser;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.xml.sax.InputSource;
+import org.xml.sax.SAXException;
 
 public class YahooBlogEntryUtil {
 	/**
 	 * Example: Monday December 24, 2007 - 11:36pm (ICT)
 	 */
 	private static final DateFormat BLOG_DATE_FORMAT = new SimpleDateFormat("EEEE MMMM d, y - HH:mma (z)");
-	private static final ContentParser CONTENT_PARSER = new ContentParser();
 	
 	private enum BlogEntryKey {
 		BLOG_ENTRY,
@@ -72,9 +75,8 @@ public class YahooBlogEntryUtil {
 	 * @param inputStream
 	 * @return
 	 */
-	public static BlogEntry parseEntry(InputStream inputStream) {
+	public static BlogEntry parseEntry(Document doc) {
 		BlogEntry blogEntry = new BlogEntry();
-		Document doc = CONTENT_PARSER.parse(inputStream, "utf-8");
 		try {
 			Node entry = (Node) YAHOO_BLOG_ENTRY_XPES.get(BlogEntryKey.BLOG_ENTRY).evaluate(doc, XPathConstants.NODE);
 			Node title = (Node) YAHOO_BLOG_ENTRY_XPES.get(BlogEntryKey.TITLE).evaluate(entry, XPathConstants.NODE);
@@ -90,7 +92,7 @@ public class YahooBlogEntryUtil {
 			}
 			blogEntry.setTitle(title.getFirstChild().getNodeValue());
 			blogEntry.setTags(buffer.toString());
-			blogEntry.setContent(CONTENT_PARSER.getRawText(body));
+			blogEntry.setContent(getRawText(body));
 			blogEntry.setDate(BLOG_DATE_FORMAT.parse(date.getFirstChild().getNodeValue()));
 		}
 		catch (XPathExpressionException e) {
@@ -105,8 +107,35 @@ public class YahooBlogEntryUtil {
 		return blogEntry;
 	}
 	
+	public static String getRawText(Node node) {
+        StringWriter writer = new StringWriter();
+        HTMLNodeBuilder builder = new HTMLNodeBuilder(writer);
+        try {
+                builder.serialize(node);
+        }
+        catch (IOException e) {
+        }
+        return writer.getBuffer().toString();
+	}
+
+	private static Document parse(InputStream inputStream, String encoding) {
+		DOMParser parser = new DOMParser();
+		InputSource inputSource = new InputSource(inputStream);
+		inputSource.setEncoding(encoding);
+		Document doc = null;
+		try {
+			parser.parse(inputSource);
+			doc = parser.getDocument();
+		}
+		catch (SAXException e) {
+		}
+		catch (IOException e) {
+		}
+		return doc;
+	}
+	
 	public static void main(String[] args) throws FileNotFoundException {
-		BlogEntry entry = YahooBlogEntryUtil.parseEntry(new FileInputStream("entry.html"));
+		BlogEntry entry = YahooBlogEntryUtil.parseEntry(parse(new FileInputStream("entry.html"), "utf-8"));
 		System.out.println(
 				"Blog: " + entry.getTitle() +
 				"\nBody: " + entry.getContent() +

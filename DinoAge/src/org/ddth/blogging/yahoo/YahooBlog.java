@@ -13,6 +13,10 @@ import org.ddth.blogging.BlogEntry;
 
 public class YahooBlog extends BasicBlog {
 
+	public static final String YAHOO_360_PROFILE_URL = "http://360.yahoo.com/profile-";
+	public static final String YAHOO_360_GUESTBOOK_URL = "http://360.yahoo.com/guestbook-";
+	public static final String YAHOO_360_BLOG_URL = "http://blog.360.yahoo.com/blog-";
+
 	public boolean createEntry(BlogEntry entry) {
 		return true;
 	}

@@ -20,20 +20,18 @@ public class Persistence {
 	
 	private static final String[] CATEGORIES = {"guestbook", "entry"};
 	private File[] folders = new File[2];
-	private int[] indexes;
 	
-	public Persistence(File profileFolder, int[] starts) {
-		indexes = starts;
+	public Persistence(File profileFolder) {
 		for (int i = 0; i < CATEGORIES.length; i++) {
 			folders[i] = new File(profileFolder, CATEGORIES[i]);
 			folders[i].mkdirs();
 		}
 	}
 
-	public void write(InputStream inputStream, int category) {
+	public void write(InputStream inputStream, int category, String tail) {
 		OutputStream outputStream = null;
 		try {
-			File outputFile = new File(folders[category], CATEGORIES[category] + "-" + indexes[category] + ".html");
+			File outputFile = new File(folders[category], CATEGORIES[category] + "-" + tail + ".html");
 			outputStream = new FileOutputStream(outputFile);
 			byte[] buffer = new byte[4096];
 			int bytesread = 0;
@@ -52,15 +50,10 @@ public class Persistence {
 			if (outputStream != null) {
 				try {
 					outputStream.close();
-					indexes[category]++;
 				}
 				catch (IOException e) {
 				}
 			}
 		}
-	}
-
-	public int getCategoryIndex(int category) {
-		return indexes[category];
 	}
 }

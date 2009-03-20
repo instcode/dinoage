@@ -5,16 +5,30 @@
  * $Author:: khoanguyen                           $
  * $Comment::                                      $
  **************************************************/
-package org.ddth.grabber.core.handler;
+package org.ddth.http.core.connection;
 
-public interface SessionListener {
+
+public interface ConnectionModel {
+
 	/**
-	 * Notify session is started
+	 * @param request
+	 * @return
 	 */
-	public void sessionStarted();
+	public RequestFuture sendRequest(Request request);
+
+	/**
+	 * 
+	 */
+	public void open();
 	
 	/**
-	 * Notify session is stopped
+	 * @return
 	 */
-	public void sessionStopped();
+	public boolean running();
+	
+	/**
+	 * 
+	 */
+	public void close();
+
 }
