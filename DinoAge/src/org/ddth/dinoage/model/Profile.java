@@ -1,10 +1,3 @@
-/****************************************************
- * $Project: DinoAge                     $
- * $Date:: Jan 5, 2008 1:36:31 PM                  $
- * $Revision: $	
- * $Author:: khoanguyen                           $
- * $Comment::                                      $
- **************************************************/
 package org.ddth.dinoage.model;
 
 import java.io.File;
@@ -18,6 +11,7 @@ import java.util.Properties;
 import org.ddth.dinoage.ResourceManager;
 
 public class Profile {
+
 	private static final String URL_SEPARATOR = ",";
 	private static final String BACKUP_URLS_COMPLETED = "backup.urls.completed";
 	private static final String BACKUP_URLS_OUTGOING = "backup.urls.outgoing";
@@ -67,7 +61,7 @@ public class Profile {
 		return value.split(URL_SEPARATOR);
 	}
 	
-	public void store(File profileFile) throws IOException {
+	public OutputStream store(File profileFile) throws IOException {
 		OutputStream outputStream = new FileOutputStream(profileFile);
 		
 		Properties properties = new Properties();
@@ -97,6 +91,7 @@ public class Profile {
 		// Store all properties
 		properties.store(outputStream, ResourceManager.getMessage(
 				ResourceManager.KEY_PROFILE_RESUME_FILE_HEADER, new String [] {profileName, profileURL}));
+		return outputStream;
 	}
 
 	public String getProfileName() {

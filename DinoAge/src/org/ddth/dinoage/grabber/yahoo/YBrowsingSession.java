@@ -12,37 +12,42 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ddth.blogging.yahoo.YahooBlog;
 import org.ddth.dinoage.model.Persistence;
 import org.ddth.dinoage.model.Profile;
+import org.ddth.dinoage.model.Workspace;
 import org.ddth.http.core.ConnectionEvent;
 import org.ddth.http.core.ConnectionListener;
-import org.ddth.http.core.Session;
 import org.ddth.http.core.connection.Request;
+import org.ddth.http.core.connection.RequestFuture;
+import org.ddth.http.core.content.handler.ContentHandlerDispatcher;
+import org.ddth.http.impl.ThreadPoolSession;
 
-public class YBackupState implements ConnectionListener {
-	private Log logger = LogFactory.getLog(YBackupState.class);
+public class YBrowsingSession extends ThreadPoolSession {
+	private Log logger = LogFactory.getLog(YBrowsingSession.class);
 	
 	/**
 	 * The boolean value is used to mark whether a URL is completed or not
 	 */
 	private Map<String, Boolean> requestMap = new ConcurrentHashMap<String, Boolean>();
-	private Queue<Request> queue = new ConcurrentLinkedQueue<Request>();
 
 	private String profileId;
 	private Profile profile;
 	private Persistence persistence;
+	private Workspace workspace;
+	private ConnectionListener listener;
 
-	public YBackupState(Profile profile, Persistence persistence) {
+	public YBrowsingSession(Profile profile, Workspace workspace, ConnectionListener listener, ContentHandlerDispatcher dispatcher) {
+		super(dispatcher);
+		this.workspace = workspace;
+		this.listener = listener;
 		this.profile = profile;
 		this.profileId = getProfileId(profile.getProfileURL());
-		this.persistence = persistence;
+		this.persistence = new Persistence(workspace.getProfileFolder(profile));
 		
 		String[] completedURLs = profile.getCompletedURLs();
 		for (String completedURL : completedURLs) {
@@ -54,32 +59,29 @@ public class YBackupState implements ConnectionListener {
 		}
 	}
 	
-	public void initialize(Session session) {
+	@Override
+	public void start() {
+		super.start();		
+		queue(new Request(YahooBlog.YAHOO_360_BLOG_URL + profileId));
+		queue(new Request(YahooBlog.YAHOO_360_GUESTBOOK_URL + profileId));
+		
 		String[] outgoingURLs = profile.getOutgoingURLs();
 		for (String outgoingURL : outgoingURLs) {
-			session.queue(new Request(outgoingURL));
+			queue(new Request(outgoingURL));
 		}
+		workspace.saveProfile(profile);
 	}
 
-	public Profile getProfile() {
-		return profile;
-	}
-	
 	public void save(InputStream inputStream, int category, String tail) {
 		persistence.write(inputStream, category, tail);
 	}
 
 	public void reset() {
-		queue.clear();
 		requestMap.clear();
 	}
 
 	public boolean isNewlyCreated() {
 		return (requestMap.size() == 0);
-	}
-
-	public void setProfileId(String profileId) {
-		this.profileId = profileId;
 	}
 
 	public String getProfileId() {
@@ -89,32 +91,39 @@ public class YBackupState implements ConnectionListener {
 	@Override
 	public void notifyFinished(ConnectionEvent event) {
 		logger.debug(event.getRequest().getURL() + "... Done!");
-		requestMap.put(event.getRequest().getURL(), Boolean.TRUE);		
+		requestMap.put(event.getRequest().getURL(), Boolean.TRUE);
+		syncState();
+		workspace.saveProfile(profile);
+		listener.notifyFinished(event);
 	}
 
 	@Override
 	public void notifyRequesting(ConnectionEvent event) {
 		logger.debug("Requesting: " + event.getRequest().getURL() + "...");
+		listener.notifyRequesting(event);
 	}
 
 	@Override
 	public void notifyResponding(ConnectionEvent event) {
+		listener.notifyResponding(event);
 	}
 
-	public boolean queue(Request request) {
-		boolean isQueued = false;
+	@Override
+	public RequestFuture queue(Request request) {
+		RequestFuture future = null;
+		
 		String sURL = request.getURL();
 		if (!requestMap.containsKey(sURL)) {
-			isQueued = queue.offer(request);
 			requestMap.put(sURL, Boolean.FALSE);
+			future = super.queue(request);
 		}
-		return isQueued;
+		return future;
 	}
 
 	/**
 	 * Synchronize between the state and its profile 
 	 */
-	public void syncState() {
+	private void syncState() {
 		List<String> completedURLs = new ArrayList<String>();
 		List<String> outgoingURLs = new ArrayList<String>();
 		Iterator<String> iterator = requestMap.keySet().iterator();
