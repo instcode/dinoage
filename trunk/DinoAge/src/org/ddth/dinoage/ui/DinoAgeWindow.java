@@ -7,12 +7,11 @@
  **************************************************/
 package org.ddth.dinoage.ui;
 
-import java.io.File;
+import java.util.Collection;
 
 import org.ddth.dinoage.DinoAge;
 import org.ddth.dinoage.ResourceManager;
-import org.ddth.dinoage.grabber.yahoo.YBackupState;
-import org.ddth.dinoage.model.Persistence;
+import org.ddth.dinoage.grabber.yahoo.YBrowsingSession;
 import org.ddth.dinoage.model.Profile;
 import org.ddth.dinoage.model.Workspace;
 import org.ddth.http.core.ConnectionEvent;
@@ -206,20 +205,23 @@ public class DinoAgeWindow implements ConnectionListener {
 				if (profile == null) {
 					return;
 				}
-				File profileFolder = dinoage.getWorkspace().getProfileFolder(profile);
-				YBackupState state = new YBackupState(profile, new Persistence(profileFolder));
+				YBrowsingSession session = new YBrowsingSession(profile,
+						dinoage.getWorkspace(),
+						dinoage.getMainWindow(),
+						dinoage.getDispatcher());
+
 				int answer = SWT.YES;
-				if (!state.isNewlyCreated()) {
+				if (!session.isNewlyCreated()) {
 					String message = ResourceManager.getMessage(
 							ResourceManager.KEY_RESUME_RETRIEVING_CONFIRM,
-							new String[] {state.getProfileId(), profile.getProfileName()}
+							new String[] {session.getProfileId(), profile.getProfileName()}
 					);
 					answer = UniversalUtil.showConfirmDlg(shell, shell.getText(), message);
 				}
 				if (answer == SWT.NO) {
-					state.reset();
+					session.reset();
 				}
-				dinoage.backup(state);
+				session.start();
 				
 				// Update backupButton action
 				if (dinoage.isRunning()) {
@@ -326,7 +328,7 @@ public class DinoAgeWindow implements ConnectionListener {
 		profilesCombo.removeAll();
 		profilesCombo.add(selection);
 		
-		Profile[] profiles = workspace.getProfiles();
+		Collection<Profile> profiles = workspace.getProfiles();
 		for (Profile profile : profiles) {
 			profilesCombo.add(profile.getProfileName());
 		}
@@ -349,7 +351,6 @@ public class DinoAgeWindow implements ConnectionListener {
 			public void run() {
 				setStatusText(ResourceManager.getMessage(
 						ResourceManager.KEY_MESSAGE_DONE_HREF, new String[] {sURL, sURL}));
-				dinoage.saveState();
 			}
 		});
 	}

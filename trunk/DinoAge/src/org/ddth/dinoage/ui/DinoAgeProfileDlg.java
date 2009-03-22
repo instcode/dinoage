@@ -8,6 +8,7 @@
 package org.ddth.dinoage.ui;
 
 import org.ddth.dinoage.ResourceManager;
+import org.ddth.dinoage.grabber.yahoo.YahooProfile;
 import org.ddth.dinoage.model.Profile;
 import org.ddth.dinoage.model.Workspace;
 import org.eclipse.swt.SWT;
@@ -36,7 +37,7 @@ public class DinoAgeProfileDlg extends Dialog {
 	private Text profileText;
 	private Button okButton; 
 	private Workspace workspace;
-	private Profile profile = new Profile();
+	private Profile profile = new YahooProfile();
 	
 	private int answer;
 	
