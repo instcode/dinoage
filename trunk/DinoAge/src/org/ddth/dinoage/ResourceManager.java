@@ -29,6 +29,9 @@ public class ResourceManager {
 		"You can only modify it by selecting from the drop down list.";
 	public static final String KEY_MESSAGE_EXIT_WHEN_RUNNING =
 		"Plz stop the current backup for {0} first.";
+	public static final String KEY_MESSAGE_WORKSPACE_MUST_BE_EXISTED =
+		"Workspace folder must be existed.";
+	
 	public static final String KEY_MESSAGE_FULL_HREF = "<a href=\"{0}\">{1}</a>";
 	public static final String KEY_MESSAGE_READY_HREF = "<a href=\"{0}\">I''m ready! Click here to visit my homepage!...</a>";
 	public static final String KEY_MESSAGE_REQUESTING_HREF = "<a href=\"{0}\">{1}... Requesting...</a>";

@@ -34,6 +34,7 @@ public class DinoAgeChooseWorkspaceDlg {
 	private Shell parent;
 	private Shell shell;
 	private Button okButton;
+	private Label errorLabel;
 	private int answer;
 
 	public DinoAgeChooseWorkspaceDlg(Shell parent, WorkspaceManager workspaces) {
@@ -92,7 +93,12 @@ public class DinoAgeChooseWorkspaceDlg {
 		workspacesCombo.setLayoutData(gd_workspacesCombo);
 		workspacesCombo.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent event) {
-				okButton.setEnabled(Workspace.checkWorkspace(workspacesCombo.getText()));
+				boolean isValid = Workspace.checkWorkspace(workspacesCombo.getText());
+				okButton.setEnabled(isValid);
+				String message = isValid ? "" : ResourceManager.getMessage(
+						ResourceManager.KEY_MESSAGE_WORKSPACE_MUST_BE_EXISTED);
+				errorLabel.setForeground(shell.getDisplay().getSystemColor(SWT.COLOR_RED));
+				errorLabel.setText(message);
 			}
 		});
 
@@ -132,8 +138,13 @@ public class DinoAgeChooseWorkspaceDlg {
 			}
 		});
 
+		errorLabel = new Label(composite, SWT.NONE);
+		final GridData gd_errorText = new GridData(SWT.LEFT, SWT.CENTER, true, false, 2, 1);
+		gd_errorText.widthHint = 355;
+		errorLabel.setLayoutData(gd_errorText);
+		
 		okButton = new Button(composite, SWT.PUSH);
-		final GridData gd_okButton = new GridData(SWT.RIGHT, SWT.CENTER, false, false, 3, 1);
+		final GridData gd_okButton = new GridData(SWT.RIGHT, SWT.CENTER, false, false);
 		gd_okButton.widthHint = 60;
 		okButton.setLayoutData(gd_okButton);
 		okButton.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_OK));
@@ -145,7 +156,7 @@ public class DinoAgeChooseWorkspaceDlg {
 				shell.close();
 			}
 		});
-
+		
 		final Button cancelButton = new Button(composite, SWT.NONE);
 		final GridData gd_cancelButton = new GridData(SWT.FILL, SWT.CENTER, false, false);
 		cancelButton.setLayoutData(gd_cancelButton);
