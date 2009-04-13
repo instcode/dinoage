@@ -31,6 +31,10 @@ public class Workspace {
 	private FileLock lock;
 	private ProfileLoader profileLoader;
 
+	public static final int WORKSPACE_IS_AVAILABLE = 0;
+	public static final int WORKSPACE_IS_INVALID = 1;
+	public static final int WORKSPACE_IS_BEING_USED = 2;
+	
 	public Workspace(File workspaceFolder, ProfileLoader loader) {
 		this.workspaceFolder = workspaceFolder;
 		this.profileLoader = loader;
@@ -42,16 +46,16 @@ public class Workspace {
 	 * @param workspacePath
 	 * @return
 	 */
-	public static boolean checkWorkspace(String workspacePath) {
+	public static int checkWorkspace(String workspacePath) {
 		File workspaceFolder = new File(workspacePath);
 		if (!workspaceFolder.exists() || !workspaceFolder.isDirectory()) {
-			return false;
+			return WORKSPACE_IS_INVALID;
 		}
 		File lockFile = new File(workspaceFolder, LOCK_FILE);
 		if (!lockFile.exists() || lockFile.delete()) {
-			return true;
+			return WORKSPACE_IS_AVAILABLE;
 		}
-		return false;
+		return WORKSPACE_IS_BEING_USED;
 	}
 	
 	public void closeWorkspace() {

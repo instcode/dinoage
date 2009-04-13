@@ -36,7 +36,7 @@ public class DinoAgeChooseWorkspaceDlg {
 	private Button okButton;
 	private Label errorLabel;
 	private int answer;
-
+	
 	public DinoAgeChooseWorkspaceDlg(Shell parent, WorkspaceManager workspaces) {
 		this.parent = parent;
 		this.workspaces = workspaces;
@@ -93,10 +93,19 @@ public class DinoAgeChooseWorkspaceDlg {
 		workspacesCombo.setLayoutData(gd_workspacesCombo);
 		workspacesCombo.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent event) {
-				boolean isValid = Workspace.checkWorkspace(workspacesCombo.getText());
-				okButton.setEnabled(isValid);
-				String message = isValid ? "" : ResourceManager.getMessage(
-						ResourceManager.KEY_MESSAGE_WORKSPACE_MUST_BE_EXISTED);
+				int check = Workspace.checkWorkspace(workspacesCombo.getText());
+				okButton.setEnabled(check == Workspace.WORKSPACE_IS_AVAILABLE);
+				String message = "";
+				switch (check) {
+				case Workspace.WORKSPACE_IS_INVALID:
+					message = ResourceManager.getMessage(
+							ResourceManager.KEY_MESSAGE_WORKSPACE_MUST_BE_EXISTED);
+					break;
+				case Workspace.WORKSPACE_IS_BEING_USED:
+					message = ResourceManager.getMessage(
+							ResourceManager.KEY_MESSAGE_WORKSPACE_IS_BEING_USED);
+					break;
+				}
 				errorLabel.setForeground(shell.getDisplay().getSystemColor(SWT.COLOR_RED));
 				errorLabel.setText(message);
 			}
