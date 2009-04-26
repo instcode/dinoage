@@ -22,7 +22,7 @@ public class UniversalUtil {
 	}
 	
 	public static int showConfirmDlg(Shell shell, String title, String message) {
-		MessageBox dlg = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO);
+		MessageBox dlg = new MessageBox(shell, SWT.ICON_QUESTION | SWT.YES | SWT.NO | SWT.CANCEL);
 		dlg.setText(title);
 		dlg.setMessage(message);
 		return dlg.open();

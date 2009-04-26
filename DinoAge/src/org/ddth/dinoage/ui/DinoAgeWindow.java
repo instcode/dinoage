@@ -44,14 +44,16 @@ public class DinoAgeWindow implements ConnectionListener {
 	private Button removeProfileButton;
 	private Button editProfileButton;
 	private Button switchWorkspaceButton;
-	private Combo profilesCombo;
-	private Text workspaceText;
+	private Button showBackup;
 	private Button backupButton;
+	private Combo profilesCombo;
 	private Link profileURLText;
 	private Link statusLabel;
+	private Text workspaceText;
 	
 	private SelectionListener backupListener;
 	private SelectionListener stopListener;
+	private SelectionListener showBackupListener;
 	private SelectionListener switchWorkspaceListener;
 	private SelectionListener editProfileListener;
 	private SelectionListener removeProfileListener;
@@ -83,7 +85,8 @@ public class DinoAgeWindow implements ConnectionListener {
 			public void shellClosed(ShellEvent event) {
 				event.doit = !dinoage.isRunning();
 				if (!event.doit) {
-					String message = ResourceManager.getMessage(ResourceManager.KEY_MESSAGE_EXIT_WHEN_RUNNING);
+					String message = ResourceManager.getMessage(ResourceManager.KEY_MESSAGE_EXIT_WHEN_RUNNING,
+							new String[] { "current profile" });
 					UniversalUtil.showMessageBox(shell, shell.getText(), message);
 				}
 				else {
@@ -113,9 +116,9 @@ public class DinoAgeWindow implements ConnectionListener {
 			public void widgetSelected(final SelectionEvent arg0) {
 				if (dinoage.isRunning()) {
 					setStatusText(ResourceManager.getMessage(ResourceManager.KEY_WAIT_FOR_STOPPING));
+					dinoage.stop();
 					shell.getDisplay().asyncExec(new Runnable() {
 						public void run() {
-							dinoage.stop();
 							backupButton.removeSelectionListener(stopListener);
 							backupButton.addSelectionListener(backupListener);
 							backupButton.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_BACKUP_BUTTON_TITLE));
@@ -139,9 +142,9 @@ public class DinoAgeWindow implements ConnectionListener {
 		editProfileListener = new SelectionAdapter() {
 			public void widgetSelected(final SelectionEvent arg0) {
 				Workspace workspace = dinoage.getWorkspace();
-				DinoAgeProfileDlg dlg = new DinoAgeProfileDlg(shell, workspace);
-				
 				Profile profile = workspace.getProfile(profilesCombo.getText());
+				
+				DinoAgeProfileDlg dlg = new DinoAgeProfileDlg(shell, workspace);
 				if (profile != null) {
 					dlg.getProfile().populate(profile);
 				}
@@ -201,27 +204,24 @@ public class DinoAgeWindow implements ConnectionListener {
 		backupListener = new SelectionAdapter() {
 			public void widgetSelected(final SelectionEvent arg0) {
 				String profileName = profilesCombo.getText();
-				Profile profile = dinoage.getWorkspace().getProfile(profileName);
-				if (profile == null) {
+				YBrowsingSession session = dinoage.createSession(profileName);
+				if (session == null) {
 					return;
 				}
-				YBrowsingSession session = new YBrowsingSession(profile,
-						dinoage.getWorkspace(),
-						dinoage.getMainWindow(),
-						dinoage.getDispatcher());
-
 				int answer = SWT.YES;
-				if (!session.isNewlyCreated()) {
+				if (!session.getProfile().isNewlyCreated()) {
 					String message = ResourceManager.getMessage(
 							ResourceManager.KEY_RESUME_RETRIEVING_CONFIRM,
-							new String[] {session.getProfileId(), profile.getProfileName()}
+							new String[] {session.getProfile().getProfileId(), session.getProfile().getProfileName()}
 					);
 					answer = UniversalUtil.showConfirmDlg(shell, shell.getText(), message);
 				}
 				if (answer == SWT.NO) {
 					session.reset();
 				}
-				session.start();
+				if (answer != SWT.CANCEL) {
+					session.start();
+				}
 				
 				// Update backupButton action
 				if (dinoage.isRunning()) {
@@ -230,6 +230,18 @@ public class DinoAgeWindow implements ConnectionListener {
 					backupButton.addSelectionListener(stopListener);
 					backupButton.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_STOP_BACKUP));
 				}
+			}
+		};
+		
+		showBackupListener = new SelectionAdapter() {
+			public void widgetSelected(final SelectionEvent arg0) {
+				String profileName = profilesCombo.getText();
+				Profile profile = dinoage.getWorkspace().getProfile(profileName);
+				if (profile == null) {
+					return;
+				}
+				ShowBlogEntryDlg dlg = new ShowBlogEntryDlg(shell);
+				dlg.open();
 			}
 		};
 	}
@@ -294,8 +306,8 @@ public class DinoAgeWindow implements ConnectionListener {
 
 		profileURLText = new Link(composite, SWT.NONE | SWT.NO_FOCUS);
 		profileURLText.addSelectionListener(launchSelection);
-		
-		GridData gd_profileURLText = new GridData(SWT.FILL, SWT.CENTER, true, true, 2, 1);
+		GridData gd_profileURLText = new GridData(SWT.FILL, SWT.CENTER, true, true);
+		gd_profileURLText.widthHint = 300;
 		gd_profileURLText.heightHint = 15;
 		profileURLText.setLayoutData(gd_profileURLText);
 
@@ -305,6 +317,11 @@ public class DinoAgeWindow implements ConnectionListener {
 		backupButton.setLayoutData(gd_backupButton);
 		backupButton.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_BACKUP_BUTTON_TITLE));
 
+		showBackup = new Button(composite, SWT.NONE);
+		showBackup.setLayoutData(new GridData(60, SWT.DEFAULT));
+		showBackup.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_SHOW_BACKUP_ELLIPSIS));
+		showBackup.addSelectionListener(showBackupListener);
+
 		statusLabel = new Link(composite, SWT.NONE | SWT.NO_FOCUS);
 		statusLabel.setForeground(shell.getDisplay().getSystemColor(SWT.COLOR_BLUE));
 		statusLabel.addSelectionListener(launchSelection);
@@ -312,7 +329,7 @@ public class DinoAgeWindow implements ConnectionListener {
 		statusLabel.setLayoutData(gd_status);
 		
 		shell.setTabList(new Control[] {composite});
-		composite.setTabList(new Control[] {workspaceText, switchWorkspaceButton, profilesCombo, editProfileButton, removeProfileButton, backupButton, workspaceText});
+		composite.setTabList(new Control[] {workspaceText, switchWorkspaceButton, profilesCombo, editProfileButton, removeProfileButton, backupButton, showBackup, workspaceText});
 		
 		initializeValues();
 	}
@@ -351,6 +368,7 @@ public class DinoAgeWindow implements ConnectionListener {
 			public void run() {
 				setStatusText(ResourceManager.getMessage(
 						ResourceManager.KEY_MESSAGE_DONE_HREF, new String[] {sURL, sURL}));
+				
 			}
 		});
 	}

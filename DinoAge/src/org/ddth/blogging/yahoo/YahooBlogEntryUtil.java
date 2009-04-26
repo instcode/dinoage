@@ -10,7 +10,6 @@ package org.ddth.blogging.yahoo;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.StringWriter;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -23,16 +22,14 @@ import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
 
-import org.cyberneko.html.parsers.DOMParser;
-import org.ddth.blogging.Blog;
 import org.ddth.blogging.BlogEntry;
-import org.ddth.blogging.BlogProvider;
+import org.ddth.http.impl.content.DomTreeContent;
+import org.ddth.http.impl.content.WebpageContent;
+import org.ddth.http.impl.content.handler.WebpageContentHandler;
 import org.w3c.dom.DOMException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
 public class YahooBlogEntryUtil {
 	/**
@@ -40,12 +37,18 @@ public class YahooBlogEntryUtil {
 	 */
 	private static final DateFormat BLOG_DATE_FORMAT = new SimpleDateFormat("EEEE MMMM d, y - HH:mma (z)");
 	
+	private static final String ENTRY_URL_XPATH = "DIV[2]/DIV/DIV[2]/DIV[2]/DIV/DIV/DL/DT/A";
+	private static final String NEXT_PREVIOUS_URL_XPATH = "DIV[2]/DIV/DIV[2]/SPAN[2]/SPAN";
+	private static final String CHECK_VALID_BODY_XPATH = "DIV[2]/DIV/DIV[2]/DIV[2]/DIV/DIV/DL/DT";
+	private static final String NEXT_ENTRY_URL_XPATH = "DIV[2]/DIV/DIV[2]/DIV[2]/DIV/DIV/DL/DD/DIV[3]/P[2]/SPAN[2]/A";
+	private static final String FIRST_ENTRY_URL_XPATH = "DIV[2]/DIV/DIV[2]/DIV[2]/DIV/DIV/DL/DD/DIV[3]/SPAN[2]/A";
+	
 	private enum BlogEntryKey {
 		BLOG_ENTRY,
 		TITLE,
 		BODY,
 		CREATED_DATE,
-		TAGS,
+		TAGS;
 	}
 	
 	private static final EnumMap<BlogEntryKey, XPathExpression> YAHOO_BLOG_ENTRY_XPES =
@@ -69,6 +72,11 @@ public class YahooBlogEntryUtil {
 		catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	public static String parseNavigationLink(Document doc) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 	/**
@@ -108,45 +116,25 @@ public class YahooBlogEntryUtil {
 	}
 	
 	public static String getRawText(Node node) {
-        StringWriter writer = new StringWriter();
-        HTMLNodeBuilder builder = new HTMLNodeBuilder(writer);
-        try {
-                builder.serialize(node);
-        }
-        catch (IOException e) {
-        }
-        return writer.getBuffer().toString();
+		StringWriter writer = new StringWriter();
+		HTMLNodeBuilder builder = new HTMLNodeBuilder(writer);
+		try {
+			builder.serialize(node);
+		} catch (IOException e) {
+		}
+		return writer.getBuffer().toString();
 	}
 
-	private static Document parse(InputStream inputStream, String encoding) {
-		DOMParser parser = new DOMParser();
-		InputSource inputSource = new InputSource(inputStream);
-		inputSource.setEncoding(encoding);
-		Document doc = null;
-		try {
-			parser.parse(inputSource);
-			doc = parser.getDocument();
-		}
-		catch (SAXException e) {
-		}
-		catch (IOException e) {
-		}
-		return doc;
-	}
-	
 	public static void main(String[] args) throws FileNotFoundException {
-		BlogEntry entry = YahooBlogEntryUtil.parseEntry(parse(new FileInputStream("entry.html"), "utf-8"));
+		WebpageContentHandler contentHandler = new WebpageContentHandler();
+		WebpageContent webContent = new WebpageContent(new FileInputStream("entry.html"), "utf-8");
+		DomTreeContent content = (DomTreeContent)contentHandler.handle(webContent);
+		BlogEntry entry = YahooBlogEntryUtil.parseEntry(content.getDocument());
+		
 		System.out.println(
 				"Blog: " + entry.getTitle() +
 				"\nBody: " + entry.getContent() +
 				"\nTags: " + entry.getTags() +
 				"\nDate: " + entry.getDate());
-		//String[] wordpress = new String[] {"http://instcode.wordpress.com/xmlrpc.php", "instcode", "password??"};
-		//Blog blog = BlogProvider.getInstance().createBlog(BlogProvider.BLOG_TYPE_WORDPRESS);
-		//blog.setup(wordpress[0], wordpress[1], wordpress[2]);
-		String[] blogger = new String[] {"", "ngxkhoa @ gmail.com", "password??"};
-		Blog blog = BlogProvider.getInstance().createBlog(BlogProvider.BLOG_TYPE_BLOGGER);
-		blog.setup(blogger[0], blogger[1], blogger[2]);
-		blog.createEntry(entry);
 	}
 }

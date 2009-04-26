@@ -7,23 +7,21 @@
  **************************************************/
 package org.ddth.dinoage.grabber.yahoo.handler;
 
-import javax.xml.xpath.XPathExpression;
-
+import org.ddth.blogging.BlogEntry;
+import org.ddth.blogging.yahoo.YahooBlogEntryUtil;
+import org.ddth.dinoage.grabber.yahoo.YBlogEntryContent;
 import org.ddth.http.core.content.Content;
 import org.ddth.http.core.content.handler.ContentHandler;
+import org.ddth.http.impl.content.DomTreeContent;
+import org.w3c.dom.Document;
 
-public class EntryListContentHandler implements ContentHandler {
-	
-	private static XPathExpression ENTRY_BODY_VALID_EXPRESSION;
-	private static final String XX = "DIV[2]/DIV/DIV[2]/DIV[2]/DIV/DIV/DL/DT";
-	private static final String YY = "DIV[2]/DIV/DIV[2]/DIV[2]/DIV/DIV/DL/DT/A";
-	
-	public EntryListContentHandler() {
-	}
+public class YBlogEntryContentHandler implements ContentHandler {
 
 	@Override
 	public Content<?> handle(Content<?> content) {
-		// TODO Auto-generated method stub
-		return null;
+		Document doc = ((DomTreeContent) content).getDocument();
+		String nextURL = YahooBlogEntryUtil.parseNavigationLink(doc);
+		BlogEntry entry = null;
+		return new YBlogEntryContent(entry, nextURL);
 	}
 }

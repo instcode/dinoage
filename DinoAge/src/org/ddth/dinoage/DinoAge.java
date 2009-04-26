@@ -14,11 +14,14 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ddth.dinoage.grabber.yahoo.handler.EntryListContentHandler;
+import org.ddth.dinoage.grabber.yahoo.YBrowsingSession;
+import org.ddth.dinoage.grabber.yahoo.handler.YBlogEntryContentHandler;
+import org.ddth.dinoage.grabber.yahoo.handler.YEntryListContentHandler;
+import org.ddth.dinoage.model.Profile;
 import org.ddth.dinoage.model.Workspace;
 import org.ddth.dinoage.model.WorkspaceManager;
-import org.ddth.dinoage.ui.DinoAgeChooseWorkspaceDlg;
 import org.ddth.dinoage.ui.DinoAgeWindow;
+import org.ddth.dinoage.ui.widget.ChooseWorkspaceDlg;
 import org.ddth.http.core.Session;
 import org.ddth.http.core.content.handler.ChainContentHandler;
 import org.ddth.http.core.content.handler.ContentHandlerDispatcher;
@@ -38,8 +41,10 @@ public class DinoAge {
 	private ContentHandlerDispatcher dispatcher;
 
 	public static final void main(String[] args) {
+		ResourceManager.createResources();
 		DinoAge dinoage = new DinoAge();
 		dinoage.run();
+		ResourceManager.disposeResources();
  	}
 
 	private void run() {
@@ -89,12 +94,19 @@ public class DinoAge {
 	}
 	
 	private ContentHandlerDispatcher createDispatcher() {
-		ChainContentHandler handler = new ChainContentHandler();
-		handler.add(new WebpageContentHandler());
-		handler.add(new EntryListContentHandler());
+		WebpageContentHandler webHandler = new WebpageContentHandler();
+		
+		ChainContentHandler frontHandler = new ChainContentHandler();
+		frontHandler.add(webHandler);
+		frontHandler.add(new YEntryListContentHandler());
+		
+		ChainContentHandler entryHandler = new ChainContentHandler();
+		entryHandler.add(webHandler);
+		entryHandler.add(new YBlogEntryContentHandler());
 		
 		ContentHandlerDispatcher dispatcher = new ContentHandlerDispatcher();
-		dispatcher.registerHandler(".*", handler);
+		dispatcher.registerHandler("http://blog.360.yahoo.com/blog-[^?]*", frontHandler);
+		dispatcher.registerHandler("http://blog.360.yahoo.com/blog-[^?][?]p=.*", entryHandler);
 		return dispatcher;
 	}
 
@@ -102,13 +114,20 @@ public class DinoAge {
 		return chooseWorkspace(null);
 	}
 	
+	/**
+	 * Bring up workspace chooser. Update configuration file after user
+	 * selects a workspace.
+	 * 
+	 * @param parent
+	 * @return
+	 */
 	public boolean chooseWorkspace(Shell parent) {
 		boolean success = false;
 		try {
 			String recentWorkspaces = settings.getRecentWorkspaces();
 			WorkspaceManager workspaces = new WorkspaceManager();
 			workspaces.setRecentWorkspaces(recentWorkspaces);
-			DinoAgeChooseWorkspaceDlg dlg = new DinoAgeChooseWorkspaceDlg(parent, workspaces);
+			ChooseWorkspaceDlg dlg = new ChooseWorkspaceDlg(parent, workspaces);
 			if (dlg.open() == SWT.OK) {
 				settings.setRecentWorkspaces(workspaces.getRecentWorkspaces());
 				settings.saveConfiguration();
@@ -124,5 +143,15 @@ public class DinoAge {
 			logger.error(e);
 		}
 		return success;
+	}
+
+	public YBrowsingSession createSession(String profileName) {
+		Profile profile = getWorkspace().getProfile(profileName);
+		//FIXME It's better to lookup an existing session other than create/add a new one
+		YBrowsingSession session = (profile == null) ? null : new YBrowsingSession(
+				profile, getWorkspace(), getDispatcher());
+		session.registerConnectionListener(getMainWindow());
+		sessions.add(session);
+		return session;
 	}
 }

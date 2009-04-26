@@ -162,4 +162,12 @@ public class Workspace {
 	public Collection<Profile> getProfiles() {
 		return map.values();
 	}
+
+	public ProfileLoader getProfileLoader() {
+		return profileLoader;
+	}
+
+	public Profile createEmptyProfile() {
+		return profileLoader.createProfile();
+	}
 }

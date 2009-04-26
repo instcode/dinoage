@@ -2,6 +2,7 @@ package org.ddth.http;
 
 import org.ddth.http.core.Session;
 import org.ddth.http.core.connection.Request;
+import org.ddth.http.core.content.Content;
 import org.ddth.http.core.content.handler.ChainContentHandler;
 import org.ddth.http.core.content.handler.ContentHandlerDispatcher;
 import org.ddth.http.impl.ThreadPoolSession;
@@ -26,7 +27,12 @@ public class Grabber {
 	private static void demo() {
 		ContentHandlerDispatcher dispatcher = createDispatcher();
 		
-		Session session = new ThreadPoolSession(dispatcher);
+		Session session = new ThreadPoolSession(dispatcher) {
+			@Override
+			protected void content(Content<?> content) {
+				System.out.println("Handle the given content goes here!");
+			}
+		};
 		session.start();
 		
 		session.queue(new Request("http://instcode.wordpress.com"));

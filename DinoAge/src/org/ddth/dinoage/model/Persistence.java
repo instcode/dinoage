@@ -14,16 +14,13 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 public class Persistence {
-
-	public static final int GUESTBOOK = 0;
-	public static final int BLOG_ENTRY = 1;
+	private File[] folders;
+	private String[] categories;
 	
-	private static final String[] CATEGORIES = {"guestbook", "entry"};
-	private File[] folders = new File[2];
-	
-	public Persistence(File profileFolder) {
-		for (int i = 0; i < CATEGORIES.length; i++) {
-			folders[i] = new File(profileFolder, CATEGORIES[i]);
+	public Persistence(File profileFolder, String[] categories) {
+		folders = new File[categories.length];
+		for (int i = 0; i < categories.length; i++) {
+			folders[i] = new File(profileFolder, categories[i]);
 			folders[i].mkdirs();
 		}
 	}
@@ -31,7 +28,7 @@ public class Persistence {
 	public void write(InputStream inputStream, int category, String tail) {
 		OutputStream outputStream = null;
 		try {
-			File outputFile = new File(folders[category], CATEGORIES[category] + "-" + tail + ".html");
+			File outputFile = new File(folders[category], categories[category] + "-" + tail + ".html");
 			outputStream = new FileOutputStream(outputFile);
 			byte[] buffer = new byte[4096];
 			int bytesread = 0;
