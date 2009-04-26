@@ -8,7 +8,6 @@
 package org.ddth.dinoage.ui;
 
 import org.ddth.dinoage.ResourceManager;
-import org.ddth.dinoage.grabber.yahoo.YahooProfile;
 import org.ddth.dinoage.model.Profile;
 import org.ddth.dinoage.model.Workspace;
 import org.eclipse.swt.SWT;
@@ -32,12 +31,10 @@ public class DinoAgeProfileDlg extends Dialog {
 
 	private Shell shell;
 	private Text profileURLText;
-	private Button backupGuestbookButton;
-	private Button backupEntryButton;
 	private Text profileText;
 	private Button okButton; 
 	private Workspace workspace;
-	private Profile profile = new YahooProfile();
+	private Profile profile;
 	
 	private int answer;
 	
@@ -51,6 +48,7 @@ public class DinoAgeProfileDlg extends Dialog {
 	public DinoAgeProfileDlg(Shell parent, Workspace workspace) {
 		super(parent, SWT.NONE);
 		this.workspace = workspace;
+		this.profile = workspace.createEmptyProfile();
 	}
 
 	/**
@@ -114,8 +112,6 @@ public class DinoAgeProfileDlg extends Dialog {
 				}		
 				profile.setProfileName(profileName);
 				profile.setProfileURL(profileURLText.getText());
-				profile.setBackupEntry(backupEntryButton.getSelection());
-				profile.setBackupGuestbook(backupGuestbookButton.getSelection());
 				if (workspace.saveProfile(profile)) {
 					answer = SWT.OK;
 					shell.close();
@@ -150,16 +146,6 @@ public class DinoAgeProfileDlg extends Dialog {
 		profileURLText.setLayoutData(gd_profileURLText);
 		profileURLText.addModifyListener(checkModifyListener);
 
-		backupEntryButton = new Button(composite, SWT.CHECK);
-		final GridData gd_entryButton = new GridData(SWT.FILL, SWT.CENTER, false, false, 3, 1);
-		backupEntryButton.setLayoutData(gd_entryButton);
-		backupEntryButton.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_BLOG_ENTRY));
-
-		backupGuestbookButton = new Button(composite, SWT.CHECK);
-		final GridData gd_guestbookButton = new GridData(SWT.FILL, SWT.CENTER, false, false, 3, 1);
-		backupGuestbookButton.setLayoutData(gd_guestbookButton);
-		backupGuestbookButton.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_GUESTBOOK));
-		
 		final Label profileLabel = new Label(composite, SWT.NONE);
 		profileLabel.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_PROFILE_NAME));
 		GridData gd_profileLabel = new GridData(SWT.FILL, SWT.CENTER, false, true);
@@ -182,8 +168,6 @@ public class DinoAgeProfileDlg extends Dialog {
 	}
 	
 	private void initializeValues() {
-		backupEntryButton.setSelection(profile.isBackupEntry());
-		backupGuestbookButton.setSelection(profile.isBackupGuestbook());
 		boolean isEditable = (profile.getProfileName() == null);
 		profileText.setText((isEditable ? "" : profile.getProfileName()));
 		profileURLText.setText((profile.getProfileURL() == null ? "" : profile.getProfileURL()));

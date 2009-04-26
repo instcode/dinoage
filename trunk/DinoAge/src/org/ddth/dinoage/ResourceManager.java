@@ -7,9 +7,18 @@
  **************************************************/
 package org.ddth.dinoage;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.SWTException;
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Cursor;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Display;
 
 public class ResourceManager {
 	public static final String KEY_PRODUCT_NAME = "DinoAge";
@@ -35,7 +44,7 @@ public class ResourceManager {
 		"Workspace is being used.";
 	
 	public static final String KEY_MESSAGE_FULL_HREF = "<a href=\"{0}\">{1}</a>";
-	public static final String KEY_MESSAGE_READY_HREF = "<a href=\"{0}\">I''m ready! Click here to visit my homepage!...</a>";
+	public static final String KEY_MESSAGE_READY_HREF = "Ready!";
 	public static final String KEY_MESSAGE_REQUESTING_HREF = "<a href=\"{0}\">{1}... Requesting...</a>";
 	public static final String KEY_MESSAGE_DONE_HREF = "<a href=\"{0}\">{1}... Done!</a>";
 	public static final String KEY_LABEL_Y360_PROFILE = "Y360 Profile URL";
@@ -100,12 +109,12 @@ public class ResourceManager {
 	public static final String KEY_DIRECTORY_DIALOG_MESSAGE = "Choose a workspace folder to use for this session.";
 	public static final String KEY_DIRECTORY_DIALOG_TITLE = "Select Workspace Folder";
 	public static final String KEY_CONFIRM_REMOVE_WORKSPACE =
-		"You gonna remove the ''{0}'' location in workspace list.\n" +
+		"You're gonna remove the ''{0}'' location in workspace list.\n" +
 		"Don''t worry, this makes no change to your existing data.\n" +
 		"\n" +
 		"Do you want to continue?";
 	public static final String KEY_CONFIRM_REMOVE_WORKSPACE_PROFILE =
-		"You gonna remove the ''{0}'' profile in profile list.\n" +
+		"You're gonna remove the ''{0}'' profile in profile list.\n" +
 		"This deletes *only* resume information (but cannot be undone).\n" +
 		"Your data will be kept untouched.\n" +
 		"\n" +
@@ -115,10 +124,16 @@ public class ResourceManager {
 	public static final String KEY_LABEL_NEW_ELLIPSIS = "New...";
 	public static final String KEY_LABEL_REMOVE = "Remove";
 	public static final String KEY_LABEL_BACKUP_BUTTON_TITLE = "Backup";
+	public static final String KEY_LABEL_SHOW_BACKUP_ELLIPSIS = "Show...";
 	public static final String KEY_LABEL_STOP_BACKUP = "Stop";
 	public static final String KEY_LABEL_PROFILE_NAME = "Profile Name";
 	
 	public static ResourceBundle resources;
+
+	public static Color BUSY_COLOR;
+	public static Cursor WAIT_CURSOR;
+	public static Cursor BUSY_CURSOR;
+	public static Image EXPORT_ICON;
 
 	static {
 		try {
@@ -127,6 +142,70 @@ public class ResourceManager {
 		catch (MissingResourceException e) {
 			// Empty
 		}
+	}
+
+	/**
+	 * Creates all of the default images, cursors and colors used within the program.
+	 * 
+	 * @param display
+	 *            the display where the images are created
+	 */
+	public static void createResources() {
+		Display display = Display.getDefault();
+		Class<?> clazz = ResourceManager.class;
+		EXPORT_ICON = ResourceManager.loadImage(display, clazz, "export.gif");
+		
+		WAIT_CURSOR = new Cursor(display, SWT.CURSOR_WAIT);
+		BUSY_CURSOR = new Cursor(display, SWT.CURSOR_APPSTARTING);
+		
+		BUSY_COLOR = display.getSystemColor(SWT.COLOR_DARK_GRAY);
+	}
+
+	/**
+	 * Disposes all of the default images used within the program.
+	 */
+	public static void disposeResources() {
+		EXPORT_ICON.dispose();
+		
+		ResourceManager.WAIT_CURSOR.dispose();
+		ResourceManager.BUSY_CURSOR.dispose();
+		
+		ResourceManager.BUSY_COLOR.dispose();
+	}
+
+	/**
+	 * Loads an image using a resource name. A new image is returned every time.
+	 * The caller is responsible for disposing of the image when it is no longer
+	 * needed.
+	 * 
+	 * @param display
+	 *            the display where the image is be created
+	 * @param clazz
+	 *            the class that is used to locate the resource
+	 * @param string
+	 *            the name of the resource
+	 * @return the new image
+	 */
+	public static Image loadImage(Display display, Class<?> clazz, String string) {
+		InputStream stream = clazz.getResourceAsStream("/images/" + string);
+		if (stream == null)
+			return null;
+		Image image = null;
+		try {
+			image = new Image(display, stream);
+		}
+		catch (SWTException ex) {
+			// Empty
+		}
+		finally {
+			try {
+				stream.close();
+			}
+			catch (IOException ex) {
+				// Empty
+			}
+		}
+		return image;
 	}
 
 	/**

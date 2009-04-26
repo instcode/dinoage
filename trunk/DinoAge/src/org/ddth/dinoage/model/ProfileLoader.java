@@ -12,5 +12,15 @@ import java.io.IOException;
 
 public interface ProfileLoader {
 
+	/**
+	 * @return
+	 */
+	public Profile createProfile();
+	
+	/**
+	 * @param profileFile
+	 * @return
+	 * @throws IOException
+	 */
 	public Profile loadProfile(File profileFile) throws IOException;
 }

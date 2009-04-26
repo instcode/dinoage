@@ -27,6 +27,14 @@ public class ChainContentHandler implements ContentHandler {
 		return handlers.remove(handler);
 	}
 
+	public ChainContentHandler clone() {
+		ChainContentHandler chainHandler = new ChainContentHandler();
+		for (ContentHandler handler : handlers) {
+			chainHandler.add(handler);
+		}
+		return chainHandler;
+	}
+	
 	public void clear() {
 		handlers.clear();
 	}

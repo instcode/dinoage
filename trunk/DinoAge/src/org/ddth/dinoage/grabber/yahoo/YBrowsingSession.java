@@ -7,144 +7,84 @@
  **************************************************/
 package org.ddth.dinoage.grabber.yahoo;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ddth.blogging.yahoo.YahooBlog;
-import org.ddth.dinoage.model.Persistence;
 import org.ddth.dinoage.model.Profile;
 import org.ddth.dinoage.model.Workspace;
-import org.ddth.http.core.ConnectionEvent;
-import org.ddth.http.core.ConnectionListener;
+import org.ddth.dinoage.model.Persistence;
 import org.ddth.http.core.connection.Request;
 import org.ddth.http.core.connection.RequestFuture;
+import org.ddth.http.core.content.Content;
 import org.ddth.http.core.content.handler.ContentHandlerDispatcher;
 import org.ddth.http.impl.ThreadPoolSession;
+import org.ddth.http.impl.content.NavigationContent;
 
 public class YBrowsingSession extends ThreadPoolSession {
-	private Log logger = LogFactory.getLog(YBrowsingSession.class);
+	private static final int BLOG_ENTRY = 0;
+	private static final String[] CATEGORIES = {"entry"};
 	
-	/**
-	 * The boolean value is used to mark whether a URL is completed or not
-	 */
-	private Map<String, Boolean> requestMap = new ConcurrentHashMap<String, Boolean>();
+	private Log logger = LogFactory.getLog(YBrowsingSession.class);
 
-	private String profileId;
-	private Profile profile;
+	private Map<String, RequestFuture> requests = new ConcurrentHashMap<String, RequestFuture>();
+
+	private YahooProfile profile;
 	private Persistence persistence;
 	private Workspace workspace;
-	private ConnectionListener listener;
 
-	public YBrowsingSession(Profile profile, Workspace workspace, ConnectionListener listener, ContentHandlerDispatcher dispatcher) {
+	public YBrowsingSession(Profile profile, Workspace workspace, ContentHandlerDispatcher dispatcher) {
 		super(dispatcher);
 		this.workspace = workspace;
-		this.listener = listener;
-		this.profile = profile;
-		this.profileId = getProfileId(profile.getProfileURL());
-		this.persistence = new Persistence(workspace.getProfileFolder(profile));
-		
-		String[] completedURLs = profile.getCompletedURLs();
-		for (String completedURL : completedURLs) {
-			requestMap.put(completedURL, Boolean.TRUE);
-		}
-		String[] outgoingURLs = profile.getOutgoingURLs();
-		for (String outgoingURL : outgoingURLs) {
-			requestMap.put(outgoingURL, Boolean.FALSE);
-		}
+		this.profile = (YahooProfile)profile;
+		this.persistence = new Persistence(workspace.getProfileFolder(profile), CATEGORIES);
+	}
+
+	public void reset() {
+		requests.clear();
+	}
+
+	public YahooProfile getProfile() {
+		return profile;
 	}
 	
 	@Override
 	public void start() {
-		super.start();		
-		queue(new Request(YahooBlog.YAHOO_360_BLOG_URL + profileId));
-		queue(new Request(YahooBlog.YAHOO_360_GUESTBOOK_URL + profileId));
-		
-		String[] outgoingURLs = profile.getOutgoingURLs();
-		for (String outgoingURL : outgoingURLs) {
-			queue(new Request(outgoingURL));
-		}
+		super.start();
+		queue(new Request(profile.getBeginningURL()));
 		workspace.saveProfile(profile);
-	}
-
-	public void save(InputStream inputStream, int category, String tail) {
-		persistence.write(inputStream, category, tail);
-	}
-
-	public void reset() {
-		requestMap.clear();
-	}
-
-	public boolean isNewlyCreated() {
-		return (requestMap.size() == 0);
-	}
-
-	public String getProfileId() {
-		return profileId;
-	}
-
-	@Override
-	public void notifyFinished(ConnectionEvent event) {
-		logger.debug(event.getRequest().getURL() + "... Done!");
-		requestMap.put(event.getRequest().getURL(), Boolean.TRUE);
-		syncState();
-		workspace.saveProfile(profile);
-		listener.notifyFinished(event);
-	}
-
-	@Override
-	public void notifyRequesting(ConnectionEvent event) {
-		logger.debug("Requesting: " + event.getRequest().getURL() + "...");
-		listener.notifyRequesting(event);
-	}
-
-	@Override
-	public void notifyResponding(ConnectionEvent event) {
-		listener.notifyResponding(event);
 	}
 
 	@Override
 	public RequestFuture queue(Request request) {
 		RequestFuture future = null;
-		
 		String sURL = request.getURL();
-		if (!requestMap.containsKey(sURL)) {
-			requestMap.put(sURL, Boolean.FALSE);
+		if (sURL != null && !requests.containsKey(sURL)) {
 			future = super.queue(request);
+			requests.put(sURL, future);
 		}
 		return future;
 	}
 
-	/**
-	 * Synchronize between the state and its profile 
-	 */
-	private void syncState() {
-		List<String> completedURLs = new ArrayList<String>();
-		List<String> outgoingURLs = new ArrayList<String>();
-		Iterator<String> iterator = requestMap.keySet().iterator();
-		while (iterator.hasNext()) {
-			String sURL = iterator.next();
-			Boolean requested = requestMap.get(sURL);
-			if (requested.booleanValue()) {
-				completedURLs.add(sURL);
-			}
-			else {
-				outgoingURLs.add(sURL);
-			}
+	@Override
+	protected void content(Content<?> content) {
+		String nextURL = null;
+		if (content instanceof NavigationContent) {
+			String[] urls = ((NavigationContent)content).getNextURLs();
+			nextURL = urls.length > 0 ? urls[0] : null;
 		}
-		profile.setCompletedURLs(completedURLs.toArray(new String[completedURLs.size()]));
-		profile.setOutgoingURLs(outgoingURLs.toArray(new String[outgoingURLs.size()]));
-	}
-
-	private String getProfileId(String profileURL) {
-		int begin = YahooBlog.YAHOO_360_PROFILE_URL.length();
-		int end = profileURL.indexOf("?", begin);
-		end = (end < 0) ? profileURL.length() : end;
-		return end <= begin ? "" : profileURL.substring(begin, end);
+		else {
+			YBlogEntryContent blogEntry = (YBlogEntryContent) content;
+			nextURL = blogEntry.getNextURL();
+			persistence.write(
+					blogEntry.getContent().getContent(),
+					BLOG_ENTRY,
+					String.valueOf(blogEntry.getEntry().getPostId()));
+		}
+		logger.debug("Next navigation link: " + nextURL);
+		
+		profile.saveURL(nextURL);
+		workspace.saveProfile(profile);
 	}
 }

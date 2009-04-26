@@ -19,7 +19,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPInputStream;
 
 import org.apache.http.Header;
@@ -66,6 +65,7 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 	private static final String NUMBER_OF_CONCURRENT_CONNECTIONS = "connection.concurrent";
 	
 	static {
+		// FIXME Should read from configuration file
 		props.put(NUMBER_OF_CONNECTIONS_PER_ROUTE, Integer.valueOf(4));
 		props.put(NUMBER_OF_CONCURRENT_CONNECTIONS, Integer.valueOf(2));
 		props.put(CONNECTION_TIME_OUT, new Long(1000*60*30));
@@ -94,40 +94,41 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 	
 	@Override
 	public void close() {
-		executor.shutdown();
-		try {
-			executor.awaitTermination(30, TimeUnit.SECONDS);
+		if (running()) {
+			executor.shutdown();
+			executor = null;
 		}
-		catch (InterruptedException e) {
-		}
-		if (!executor.isShutdown()) {
-			executor.shutdownNow();
-		}
-		executor = null;
 	}
 
 	@Override
 	public RequestFuture sendRequest(final Request request) {
+		final HttpUriRequest httpRequest = createHttpRequest(request);
 		final Future<Response> future = executor.submit(new Callable<Response>() {
 			@Override
 			public Response call() throws Exception {
-				return request(request);
+				return request(request, httpRequest);
 			}
 		});
 		
-		return new RequestFuture(future);
+		return new RequestFuture(future) {
+			@Override
+			public boolean cancel(boolean mayInterruptIfRunning) {
+				httpRequest.abort();
+				return super.cancel(mayInterruptIfRunning);
+			}
+		};
 	}
 
 	public void setup(CookieStore cookieStore) {
 		((DefaultHttpClient)httpClient).setCookieStore(cookieStore);
 	}
 
-	private Response request(final Request request) {
+	private Response request(final Request request, final HttpUriRequest httpRequest) {
 		HttpEntity entity = null;
 		Response response = null;
 		try {
 			monitor.notifyRequesting(new ConnectionEvent(request));
-			HttpUriRequest httpRequest = createHttpRequest(request);
+			//printHeader(httpRequest.getAllHeaders());
 			HttpResponse httpResponse = httpClient.execute(httpRequest);
 			entity = httpResponse.getEntity();
 			if (entity != null) {
@@ -144,7 +145,6 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 		catch (Exception e) {
 			logger.debug(e);
 		}
-		
 		finally {
 			// If we could be sure that the stream of the entity has been
 			// closed, we wouldn't need this code to release the connection.
@@ -158,7 +158,7 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 					logger.debug(e);
 				}
 			}
-			monitor.notifyFinished(new ConnectionEvent(request));
+			monitor.notifyFinished(new ConnectionEvent(request, response));
 		}
 		return response;
 	}
@@ -188,11 +188,13 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 
 		ClientConnectionManager ccm = new ThreadSafeClientConnManager(params, supportedSchemes);
 		DefaultHttpClient httpClient = new DefaultHttpClient(ccm, params);
+		//final HttpHost proxy = new HttpHost("127.0.0.1", 8080, "http");
+		//httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
 		httpClient.getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.BROWSER_COMPATIBILITY);
 		return httpClient;
 	}
 
-	private HttpUriRequest createHttpRequest(final Request request) throws UnsupportedEncodingException {
+	private HttpUriRequest createHttpRequest(final Request request) {
 		HttpUriRequest httpRequest = null;
 		if (request.getParameters() != null) {
 			HttpPost httpPost = new HttpPost(request.getURL());
@@ -205,7 +207,11 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 				String value = parameters.get(parameter);
 				nvps.add(new BasicNameValuePair(parameter, value));
 			}
-			httpPost.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
+			try {
+				httpPost.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
+			}
+			catch (UnsupportedEncodingException e) {
+			}
 			httpRequest = httpPost;
 		}
 		else {
@@ -216,11 +222,10 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 		// Prefer GZIP for optimizing bandwidth
 		httpRequest.addHeader("Referer", request.getURL());
 		httpRequest.addHeader("Accept-Encoding", "gzip");
-		printHeader(httpRequest.getAllHeaders());
 		return httpRequest;
 	}
 
-	private void printHeader(Header[] headers) {
+	protected void printHeader(Header[] headers) {
 		logger.debug("----------------------------------------");
 		for (int i = 0; i < headers.length; i++) {
 			logger.debug(headers[i]);

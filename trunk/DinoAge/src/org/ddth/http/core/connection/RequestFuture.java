@@ -8,7 +8,7 @@ import java.util.concurrent.TimeoutException;
 public class RequestFuture implements Future<Response> {
 
 	private Future<Response> future;
-	
+
 	public RequestFuture(Future<Response> future) {
 		this.future = future;
 	}

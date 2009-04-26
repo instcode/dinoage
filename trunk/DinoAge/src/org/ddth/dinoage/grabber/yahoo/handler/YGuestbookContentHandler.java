@@ -7,17 +7,10 @@
  **************************************************/
 package org.ddth.dinoage.grabber.yahoo.handler;
 
-import org.ddth.http.core.Session;
 import org.ddth.http.core.content.Content;
 import org.ddth.http.core.content.handler.ContentHandler;
 
-public class GuestbookContentHandler implements ContentHandler {
-	private static final String NEXT_PREVIOUS_URL_XPATH = "DIV[2]/DIV/DIV[2]/SPAN[2]/SPAN";
-	private Session session;
-	
-	public GuestbookContentHandler(Session session) {
-		this.session = session;
-	}
+public class YGuestbookContentHandler implements ContentHandler {
 
 	@Override
 	public Content<?> handle(Content<?> content) {

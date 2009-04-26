@@ -16,6 +16,12 @@ import org.ddth.dinoage.model.ProfileLoader;
 
 public class DinoAgeProfileLoader implements ProfileLoader {
 
+	@Override
+	public Profile createProfile() {
+		return new YahooProfile();
+	}
+	
+	@Override
 	public Profile loadProfile(File profileFile) throws IOException {
 		Profile profile = new YahooProfile();
 		profile.load(profileFile);

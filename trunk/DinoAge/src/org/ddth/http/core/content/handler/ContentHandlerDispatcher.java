@@ -1,13 +1,13 @@
 package org.ddth.http.core.content.handler;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.ddth.http.core.connection.Request;
 import org.ddth.http.core.connection.Response;
+import org.ddth.http.core.content.Content;
 
 public class ContentHandlerDispatcher {
 	private class ContentHandlerEntry {
@@ -15,18 +15,18 @@ public class ContentHandlerDispatcher {
 		ContentHandler handler;
 	}
 	
-	private Map<String, ContentHandlerEntry> handlers = new HashMap<String, ContentHandlerEntry>();
+	private List<ContentHandlerEntry> handlers = new ArrayList<ContentHandlerEntry>();
 
-	public void handle(Request request, Response response) {
-		Iterator<ContentHandlerEntry> iterator = handlers.values().iterator();
-		while (iterator.hasNext()) {
-			ContentHandlerEntry entry = iterator.next();
+	public Content<?> handle(Request request, Response response) {
+		Content<?> content = null;
+		for (ContentHandlerEntry entry : handlers) {
 			Matcher matcher = entry.pattern.matcher(request.getURL());
 			if (matcher.find()) {
-				entry.handler.handle(response.getContent());
+				content = entry.handler.handle(response.getContent());
 				break;
 			}
 		}
+		return content;
 	}
 	
 	/**
@@ -34,24 +34,13 @@ public class ContentHandlerDispatcher {
 	 * @param handler
 	 */
 	public void registerHandler(String path, ContentHandler handler) {
-		ContentHandlerEntry entry = handlers.get(path);
-		if (entry == null) {
-			entry = new ContentHandlerEntry();
-			entry.pattern = Pattern.compile(path);
-			handlers.put(path, entry);
-		}
+		ContentHandlerEntry entry = new ContentHandlerEntry();
+		entry.pattern = Pattern.compile(path);
 		entry.handler = handler;
+		handlers.add(entry);
 	}
 	
-	/**
-	 * @param path
-	 * @return
-	 */
-	public ContentHandler unregisterHandler(String path) {
-		ContentHandlerEntry entry = handlers.remove(path);
-		if (entry != null) {
-			return entry.handler;
-		}
-		return null;
+	public void clear() {
+		handlers.clear();
 	}
 }
