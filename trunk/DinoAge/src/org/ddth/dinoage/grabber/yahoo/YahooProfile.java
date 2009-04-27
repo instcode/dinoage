@@ -24,11 +24,15 @@ public class YahooProfile extends Profile {
 	public void setProfileURL(String profileURL) {
 		super.setProfileURL(profileURL);
 		this.profileId = getProfileId(getProfileURL());
+		this.beginningURL = YahooBlog.YAHOO_360_BLOG_URL + getProfileId();
 	}
 
 	@Override
 	protected void innerLoad(Properties properties) {
 		beginningURL = properties.getProperty(PROFILE_URLS_BEGINNING, YahooBlog.YAHOO_360_BLOG_URL + getProfileId());
+		if (beginningURL.trim().length() == 0) {
+			beginningURL = YahooBlog.YAHOO_360_BLOG_URL + getProfileId();
+		}
 		isNewlyCreated = false;
 	}
 
