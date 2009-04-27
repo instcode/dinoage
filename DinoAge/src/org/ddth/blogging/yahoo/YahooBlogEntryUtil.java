@@ -14,7 +14,6 @@ import java.io.StringWriter;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.EnumMap;
 
 import javax.xml.xpath.XPath;
 import javax.xml.xpath.XPathConstants;
@@ -37,46 +36,58 @@ public class YahooBlogEntryUtil {
 	 */
 	private static final DateFormat BLOG_DATE_FORMAT = new SimpleDateFormat("EEEE MMMM d, y - HH:mma (z)");
 	
-	private static final String ENTRY_URL_XPATH = "DIV[2]/DIV/DIV[2]/DIV[2]/DIV/DIV/DL/DT/A";
-	private static final String NEXT_PREVIOUS_URL_XPATH = "DIV[2]/DIV/DIV[2]/SPAN[2]/SPAN";
-	private static final String CHECK_VALID_BODY_XPATH = "DIV[2]/DIV/DIV[2]/DIV[2]/DIV/DIV/DL/DT";
-	private static final String NEXT_ENTRY_URL_XPATH = "DIV[2]/DIV/DIV[2]/DIV[2]/DIV/DIV/DL/DD/DIV[3]/P[2]/SPAN[2]/A";
-	private static final String FIRST_ENTRY_URL_XPATH = "DIV[2]/DIV/DIV[2]/DIV[2]/DIV/DIV/DL/DD/DIV[3]/SPAN[2]/A";
-	
-	private enum BlogEntryKey {
-		BLOG_ENTRY,
-		TITLE,
-		BODY,
-		CREATED_DATE,
-		TAGS;
+	private static class NavigationEntryKey {
+		static XPathExpression BLOG_ENTRY_URL;
+		static XPathExpression PREVIOUS_BLOG_ENTRY_URL;
 	}
 	
-	private static final EnumMap<BlogEntryKey, XPathExpression> YAHOO_BLOG_ENTRY_XPES =
-		new EnumMap<BlogEntryKey, XPathExpression>(BlogEntryKey.class);
+	private static class BlogEntryKey {
+		static XPathExpression BLOG_ENTRY;
+		static XPathExpression TITLE;
+		static XPathExpression BODY;
+		static XPathExpression CREATED_DATE;
+		static XPathExpression TAGS;
+		static XPathExpression COMMENTS;
+	}
 	
 	static {
 		try {
 			XPath xpath = XPathFactory.newInstance().newXPath();
 			
-			YAHOO_BLOG_ENTRY_XPES.put(BlogEntryKey.BLOG_ENTRY,
-					xpath.compile("/HTML/BODY/DIV[2]/DIV/DIV[2]/DIV[2]/DIV/DIV/DL"));
-			YAHOO_BLOG_ENTRY_XPES.put(BlogEntryKey.TITLE,
-					xpath.compile("DT"));
-			YAHOO_BLOG_ENTRY_XPES.put(BlogEntryKey.BODY,
-					xpath.compile("DD/DIV[2]"));
-			YAHOO_BLOG_ENTRY_XPES.put(BlogEntryKey.CREATED_DATE,
-					xpath.compile("DD/DIV[3]/P"));
-			YAHOO_BLOG_ENTRY_XPES.put(BlogEntryKey.TAGS,
-					xpath.compile("DD/DIV[3]/SPAN/SPAN/A"));
+			BlogEntryKey.BLOG_ENTRY = xpath.compile("/HTML/BODY/DIV[2]/DIV/DIV[2]/DIV[2]/DIV/DIV/DL");
+			BlogEntryKey.TITLE = xpath.compile("DT");
+			BlogEntryKey.BODY = xpath.compile("DD/DIV[2]");
+			BlogEntryKey.CREATED_DATE = xpath.compile("DD/DIV[3]/P");
+			BlogEntryKey.TAGS = xpath.compile("DD/DIV[3]/SPAN/SPAN/A");
+			BlogEntryKey.COMMENTS = xpath.compile("//*[@id=\"num_next\"]");
+			
+			NavigationEntryKey.BLOG_ENTRY_URL = xpath.compile("/HTML/BODY/DIV[2]/DIV/DIV[2]/DIV[2]/DIV/DIV/DL/DD/DIV[3]/SPAN[2]/A");
+			NavigationEntryKey.PREVIOUS_BLOG_ENTRY_URL = xpath.compile("/HTML/BODY/DIV[2]/DIV/DIV[2]/DIV[2]/DIV/DIV/DL/DD/DIV[3]/P[2]/SPAN[2]/A");
+			
 		}
 		catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
+	public static String parsePreviousBlogEntryLink(Document doc) {
+		Node link = null;
+		try {
+			link = (Node) NavigationEntryKey.PREVIOUS_BLOG_ENTRY_URL.evaluate(doc, XPathConstants.NODE);
+		}
+		catch (XPathExpressionException e) {
+		}
+		return link != null ? link.getAttributes().getNamedItem("href").getNodeValue() : "";
+	}
+	
 	public static String parseNavigationLink(Document doc) {
-		// TODO Auto-generated method stub
-		return null;
+		Node link = null;
+		try {
+			link = (Node) NavigationEntryKey.BLOG_ENTRY_URL.evaluate(doc, XPathConstants.NODE);
+		}
+		catch (XPathExpressionException e) {
+		}
+		return link != null ? link.getAttributes().getNamedItem("href").getNodeValue() : "";
 	}
 	
 	/**
@@ -86,11 +97,12 @@ public class YahooBlogEntryUtil {
 	public static BlogEntry parseEntry(Document doc) {
 		BlogEntry blogEntry = new BlogEntry();
 		try {
-			Node entry = (Node) YAHOO_BLOG_ENTRY_XPES.get(BlogEntryKey.BLOG_ENTRY).evaluate(doc, XPathConstants.NODE);
-			Node title = (Node) YAHOO_BLOG_ENTRY_XPES.get(BlogEntryKey.TITLE).evaluate(entry, XPathConstants.NODE);
-			Node body = (Node) YAHOO_BLOG_ENTRY_XPES.get(BlogEntryKey.BODY).evaluate(entry, XPathConstants.NODE);
-			Node date = (Node) YAHOO_BLOG_ENTRY_XPES.get(BlogEntryKey.CREATED_DATE).evaluate(entry, XPathConstants.NODE);
-			NodeList tags = (NodeList) YAHOO_BLOG_ENTRY_XPES.get(BlogEntryKey.TAGS).evaluate(entry, XPathConstants.NODESET);
+			Node entry = (Node) BlogEntryKey.BLOG_ENTRY.evaluate(doc, XPathConstants.NODE);
+			Node title = (Node) BlogEntryKey.TITLE.evaluate(entry, XPathConstants.NODE);
+			Node body = (Node) BlogEntryKey.BODY.evaluate(entry, XPathConstants.NODE);
+			Node date = (Node) BlogEntryKey.CREATED_DATE.evaluate(entry, XPathConstants.NODE);
+			//Node comment = (Node) BlogEntryKey.COMMENTS.evaluate(entry, XPathConstants.NODE);
+			NodeList tags = (NodeList) BlogEntryKey.TAGS.evaluate(entry, XPathConstants.NODESET);
 			
 			StringBuilder buffer = new StringBuilder();  
 			int length = tags.getLength();
@@ -127,7 +139,7 @@ public class YahooBlogEntryUtil {
 
 	public static void main(String[] args) throws FileNotFoundException {
 		WebpageContentHandler contentHandler = new WebpageContentHandler();
-		WebpageContent webContent = new WebpageContent(new FileInputStream("entry.html"), "utf-8");
+		WebpageContent webContent = new WebpageContent(new FileInputStream("./workspace/w1/onlyu/entry/entry-0.html"), "utf-8");
 		DomTreeContent content = (DomTreeContent)contentHandler.handle(webContent);
 		BlogEntry entry = YahooBlogEntryUtil.parseEntry(content.getDocument());
 		
