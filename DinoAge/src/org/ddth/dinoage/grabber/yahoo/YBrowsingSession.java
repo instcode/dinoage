@@ -71,8 +71,10 @@ public class YBrowsingSession extends ThreadPoolSession {
 	protected void content(Content<?> content) {
 		String nextURL = null;
 		if (content instanceof NavigationContent) {
-			String[] urls = ((NavigationContent)content).getNextURLs();
+			NavigationContent navigationContent = (NavigationContent)content;
+			String[] urls = navigationContent.getNextURLs();
 			nextURL = urls.length > 0 ? urls[0] : null;
+			persistence.write(navigationContent.getContent().getContent(), BLOG_ENTRY, "list");
 		}
 		else {
 			YBlogEntryContent blogEntry = (YBlogEntryContent) content;
@@ -82,8 +84,8 @@ public class YBrowsingSession extends ThreadPoolSession {
 					BLOG_ENTRY,
 					String.valueOf(blogEntry.getEntry().getPostId()));
 		}
-		logger.debug("Next navigation link: " + nextURL);
-		
+		logger.debug("Queue: " + nextURL);
+		queue(new Request(nextURL));
 		profile.saveURL(nextURL);
 		workspace.saveProfile(profile);
 	}

@@ -23,6 +23,7 @@ public class Persistence {
 			folders[i] = new File(profileFolder, categories[i]);
 			folders[i].mkdirs();
 		}
+		this.categories = categories;
 	}
 
 	public void write(InputStream inputStream, int category, String tail) {
