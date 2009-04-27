@@ -42,8 +42,8 @@ public class Blogger extends BasicBlog {
 			service.setUserCredentials(author, password);
 			// Get the blogId from the meta-feed.
 			String blogId = getBlogId(service);
-			blogURL = FEED_URI_BASE + "/" + blogId;
-			super.setup(blogURL, author, password);
+			String feedURL = FEED_URI_BASE + "/" + blogId;
+			super.setup(feedURL, author, password);
 		}
 		catch (AuthenticationException e) {
 			e.printStackTrace();
