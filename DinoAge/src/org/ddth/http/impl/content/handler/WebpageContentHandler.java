@@ -12,7 +12,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import org.apache.log4j.Logger;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.cyberneko.html.parsers.DOMParser;
 import org.ddth.http.core.content.Content;
 import org.ddth.http.core.content.handler.ContentHandler;
@@ -23,7 +24,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 public class WebpageContentHandler implements ContentHandler {
-	private Logger logger = Logger.getLogger(WebpageContentHandler.class);
+	private Log logger = LogFactory.getLog(WebpageContentHandler.class);
 	
 	@Override
 	public Content<?> handle(Content<?> content) {

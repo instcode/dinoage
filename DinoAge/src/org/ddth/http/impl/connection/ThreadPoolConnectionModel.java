@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -21,6 +22,8 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.zip.GZIPInputStream;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.http.Header;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -42,14 +45,15 @@ import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
+import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
 import org.apache.http.params.HttpProtocolParams;
 import org.apache.http.protocol.HTTP;
-import org.apache.log4j.Logger;
 import org.ddth.http.core.ConnectionEvent;
 import org.ddth.http.core.ConnectionListener;
 import org.ddth.http.core.connection.ConnectionModel;
@@ -71,7 +75,7 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 		props.put(CONNECTION_TIME_OUT, new Long(1000*60*30));
 	}
 	
-	private Logger logger = Logger.getLogger(ThreadPoolConnectionModel.class);
+	private static final Log logger = LogFactory.getLog(ThreadPoolConnectionModel.class);
 	private HttpClient httpClient;
 	private ScheduledExecutorService executor;
 
@@ -119,7 +123,16 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 		};
 	}
 
-	public void setup(CookieStore cookieStore) {
+	public void setup(Map<String, String>[] cookies) {
+		CookieStore cookieStore = new BasicCookieStore();
+		for (Map<String, String> cookie : cookies) {
+			BasicClientCookie basicClientCookie = new BasicClientCookie(cookie.get("name"), cookie.get("value"));
+			basicClientCookie.setDomain(cookie.get("host"));
+			basicClientCookie.setPath(cookie.get("path"));
+			basicClientCookie.setSecure(Boolean.getBoolean(cookie.get("secure")));
+			basicClientCookie.setExpiryDate(new Date(System.currentTimeMillis() + 31536000000L));
+			cookieStore.addCookie(basicClientCookie);
+		}
 		((DefaultHttpClient)httpClient).setCookieStore(cookieStore);
 	}
 
@@ -143,7 +156,7 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 			}
 		}
 		catch (Exception e) {
-			logger.debug(e);
+			logger.error("Error when processing an http request", e);
 		}
 		finally {
 			// If we could be sure that the stream of the entity has been
@@ -155,7 +168,7 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 					entity.consumeContent();
 				}
 				catch (IOException e) {
-					logger.debug(e);
+					logger.error("Error when consuming an http stream", e);
 				}
 			}
 			monitor.notifyFinished(new ConnectionEvent(request, response));
