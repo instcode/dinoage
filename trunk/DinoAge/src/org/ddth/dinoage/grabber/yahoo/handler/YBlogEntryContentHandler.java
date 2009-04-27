@@ -20,8 +20,10 @@ public class YBlogEntryContentHandler implements ContentHandler {
 	@Override
 	public Content<?> handle(Content<?> content) {
 		Document doc = ((DomTreeContent) content).getDocument();
-		String nextURL = YahooBlogEntryUtil.parseNavigationLink(doc);
-		BlogEntry entry = null;
-		return new YBlogEntryContent(entry, nextURL);
+		String nextURL = YahooBlogEntryUtil.parsePreviousBlogEntryLink(doc);
+		BlogEntry entry = YahooBlogEntryUtil.parseEntry(doc);
+		YBlogEntryContent blogEntryContent = new YBlogEntryContent(entry, nextURL);
+		blogEntryContent.setContent((DomTreeContent) content);
+		return blogEntryContent;
 	}
 }

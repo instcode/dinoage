@@ -105,8 +105,8 @@ public class DinoAge {
 		entryHandler.add(new YBlogEntryContentHandler());
 		
 		ContentHandlerDispatcher dispatcher = new ContentHandlerDispatcher();
-		dispatcher.registerHandler("http://blog.360.yahoo.com/blog-[^?]*", frontHandler);
-		dispatcher.registerHandler("http://blog.360.yahoo.com/blog-[^?][?]p=.*", entryHandler);
+		dispatcher.registerHandler("http://.*/blog-.*\\?.*p=(\\d+).*", entryHandler);
+		dispatcher.registerHandler("http://.*/blog-[^?]*", frontHandler);
 		return dispatcher;
 	}
 

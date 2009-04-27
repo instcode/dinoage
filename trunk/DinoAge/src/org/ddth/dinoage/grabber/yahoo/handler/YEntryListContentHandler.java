@@ -20,6 +20,8 @@ public class YEntryListContentHandler implements ContentHandler {
 	public Content<?> handle(Content<?> content) {
 		Document doc = ((DomTreeContent) content).getDocument();
 		String firstEntryURL = YahooBlogEntryUtil.parseNavigationLink(doc);
-		return new NavigationContent(new String[] { firstEntryURL });
+		NavigationContent navigationContent = new NavigationContent(new String[] { firstEntryURL });
+		navigationContent.setContent((DomTreeContent) content);
+		return navigationContent;
 	}
 }
