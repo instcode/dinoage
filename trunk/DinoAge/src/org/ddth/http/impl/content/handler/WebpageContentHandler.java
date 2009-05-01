@@ -23,6 +23,19 @@ import org.w3c.dom.Document;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+/**
+ * A {@link ContentHandler} for a normal web page. It takes the
+ * {@link WebpageContent} as an input content and produces the
+ * {@link DomTreeContent} object as an output.<br>
+ * <br>
+ * The input stream within the output content is a markable/resetable
+ * {@link InputStream}. It means you could reset its position to the
+ * beginning and start reading it over again. This might be useful in
+ * case you want to serialize the stream into an external file.<br>
+ * <p> 
+ * @author khoa.nguyen
+ *
+ */
 public class WebpageContentHandler implements ContentHandler {
 	private Log logger = LogFactory.getLog(WebpageContentHandler.class);
 	
@@ -44,6 +57,16 @@ public class WebpageContentHandler implements ContentHandler {
 		return domTreeContent;
 	}
 	
+	/**
+	 * Parse the given input stream to a DOM tree with the
+	 * specific encoding. 
+	 * 
+	 * @param inputStream
+	 * 		The inputStream to be read.
+	 * @param encoding
+	 * 		The selective encoding of the given stream.
+	 * @return
+	 */
 	private Document parse(InputStream inputStream, String encoding) {
 		DOMParser parser = new DOMParser();
 		InputSource inputSource = new InputSource(inputStream);
@@ -62,6 +85,26 @@ public class WebpageContentHandler implements ContentHandler {
 		return doc;
 	}
 	
+	/**
+	 * Consume the input stream buffer and store it to an on-memory buffer.<br>
+	 * <br>
+	 * In fact, this code cannot handle universal cases because it reads all the
+	 * streaming data into a buffer at once. If the buffer is large enough (or
+	 * lack of memory), the {@link OutOfMemoryError} will be thrown immediately.<br>
+	 * <br>
+	 * However, usual web page size always has lower than 1MB, and it's no
+	 * problem to read all the data into a {@link ByteArrayOutputStream} object.<br>
+	 * <br>
+	 * Besides, the initial buffer size is only ~64KB but it can expand to any
+	 * size provide that you have enough memory for it :D.. However, in case you
+	 * know that your web page data always be around, e.g. 70KB or more, you
+	 * should modify this value to that higher value so it doesn't have to
+	 * re-copy a whole array whenever it doubles the size of the buffer.<br>
+	 * <br>
+	 * 
+	 * @param inputStream
+	 * @return
+	 */
 	private byte[] consume(InputStream inputStream) {
 		ByteArrayOutputStream savedBytes = new ByteArrayOutputStream(64000);
 		try {
@@ -75,7 +118,7 @@ public class WebpageContentHandler implements ContentHandler {
 			} while (bytesread > 0);
 		}
 		catch (IOException e) {
-			logger.error(e);
+			logger.error("Error", e);
 		}
 		return savedBytes.toByteArray();
 	}

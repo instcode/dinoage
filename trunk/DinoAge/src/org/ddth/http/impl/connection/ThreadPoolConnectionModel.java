@@ -62,6 +62,20 @@ import org.ddth.http.core.connection.RequestFuture;
 import org.ddth.http.core.connection.Response;
 import org.ddth.http.impl.content.WebpageContent;
 
+/**
+ * This is an implementation of {@link ConnectionModel} interface uses a
+ * threadpool to support non-blocking invocation.<br>
+ * <br>
+ * It also uses <a href="http://hc.apache.org">HTTPComponent</a> as a compatible
+ * browser to virtually surf the web ;-).<br>
+ * <br>
+ * Every queued request will be executed within a thread in a well scheduled
+ * threadpool so I'm sure that all requests will be executed properly.<br>
+ * <br>
+ * 
+ * @author khoa.nguyen
+ * 
+ */
 public class ThreadPoolConnectionModel implements ConnectionModel {
 	private static final Properties props = new Properties();
 	private static final String NUMBER_OF_CONNECTIONS_PER_ROUTE = "connection.route";
@@ -81,6 +95,11 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 
 	private ConnectionListener monitor;
 	
+	/**
+	 * Support adding a ConnectionListener during its creation time.
+	 * 
+	 * @param listener
+	 */
 	public ThreadPoolConnectionModel(ConnectionListener listener) {
 		monitor = listener;
 		httpClient = createHttpClient();
@@ -123,6 +142,11 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 		};
 	}
 
+	/**
+	 * This will support adding cookie on-the-fly but not now :-)
+	 * 
+	 * @param cookies
+	 */
 	public void setup(Map<String, String>[] cookies) {
 		CookieStore cookieStore = new BasicCookieStore();
 		for (Map<String, String> cookie : cookies) {
@@ -136,6 +160,17 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 		((DefaultHttpClient)httpClient).setCookieStore(cookieStore);
 	}
 
+	/**
+	 * Send a request and wait for the responding in a blocking way. Also notify
+	 * to the monitor every change in every state.
+	 * 
+	 * @param request
+	 *            The original/internal request.
+	 * @param httpRequest
+	 *            The GET/POST request by Apache HTTPComponent.
+	 * @return A Response object which contains every responding data from
+	 *         server.
+	 */
 	private Response request(final Request request, final HttpUriRequest httpRequest) {
 		HttpEntity entity = null;
 		Response response = null;
@@ -145,11 +180,13 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 			HttpResponse httpResponse = httpClient.execute(httpRequest);
 			entity = httpResponse.getEntity();
 			if (entity != null) {
-				InputStream inputStream = entity.getContent(); 
+				InputStream inputStream = entity.getContent();
+				// Check if the body data is actually in GZIP format 
 				if (entity.getContentEncoding() != null && "gzip".equals(entity.getContentEncoding().getValue())) {
 					// Wrap content with GZIP input stream
 					inputStream = new GZIPInputStream(inputStream);
 				}
+				// Concern about the charset is always needed.
 				String charset = entity.getContentType().getValue().split("=")[1];
 				response = new Response(new WebpageContent(inputStream, charset));
 				monitor.notifyResponding(new ConnectionEvent(request, response));
@@ -176,6 +213,13 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 		return response;
 	}
 
+	/**
+	 * Setup all configuration needed for a new client. This will create a
+	 * threadsafe client and it can serve multiple requests at a time.
+	 * 
+	 * @return
+	 * 		An apache HttpClient.
+	 */
 	private final HttpClient createHttpClient() {
 		SchemeRegistry supportedSchemes = new SchemeRegistry();
 
@@ -183,11 +227,15 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 		supportedSchemes.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
 
 		HttpParams params = new BasicHttpParams();
+		// Stupid fake client =)) Should grab the incredible long value
+		// from Firefox
 		HttpProtocolParams.setUserAgent(params, "Mozilla/5.0");
 		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
 		HttpProtocolParams.setContentCharset(params, HTTP.UTF_8);
 		HttpProtocolParams.setUseExpectContinue(params, true);
 		
+		// Support configuring number of concurrent connections so the bandwidth
+		// won't be throttled.
 		ConnManagerParams.setMaxTotalConnections(params, ((Integer)props.get(NUMBER_OF_CONCURRENT_CONNECTIONS)).intValue());
 		ConnManagerParams.setMaxConnectionsPerRoute(params, new ConnPerRoute() {
 			private final int connectionCount = ((Integer)props.get(NUMBER_OF_CONNECTIONS_PER_ROUTE)).intValue();
@@ -201,6 +249,7 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 
 		ClientConnectionManager ccm = new ThreadSafeClientConnManager(params, supportedSchemes);
 		DefaultHttpClient httpClient = new DefaultHttpClient(ccm, params);
+		// Support configuring proxy... Either simple proxy or SOCK, will check it later :D
 		//final HttpHost proxy = new HttpHost("127.0.0.1", 8080, "http");
 		//httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
 		httpClient.getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.BROWSER_COMPATIBILITY);
