@@ -24,14 +24,59 @@ import org.ddth.http.core.content.Content;
 import org.ddth.http.core.content.handler.ContentHandlerDispatcher;
 import org.ddth.http.impl.connection.ThreadPoolConnectionModel;
 
+/**
+ * This is a basic implementation of {@link Session} which supports "threadpool"
+ * {@link ConnectionModel}.<br>
+ * <br>
+ * Because of the name, we cannot change the {@link ConnectionModel} object in
+ * this class :D. Of course, I know I can make it more generic, more extensible,
+ * but in that case, I have to do more work :).. So, no design is the best, it's
+ * just good enough :D.<br>
+ * <br>
+ * Actually, you can write a little code to support customizing the connection
+ * model. It won't take much time because all you have to do is changing the
+ * creation of {@link ConnectionModel} object line of code. I'm just too lazy to
+ * do it :p.<br>
+ * <br>
+ * 
+ * @author khoa.nguyen
+ * 
+ */
 public abstract class ThreadPoolSession implements ConnectionListener, Session {
 	private Log logger = LogFactory.getLog(ThreadPoolSession.class);
 	
+	/**
+	 * A connection which has responsibility to send and handle any request
+	 * queued by this session.   
+	 */
 	private ConnectionModel connectionModel = new ThreadPoolConnectionModel(this);
+	
+	/**
+	 * The internal dispatcher which dispatches the content to a proper
+	 * {@link ContentHandler}.
+	 */
 	private ContentHandlerDispatcher dispatcher;
+	
+	/**
+	 * A request queue which is used for checking whether a request is on queued
+	 * or not. It also tracks the status of any request made, by keeping a
+	 * {@link RequestFuture} which is associated to that request. This
+	 * queue is also used when we try to stop the session by enforcing all
+	 * the ongoing requests to be cancelled.
+	 */
 	private Map<String, RequestFuture> queue = new ConcurrentHashMap<String, RequestFuture>();
+	
+	/**
+	 * A list of ConnectionListeners which are interested in requesting events.
+	 */
 	private List<ConnectionListener> listeners = new ArrayList<ConnectionListener>();
 
+	/**
+	 * Create a new session with the given content handle dispatcher.
+	 * 
+	 * @param dispatcher
+	 * 		The dispatcher to be used in this session.
+	 */
 	public ThreadPoolSession(ContentHandlerDispatcher dispatcher) {
 		this.dispatcher = dispatcher;
 	}
@@ -49,12 +94,26 @@ public abstract class ThreadPoolSession implements ConnectionListener, Session {
 		return future;
 	}
 
+	/**
+	 * Register a listener.
+	 * 
+	 * @param listener
+	 * 		The listener to be registered.
+	 */
 	public void registerConnectionListener(ConnectionListener listener) {
 		listeners.add(listener);
 	}
 	
-	public void unregisterConnectionListener(ConnectionListener listener) {
-		listeners.remove(listener);
+	/**
+	 * Unregister a listener.
+	 * 
+	 * @param listener
+	 * 		The listener to be removed from the list.
+	 * @return
+	 * 		true if the listener is in the list.
+	 */
+	public boolean unregisterConnectionListener(ConnectionListener listener) {
+		return listeners.remove(listener);
 	}
 	
 	@Override
@@ -103,5 +162,12 @@ public abstract class ThreadPoolSession implements ConnectionListener, Session {
 		content(content);
 	}
 	
+	/**
+	 * Handle the final content which was pre-processed via a chain of
+	 * {@link ContentHandler}s.
+	 * 
+	 * @param content
+	 * 		The content to be processed.
+	 */
 	protected abstract void content(Content<?> content);
 }
