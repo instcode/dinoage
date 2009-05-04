@@ -23,9 +23,7 @@ import org.ddth.dinoage.model.WorkspaceManager;
 import org.ddth.dinoage.ui.DinoAgeWindow;
 import org.ddth.dinoage.ui.widget.ChooseWorkspaceDlg;
 import org.ddth.http.core.Session;
-import org.ddth.http.core.content.handler.ChainContentHandler;
 import org.ddth.http.core.content.handler.ContentHandlerDispatcher;
-import org.ddth.http.impl.content.handler.WebpageContentHandler;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 
@@ -94,19 +92,9 @@ public class DinoAge {
 	}
 	
 	private ContentHandlerDispatcher createDispatcher() {
-		WebpageContentHandler webHandler = new WebpageContentHandler();
-		
-		ChainContentHandler frontHandler = new ChainContentHandler();
-		frontHandler.add(webHandler);
-		frontHandler.add(new YEntryListContentHandler());
-		
-		ChainContentHandler entryHandler = new ChainContentHandler();
-		entryHandler.add(webHandler);
-		entryHandler.add(new YBlogEntryContentHandler());
-		
 		ContentHandlerDispatcher dispatcher = new ContentHandlerDispatcher();
-		dispatcher.registerHandler("http://.*/blog-.*\\?.*p=(\\d+).*", entryHandler);
-		dispatcher.registerHandler("http://.*/blog-[^?]*", frontHandler);
+		dispatcher.registerHandler("http://.*/blog-.*\\?.*p=(\\d+).*", new YBlogEntryContentHandler());
+		dispatcher.registerHandler("http://.*/blog-[^?]*", new YEntryListContentHandler());
 		return dispatcher;
 	}
 

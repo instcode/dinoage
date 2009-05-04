@@ -28,6 +28,8 @@ public class ResourceManager {
 	public static final String KEY_ENCODING = "UTF-8";
 	public static final String KEY_RELAX_URL = "http://360.yahoo.com/profile-n75YJ78_fL5JcEVFlIE1";
 	
+	public static final String KEY_MINIMIZE_TO_TRAY =
+		"DinoAge will continue running in the system tray.";
 	public static final String KEY_RESUME_RETRIEVING_CONFIRM =
 		"A resumable backup for ''{0}'' is found in ''{1}'' folder.\n" +
 		"\n" +
@@ -127,6 +129,8 @@ public class ResourceManager {
 	public static final String KEY_LABEL_SHOW_BACKUP_ELLIPSIS = "Show...";
 	public static final String KEY_LABEL_STOP_BACKUP = "Stop";
 	public static final String KEY_LABEL_PROFILE_NAME = "Profile Name";
+	public static final String KEY_LABEL_SHOW_WINDOW = "Show";
+	public static final String KEY_LABEL_EXIT = "Exit";
 	
 	public static ResourceBundle resources;
 
