@@ -9,19 +9,25 @@ package org.ddth.blogging;
 
 import java.util.Date;
 
-public class BlogComment {
-	private Author author;
+public class BlogPost {
+	private String title;
 	private String content;
+	private String tags;
 	private Date date;
 	private String postId;
 
-	public BlogComment(Author author, String content) {
-		setAuthor(author);
+	public BlogPost(String title, String content, String tags) {
+		setTitle(title);
 		setContent(content);
+		setTags(tags);
 	}
 	
-	public BlogComment(String content) {
-		this(null, content);
+	public BlogPost(String title, String content) {
+		this(title, content, "");
+	}
+	
+	public BlogPost() {
+		this("", "");
 	}
 	
 	public String getContent() {
@@ -32,6 +38,22 @@ public class BlogComment {
 		this.content = content;
 	}
 
+	public String getTags() {
+		return tags;
+	}
+
+	public void setTags(String tags) {
+		this.tags = tags;
+	}
+
+	public String getTitle() {
+		return title;
+	}
+
+	public void setTitle(String title) {
+		this.title = title;
+	}
+
 	public void setDate(Date date) {
 		this.date = date;
 	}
@@ -40,24 +62,11 @@ public class BlogComment {
 		return date;
 	}
 
-	public void setAuthor(Author author) {
-		this.author = author;
-	}
-
-	public Author getAuthor() {
-		return author;
-	}
-
 	public void setPostId(String postId) {
 		this.postId = postId;
 	}
 
 	public String getPostId() {
 		return postId;
-	}
-	
-	@Override
-	public String toString() {
-		return author + " " + content;
 	}
 }

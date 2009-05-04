@@ -29,9 +29,9 @@ public class YahooProfile extends Profile {
 
 	@Override
 	protected void innerLoad(Properties properties) {
-		beginningURL = properties.getProperty(PROFILE_URLS_BEGINNING, YahooBlog.YAHOO_360_BLOG_URL + getProfileId());
-		if (beginningURL.trim().length() == 0) {
-			beginningURL = YahooBlog.YAHOO_360_BLOG_URL + getProfileId();
+		beginningURL = properties.getProperty(PROFILE_URLS_BEGINNING);
+		if (!beginningURL.startsWith("http://")) {
+			saveURL(null);
 		}
 		isNewlyCreated = false;
 	}
@@ -55,6 +55,7 @@ public class YahooProfile extends Profile {
 	
 	public void saveURL(String url) {
 		if (url == null) {
+			beginningURL = YahooBlog.YAHOO_360_BLOG_URL + getProfileId();
 			return;
 		}
 		beginningURL = url;

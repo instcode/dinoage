@@ -3,7 +3,7 @@ package org.ddth.dinoage.ui;
 import java.text.DateFormat;
 import java.util.Date;
 
-import org.ddth.blogging.BlogEntry;
+import org.ddth.blogging.BlogPost;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
@@ -113,7 +113,7 @@ public class BlogEntryView extends Composite {
 		});
 
 		for (int i = 0; i < 5; i++) {
-			BlogEntry entry = new BlogEntry("Blog " + i, "<<Empty>>...");
+			BlogPost entry = new BlogPost("Blog " + i, "<<Empty>>...");
 			createTableItem(entry);
 		}
 	}
@@ -126,7 +126,7 @@ public class BlogEntryView extends Composite {
 	 *            the file to provide data for the item
 	 * @return the new table item
 	 */
-	public TableItem createTableItem(BlogEntry entry) {
+	public TableItem createTableItem(BlogPost entry) {
 		if (getShell().isDisposed())
 			return null;
 		TableItem item = new TableItem(m_table, SWT.NULL);

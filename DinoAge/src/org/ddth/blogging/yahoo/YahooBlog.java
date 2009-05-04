@@ -9,7 +9,7 @@ package org.ddth.blogging.yahoo;
 
 import org.ddth.blogging.BasicBlog;
 import org.ddth.blogging.BlogComment;
-import org.ddth.blogging.BlogEntry;
+import org.ddth.blogging.BlogPost;
 
 public class YahooBlog extends BasicBlog {
 
@@ -17,7 +17,7 @@ public class YahooBlog extends BasicBlog {
 	public static final String YAHOO_360_GUESTBOOK_URL = "http://360.yahoo.com/guestbook-";
 	public static final String YAHOO_360_BLOG_URL = "http://blog.360.yahoo.com/blog-";
 
-	public boolean createEntry(BlogEntry entry) {
+	public boolean createEntry(BlogPost entry) {
 		return true;
 	}
 

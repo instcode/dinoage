@@ -28,7 +28,7 @@ public interface Blog {
 	 * @param entry
 	 * @return
 	 */
-	public boolean createEntry(BlogEntry entry);
+	public boolean createEntry(BlogPost entry);
 	
 	/**
 	 * Create a comment :D
