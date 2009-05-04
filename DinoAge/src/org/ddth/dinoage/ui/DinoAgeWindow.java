@@ -17,6 +17,8 @@ import org.ddth.dinoage.model.Workspace;
 import org.ddth.http.core.ConnectionEvent;
 import org.ddth.http.core.ConnectionListener;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MenuDetectEvent;
+import org.eclipse.swt.events.MenuDetectListener;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -24,6 +26,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -35,8 +38,13 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.ToolTip;
+import org.eclipse.swt.widgets.Tray;
+import org.eclipse.swt.widgets.TrayItem;
 
 public class DinoAgeWindow implements ConnectionListener {
 	
@@ -50,7 +58,11 @@ public class DinoAgeWindow implements ConnectionListener {
 	private Link profileURLText;
 	private Link statusLabel;
 	private Text workspaceText;
+	private ToolTip tooltip;
+	private MenuItem showWorkspaceChooserDialogItem;
+	private MenuItem showMainWindowItem;
 	
+	private SelectionListener showWindowListener;
 	private SelectionListener backupListener;
 	private SelectionListener stopListener;
 	private SelectionListener showBackupListener;
@@ -61,6 +73,7 @@ public class DinoAgeWindow implements ConnectionListener {
 	
 	private DinoAge dinoage;
 	private ModifyListener profileModifyListener;
+	private SelectionListener exitListener;
 	private static final String CREATE_NEW_PROFILE_TEXT = "<create new>";
 
 	public DinoAgeWindow(DinoAge dinoage) {
@@ -68,36 +81,27 @@ public class DinoAgeWindow implements ConnectionListener {
 	}
 	
 	public void open() {
-		shell = new Shell(SWT.CENTER | SWT.CLOSE);
+		shell = new Shell(SWT.CENTER | SWT.CLOSE | SWT.MIN);
 		shell.setText(ResourceManager.KEY_PRODUCT_DIALOG_TITLE);
 		shell.setLayout(new FillLayout());
 
 		createListeners();
 		createContent();
+		if (!createTray()) {
+			shell.addShellListener(new ShellAdapter() {
+				@Override
+				public void shellClosed(ShellEvent e) {
+					exitListener.widgetSelected(null);
+				}
+			});
+		}
 		
 		shell.pack();
 		shell.setMinimumSize(shell.getSize());
-		
 		// Center the shell
 		UniversalUtil.centerWindow(shell);
 
-		shell.addShellListener(new ShellAdapter() {
-			public void shellClosed(ShellEvent event) {
-				event.doit = !dinoage.isRunning();
-				if (!event.doit) {
-					String message = ResourceManager.getMessage(ResourceManager.KEY_MESSAGE_EXIT_WHEN_RUNNING,
-							new String[] { "current profile" });
-					UniversalUtil.showMessageBox(shell, shell.getText(), message);
-				}
-				else {
-					// Close workspace before exiting
-					dinoage.getWorkspace().closeWorkspace();
-				}
-			}
-		});
-
 		shell.open();
-		shell.layout();
 		Display display = shell.getDisplay();
 		while (!shell.isDisposed()) {
 			if (!display.readAndDispatch())
@@ -106,6 +110,29 @@ public class DinoAgeWindow implements ConnectionListener {
 	}
 	
 	private void createListeners() {
+		showWindowListener = new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent event) {
+				shell.setMinimized(false);
+				shell.setVisible(true);
+			}
+		};
+		
+		exitListener = new SelectionAdapter() {			
+			public void widgetSelected(final SelectionEvent e) {
+				if (dinoage.isRunning()) {
+					Profile profile = dinoage.getWorkspace().getProfile(profilesCombo.getText());
+					String message = ResourceManager.getMessage(ResourceManager.KEY_MESSAGE_EXIT_WHEN_RUNNING,
+							new String[] { profile.getProfileName() });
+					UniversalUtil.showMessageBox(shell, shell.getText(), message);
+				}
+				else {
+					// Close workspace before exiting
+					dinoage.getWorkspace().closeWorkspace();
+					shell.close();
+				}
+			}
+		};
+		
 		launchSelection = new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
 				Program.launch(event.text);
@@ -217,6 +244,7 @@ public class DinoAgeWindow implements ConnectionListener {
 					answer = UniversalUtil.showConfirmDlg(shell, shell.getText(), message);
 				}
 				if (answer == SWT.NO) {
+					session.getProfile().saveURL(null);
 					session.reset();
 				}
 				if (answer != SWT.CANCEL) {
@@ -244,6 +272,78 @@ public class DinoAgeWindow implements ConnectionListener {
 				dlg.open();
 			}
 		};
+	}
+
+	private boolean createTray() {
+		Display display = shell.getDisplay();
+		Tray tray = display.getSystemTray();
+		if (tray == null) {
+			return false;
+		}
+		
+		tooltip = new ToolTip(shell, SWT.BALLOON | SWT.ICON_INFORMATION);
+		tooltip.setText(ResourceManager.getMessage(ResourceManager.KEY_PRODUCT_NAME));
+		tooltip.setMessage(ResourceManager.getMessage(ResourceManager.KEY_MINIMIZE_TO_TRAY));
+	
+		Image image = new Image(display, DinoAgeWindow.class.getResourceAsStream("/images/export.gif"));
+		
+		final TrayItem item = new TrayItem(tray, SWT.NONE);
+		item.setImage(image);
+		item.setToolTip(tooltip);
+		
+		shell.addShellListener(new ShellAdapter() {
+			/**
+			 * Go to tray when minimized/close active window.
+			 */
+			private void gotoTray() {
+				shell.setVisible(false);
+				tooltip.setVisible(true);
+			}
+			
+			@Override
+			public void shellIconified(ShellEvent even) {
+				gotoTray();
+			}
+			
+			@Override
+			public void shellClosed(ShellEvent event) {
+				// If the window is showing, we only put it to tray
+				if (shell.isVisible()) {
+					event.doit = false;
+					gotoTray();
+				}
+				else {
+					// 'Cause the program is gonna close soon, clean up
+					// everything.
+					item.setVisible(false);
+				}
+			}
+		});
+		
+		final Menu menu = new Menu(shell, SWT.POP_UP);
+		showMainWindowItem = new MenuItem(menu, SWT.PUSH);
+		showMainWindowItem.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_SHOW_WINDOW));
+		showMainWindowItem.setEnabled(true);
+		showMainWindowItem.addSelectionListener(showWindowListener);
+		
+		showWorkspaceChooserDialogItem = new MenuItem(menu, SWT.PUSH);		
+		showWorkspaceChooserDialogItem.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_SWITCH_WORKSPACE_ELLIPSIS));
+		showWorkspaceChooserDialogItem.setEnabled(true);
+		showWorkspaceChooserDialogItem.addSelectionListener(switchWorkspaceListener);
+		
+		MenuItem exitItem = new MenuItem(menu, SWT.PUSH);		
+		exitItem.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_EXIT));
+		exitItem.addSelectionListener(exitListener);
+			
+		// Add menu detection listener to tray icon.
+		item.addMenuDetectListener(new MenuDetectListener() {
+			@Override
+			public void menuDetected(MenuDetectEvent e) {
+				menu.setVisible(true);
+			}
+		});
+		item.addSelectionListener(showWindowListener);
+		return true;
 	}
 	
 	private void createContent() {
@@ -307,7 +407,7 @@ public class DinoAgeWindow implements ConnectionListener {
 		profileURLText = new Link(composite, SWT.NONE | SWT.NO_FOCUS);
 		profileURLText.addSelectionListener(launchSelection);
 		GridData gd_profileURLText = new GridData(SWT.FILL, SWT.CENTER, true, true);
-		gd_profileURLText.widthHint = 300;
+		gd_profileURLText.widthHint = 400;
 		gd_profileURLText.heightHint = 15;
 		profileURLText.setLayoutData(gd_profileURLText);
 
