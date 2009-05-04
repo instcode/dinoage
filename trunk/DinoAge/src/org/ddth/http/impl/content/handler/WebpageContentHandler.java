@@ -7,10 +7,14 @@
  **************************************************/
 package org.ddth.http.impl.content.handler;
 
+import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.io.UnsupportedEncodingException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -44,15 +48,14 @@ public class WebpageContentHandler implements ContentHandler {
 		DomTreeContent domTreeContent = null;
 		try {
 			WebpageContent webpage = (WebpageContent)content;
-			byte[] buffer = consume(webpage.getContent());
-			ByteArrayInputStream byteStream = new ByteArrayInputStream(buffer);			
+			InputStream byteStream = consume(webpage.getContent(), webpage.getCharset());
 			Document doc = parse(byteStream, webpage.getCharset());
 			byteStream.reset();
 			domTreeContent = new DomTreeContent(doc);
 			domTreeContent.setContent(byteStream);
 		}
 		catch (Exception e) {
-			logger.error(e);
+			logger.error("Error", e);
 		}
 		return domTreeContent;
 	}
@@ -73,14 +76,15 @@ public class WebpageContentHandler implements ContentHandler {
 		inputSource.setEncoding(encoding);
 		Document doc = null;
 		try {
+			//parser.setFeature("http://cyberneko.org/html/features/report-errors", true);
 			parser.parse(inputSource);
 			doc = parser.getDocument();
 		}
 		catch (SAXException e) {
-			logger.error(e);
+			logger.error("Error", e);
 		}
 		catch (IOException e) {
-			logger.error(e);
+			logger.error("Error", e);
 		}
 		return doc;
 	}
@@ -103,23 +107,61 @@ public class WebpageContentHandler implements ContentHandler {
 	 * <br>
 	 * 
 	 * @param inputStream
+	 * 		An {@link InputStream}
+	 * @param charset
+	 * 		The charset encoding of the given stream
 	 * @return
+	 * 		An markable {@link InputStream}.
 	 */
-	private byte[] consume(InputStream inputStream) {
-		ByteArrayOutputStream savedBytes = new ByteArrayOutputStream(64000);
+	protected ByteArrayInputStream consume(InputStream inputStream, String charset) throws UnsupportedEncodingException {
+		ByteArrayOutputStream savedBytes = new ByteArrayOutputStream(64000) {
+			@Override
+			public synchronized byte[] toByteArray() {
+				// Don't have to copy the buffer again and again. However, remember
+				// that the buffer length is different from the stream buffer size.
+				return buf;
+			}
+		};
+		OutputStreamWriter writer = new OutputStreamWriter(savedBytes, charset);
+		BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream, charset));
 		try {
-			byte[] buffer = new byte[256];
-			int bytesread = 0;
-			do {
-				bytesread = inputStream.read(buffer, 0, 256);
-				if (bytesread > 0) {
-					savedBytes.write(buffer, 0, bytesread);
+			String line = null;
+			while ((line = reader.readLine()) != null) {
+				if (savedBytes.size() > 16384) {
+					writer.flush();
 				}
-			} while (bytesread > 0);
+				line = filter(line);
+				writer.write(line);
+				writer.append('\n');
+			}
 		}
 		catch (IOException e) {
 			logger.error("Error", e);
 		}
-		return savedBytes.toByteArray();
+		finally {
+			try {
+				writer.close();
+			}
+			catch (IOException e) {
+			}
+		}
+		
+		return new ByteArrayInputStream(savedBytes.toByteArray(), 0, savedBytes.size());
+	}
+
+	/**
+	 * Apply filtering to the given input.<br>
+	 * <br>
+	 * Subclass might override this method and will have a chance to modify the
+	 * input before putting it to the buffer.<br>
+	 * <br>
+	 * 
+	 * @param input
+	 * 		A line of text from the original HTML document.
+	 * @return
+	 * 		The line output after modifying.
+	 */
+	protected String filter(String input) {
+		return input;
 	}
 }

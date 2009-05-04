@@ -10,6 +10,7 @@ package org.ddth.http.impl.connection;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
@@ -86,7 +87,7 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 		// FIXME Should read from configuration file
 		props.put(NUMBER_OF_CONNECTIONS_PER_ROUTE, Integer.valueOf(4));
 		props.put(NUMBER_OF_CONCURRENT_CONNECTIONS, Integer.valueOf(2));
-		props.put(CONNECTION_TIME_OUT, new Long(1000*60*30));
+		props.put(CONNECTION_TIME_OUT, new Long(1000*10L));
 	}
 	
 	private static final Log logger = LogFactory.getLog(ThreadPoolConnectionModel.class);
@@ -194,6 +195,9 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 		}
 		catch (Exception e) {
 			logger.error("Error when processing an http request", e);
+			if (e instanceof SocketException) {
+				sendRequest(request);
+			}
 		}
 		finally {
 			// If we could be sure that the stream of the entity has been
@@ -227,8 +231,8 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 		supportedSchemes.register(new Scheme("https", SSLSocketFactory.getSocketFactory(), 443));
 
 		HttpParams params = new BasicHttpParams();
-		// Stupid fake client =)) Should grab the incredible long value
-		// from Firefox
+		// Stupid fake client =)) Should grab the incredible long user-agent
+		// value from Firefox
 		HttpProtocolParams.setUserAgent(params, "Mozilla/5.0");
 		HttpProtocolParams.setVersion(params, HttpVersion.HTTP_1_1);
 		HttpProtocolParams.setContentCharset(params, HTTP.UTF_8);
@@ -273,6 +277,7 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 				httpPost.setEntity(new UrlEncodedFormEntity(nvps, HTTP.UTF_8));
 			}
 			catch (UnsupportedEncodingException e) {
+				logger.error("Create an HTTP request failed.", e);
 			}
 			httpRequest = httpPost;
 		}
