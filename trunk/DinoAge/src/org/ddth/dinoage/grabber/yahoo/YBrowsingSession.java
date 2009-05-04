@@ -22,6 +22,10 @@ import org.ddth.http.core.content.handler.ContentHandlerDispatcher;
 import org.ddth.http.impl.ThreadPoolSession;
 import org.ddth.http.impl.content.NavigationContent;
 
+/**
+ * @author khoa.nguyen
+ *
+ */
 public class YBrowsingSession extends ThreadPoolSession {
 	private static final int BLOG_ENTRY = 0;
 	private static final String[] CATEGORIES = {"entry"};
@@ -41,10 +45,16 @@ public class YBrowsingSession extends ThreadPoolSession {
 		this.persistence = new Persistence(workspace.getProfileFolder(profile), CATEGORIES);
 	}
 
+	/**
+	 * 
+	 */
 	public void reset() {
 		requests.clear();
 	}
 
+	/**
+	 * @return
+	 */
 	public YahooProfile getProfile() {
 		return profile;
 	}
@@ -78,15 +88,21 @@ public class YBrowsingSession extends ThreadPoolSession {
 		}
 		else {
 			YBlogEntryContent blogEntry = (YBlogEntryContent) content;
-			nextURL = blogEntry.getNextURL();
+			nextURL = blogEntry.getEntry().getNextURL();
 			persistence.write(
 					blogEntry.getContent().getContent(),
 					BLOG_ENTRY,
-					String.valueOf(blogEntry.getEntry().getPostId()));
+					String.valueOf(blogEntry.getEntry().getPost().getPostId()));
 		}
-		logger.debug("Queue: " + nextURL);
-		queue(new Request(nextURL));
-		profile.saveURL(nextURL);
-		workspace.saveProfile(profile);
+		if (nextURL != null && nextURL.startsWith("http://")) {
+			queue(new Request(nextURL));
+			profile.saveURL(nextURL);
+			workspace.saveProfile(profile);
+		}
+		else {
+			// Something went wrong or there's nothing left to do...
+			logger.debug("Stopping current session...");
+			shutdown();
+		}
 	}
 }

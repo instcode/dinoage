@@ -7,23 +7,22 @@
  **************************************************/
 package org.ddth.dinoage.grabber.yahoo.handler;
 
-import org.ddth.blogging.BlogEntry;
+import org.ddth.blogging.yahoo.YahooBlogEntry;
 import org.ddth.blogging.yahoo.YahooBlogEntryUtil;
 import org.ddth.dinoage.grabber.yahoo.YBlogEntryContent;
 import org.ddth.http.core.content.Content;
-import org.ddth.http.core.content.handler.ContentHandler;
 import org.ddth.http.impl.content.DomTreeContent;
 import org.w3c.dom.Document;
 
-public class YBlogEntryContentHandler implements ContentHandler {
+public class YBlogEntryContentHandler extends YahooBlogContentHandler {
 
 	@Override
 	public Content<?> handle(Content<?> content) {
-		Document doc = ((DomTreeContent) content).getDocument();
-		String nextURL = YahooBlogEntryUtil.parsePreviousBlogEntryLink(doc);
-		BlogEntry entry = YahooBlogEntryUtil.parseEntry(doc);
-		YBlogEntryContent blogEntryContent = new YBlogEntryContent(entry, nextURL);
-		blogEntryContent.setContent((DomTreeContent) content);
+		DomTreeContent domTreeContent = (DomTreeContent) super.handle(content);
+		Document doc = domTreeContent.getDocument();
+		YahooBlogEntry entry = YahooBlogEntryUtil.parseEntry(doc);
+		YBlogEntryContent blogEntryContent = new YBlogEntryContent(entry);
+		blogEntryContent.setContent(domTreeContent);
 		return blogEntryContent;
 	}
 }

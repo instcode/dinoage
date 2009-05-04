@@ -13,7 +13,7 @@ import java.util.TimeZone;
 
 import org.ddth.blogging.BasicBlog;
 import org.ddth.blogging.BlogComment;
-import org.ddth.blogging.BlogEntry;
+import org.ddth.blogging.BlogPost;
 
 import com.google.gdata.client.GoogleService;
 import com.google.gdata.data.Category;
@@ -68,7 +68,7 @@ public class Blogger extends BasicBlog {
 		throw new IOException("User has no blogs!");
 	}
 
-	public boolean createEntry(BlogEntry entry) {
+	public boolean createEntry(BlogPost entry) {
 		boolean success = false; 
 		Entry blogEntry = new Entry();
 		blogEntry.setTitle(new PlainTextConstruct(entry.getTitle()));
