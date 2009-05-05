@@ -17,9 +17,22 @@ import org.apache.http.client.CookieStore;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
+/**
+ * In the past, Firefox stored all cookies in plain text file format
+ * *cookies.txt*. Since Firefox 3.x, persistent cookies have been moved to
+ * *cookies.sqlite* while session cookies were moved to *sessionstore.js*. This
+ * makes it even harder to implement a cookies reader. However, because
+ * persistent cookies are not important and can be retrieved easily from server
+ * at any time, we only need to focus on reading session cookies. Luckily, in
+ * sessionstore.js, session cookies are stored in json format and we can read
+ * them easily with any json library. And, this {@link CookiesReader} is really
+ * that simple Mozilla Firefox cookies (session) store reader.<br>
+ * 
+ * @author khoa.nguyen
+ * 
+ */
 public class CookiesReader {
 	private CookieStore cookieStore;
 
@@ -38,7 +51,7 @@ public class CookiesReader {
 		if (os.indexOf("win") >= 0) {
 			profilesFolder = new File(System.getenv("APPDATA") + "\\Mozilla\\Firefox\\Profiles");
 		} else if (os.indexOf("mac") >= 0) {
-			profilesFolder = new File("~/Library/Application Support/Firefox/Profiles/");
+			profilesFolder = new File("~/Library/Application Support/Firefox/Profiles");
 		} else if (os.indexOf("nix") >= 0 || os.indexOf("nux") >= 0) {
 			profilesFolder = new File("~/.mozilla/firefox");
 		}
@@ -79,10 +92,8 @@ public class CookiesReader {
 		BufferedReader reader = null;
 		try {
 			reader = new BufferedReader(new FileReader(getSessionStore()));
-			String s = reader.readLine();
-			JSONArray a = new JSONArray(s);
-			JSONObject o = a.getJSONObject(0);
-			JSONArray windows = o.getJSONArray("windows");
+			String json = reader.readLine();
+			JSONArray windows = new JSONArray(json).getJSONObject(0).getJSONArray("windows");
 			JSONArray cookies = windows.getJSONObject(0).getJSONArray("cookies");
 			for (int i = 0; i < cookies.length(); i++) {
 				JSONObject session = cookies.getJSONObject(i);
@@ -92,14 +103,17 @@ public class CookiesReader {
 				String path = session.getString("path");
 				addCookie(host, name, value, path);
 			}
-		} catch (IOException e) {
-		} catch (JSONException e) {
-		} finally {
+		}
+		catch (Exception e) {
+			// Something's wrong with the reading, but it's okay :-)
+		}
+		finally {
 			try {
 				if (reader != null) {
 					reader.close();
 				}
-			} catch (IOException e) {
+			}
+			catch (IOException e) {
 			}
 		}
 		return cookieStore;
