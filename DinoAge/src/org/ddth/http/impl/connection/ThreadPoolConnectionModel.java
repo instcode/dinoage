@@ -12,7 +12,6 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.SocketException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +29,6 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.HttpVersion;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpGet;
@@ -46,10 +44,8 @@ import org.apache.http.conn.scheme.PlainSocketFactory;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
-import org.apache.http.impl.cookie.BasicClientCookie;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.HttpParams;
@@ -79,6 +75,7 @@ import org.ddth.http.impl.content.WebpageContent;
  */
 public class ThreadPoolConnectionModel implements ConnectionModel {
 	private static final Properties props = new Properties();
+	private static final String FIREFOX_COOKIES_ENABLE = "firefox.cookies";
 	private static final String NUMBER_OF_CONNECTIONS_PER_ROUTE = "connection.route";
 	private static final String CONNECTION_TIME_OUT = "connection.timeout";
 	private static final String NUMBER_OF_CONCURRENT_CONNECTIONS = "connection.concurrent";
@@ -141,24 +138,6 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 				return super.cancel(mayInterruptIfRunning);
 			}
 		};
-	}
-
-	/**
-	 * This will support adding cookie on-the-fly but not now :-)
-	 * 
-	 * @param cookies
-	 */
-	public void setup(Map<String, String>[] cookies) {
-		CookieStore cookieStore = new BasicCookieStore();
-		for (Map<String, String> cookie : cookies) {
-			BasicClientCookie basicClientCookie = new BasicClientCookie(cookie.get("name"), cookie.get("value"));
-			basicClientCookie.setDomain(cookie.get("host"));
-			basicClientCookie.setPath(cookie.get("path"));
-			basicClientCookie.setSecure(Boolean.getBoolean(cookie.get("secure")));
-			basicClientCookie.setExpiryDate(new Date(System.currentTimeMillis() + 31536000000L));
-			cookieStore.addCookie(basicClientCookie);
-		}
-		((DefaultHttpClient)httpClient).setCookieStore(cookieStore);
 	}
 
 	/**
@@ -257,6 +236,11 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 		//final HttpHost proxy = new HttpHost("127.0.0.1", 8080, "http");
 		//httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
 		httpClient.getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.BROWSER_COMPATIBILITY);
+		// Load all cookies from Firefox
+		if ("yes".equals(System.getProperty(FIREFOX_COOKIES_ENABLE, "no"))) {
+			httpClient.setCookieStore((new CookiesReader()).readBrowserCookies());
+			logger.info("Loaded all cookies from default Firefox profile.");
+		}
 		return httpClient;
 	}
 
