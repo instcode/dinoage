@@ -39,7 +39,7 @@ import org.w3c.dom.NodeList;
 
 public class YahooBlogEntryUtil {
 	private static Log logger = LogFactory.getLog(YBrowsingSession.class);
-	
+
 	/**
 	 * Example: Monday December 24, 2007 - 11:36pm (ICT)
 	 */
@@ -49,6 +49,12 @@ public class YahooBlogEntryUtil {
 	 * Pattern to extract post-id from tag-error-<b>#post-id</b>
 	 */
 	private static final Pattern PATTERN_TO_EXTRACT_POST_ID = Pattern.compile("tag-error-(\\d+)");
+	
+	/**
+	 * Text to determine which link is next navigation
+	 * link from blog page.
+	 */
+	private static final String TEXT_NODE_PERMANENT_LINK = "Permanent Link";
 	
 	private static class XPathKey {
 		private static final XPath UNTHREADSAFE_XPATH = XPathFactory.newInstance().newXPath();
@@ -92,7 +98,7 @@ public class YahooBlogEntryUtil {
 		/**
 		 * Start from {@value #YMGL_BLOG}
 		 */
-		static XPathKey FIRST_BLOG_ENTRY_URL	= new XPathKey("DIV/DL/DD/DIV[3]/SPAN[2]/A/@href");
+		static XPathKey FIRST_BLOG_ENTRY_URL	= new XPathKey("DIV/DL/DD[1]/DIV[3]/SPAN[2]/A");
 		static XPathKey PREVIOUS_BLOG_ENTRY_URL	= new XPathKey("DIV/DL/DD/DIV[3]/P[2]/SPAN[2]/A/@href");
 		static XPathKey BLOG_ENTRY_TAG_ERROR_ID	= new XPathKey("DIV/DL/DD/DIV[3]/DIV/@id");
 		static XPathKey BLOG_ENTRY_TITLE		= new XPathKey("DIV/DL/DT");
@@ -128,7 +134,17 @@ public class YahooBlogEntryUtil {
 	 */
 	public static String parseNavigationLink(Document doc) {
 		Node entry = YahooBlogKey.YMGL_BLOG.getNode(doc);
-		return YahooBlogKey.FIRST_BLOG_ENTRY_URL.getText(entry);
+		NodeList links = YahooBlogKey.FIRST_BLOG_ENTRY_URL.getNodeList(entry);
+		int length = links.getLength();
+		String navigationURL = null;
+		for (int index = 0; index < length; index++) {
+			Node node = links.item(index);
+			String name = node.getFirstChild().getNodeValue();
+			if (TEXT_NODE_PERMANENT_LINK.equals(name)) {
+				navigationURL = node.getAttributes().getNamedItem("href").getNodeValue();
+			}
+		}
+		return navigationURL;
 	}
 
 	/**
@@ -266,13 +282,14 @@ public class YahooBlogEntryUtil {
 
 	public static void main(String[] args) throws IOException {
 		YahooBlogContentHandler contentHandler = new YahooBlogContentHandler();
-		FileInputStream inputStream = new FileInputStream("./workspaces/w1/instcode/entry/entry-error.html");
+		FileInputStream inputStream = new FileInputStream("./workspaces/w1/instcode/entry/entry-list.html");
 		WebpageContent webContent = new WebpageContent(inputStream, "utf-8");
 		DomTreeContent content = (DomTreeContent)contentHandler.handle(webContent);
+	
+		System.out.println(YahooBlogEntryUtil.parseNavigationLink(content.getDocument()));
+
 		YahooBlogEntry entry = YahooBlogEntryUtil.parseEntry(content.getDocument());
 		BlogPost post = entry.getPost();
-		
-		System.out.println(YahooBlogEntryUtil.parseNavigationLink(content.getDocument()));
 		System.out.println(
 				"Link: " + entry.getNextURL() +
 				"\nEntry: " + post.getPostId() +
