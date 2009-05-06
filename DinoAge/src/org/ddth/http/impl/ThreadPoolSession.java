@@ -81,7 +81,6 @@ public abstract class ThreadPoolSession implements ConnectionListener, Session {
 		this.dispatcher = dispatcher;
 	}
 
-	@Override
 	public RequestFuture queue(Request request) {
 		if (request == null) {
 			throw new IllegalArgumentException("Request is null");
@@ -116,17 +115,14 @@ public abstract class ThreadPoolSession implements ConnectionListener, Session {
 		return listeners.remove(listener);
 	}
 	
-	@Override
 	public void start() {
 		connectionModel.open();
 	}
 
-	@Override
 	public boolean isRunning() {
 		return connectionModel.running();
 	}
 	
-	@Override
 	public void shutdown() {
 		// Force abort current request
 		for (RequestFuture future : queue.values()) {
@@ -135,7 +131,6 @@ public abstract class ThreadPoolSession implements ConnectionListener, Session {
 		connectionModel.close();
 	}
 
-	@Override
 	public void notifyRequesting(ConnectionEvent event) {
 		logger.debug("Requesting: " + event.getRequest().getURL() + "...");
 		for (ConnectionListener listener : listeners) {
@@ -143,7 +138,6 @@ public abstract class ThreadPoolSession implements ConnectionListener, Session {
 		}
 	}
 
-	@Override
 	public void notifyFinished(ConnectionEvent event) {
 		logger.debug("Requesting: " + event.getRequest().getURL() + "... Done!");
 		queue.remove(event.getRequest().getURL());
@@ -152,7 +146,6 @@ public abstract class ThreadPoolSession implements ConnectionListener, Session {
 		}
 	}
 
-	@Override
 	public void notifyResponding(ConnectionEvent event) {
 		logger.debug("Handling: " + event.getRequest().getURL() + "...");
 		for (ConnectionListener listener : listeners) {

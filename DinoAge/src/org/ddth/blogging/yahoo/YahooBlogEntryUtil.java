@@ -37,6 +37,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
+import com.ibm.icu.text.Normalizer;
+
 public class YahooBlogEntryUtil {
 	private static Log logger = LogFactory.getLog(YBrowsingSession.class);
 
@@ -230,6 +232,8 @@ public class YahooBlogEntryUtil {
 			postId = matcher.group(1);
 		}
 		String title = YahooBlogKey.BLOG_ENTRY_TITLE.getText(ymglBlog);
+		// For testing purpose
+		Normalizer.normalize(title, Normalizer.NFD);
 		String date = YahooBlogKey.BLOG_ENTRY_CREATED_DATE.getText(ymglBlog);
 		Node body = YahooBlogKey.BLOG_ENTRY_BODY.getNode(ymglBlog);
 		NodeList tags = YahooBlogKey.BLOG_ENTRY_TAGS.getNodeList(ymglBlog);
@@ -282,7 +286,7 @@ public class YahooBlogEntryUtil {
 
 	public static void main(String[] args) throws IOException {
 		YahooBlogContentHandler contentHandler = new YahooBlogContentHandler();
-		FileInputStream inputStream = new FileInputStream("./workspaces/w1/instcode/entry/entry-list.html");
+		FileInputStream inputStream = new FileInputStream("./workspaces/w1/instcode/entry/entry-1590.html");
 		WebpageContent webContent = new WebpageContent(inputStream, "utf-8");
 		DomTreeContent content = (DomTreeContent)contentHandler.handle(webContent);
 	

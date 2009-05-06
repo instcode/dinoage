@@ -43,7 +43,6 @@ import org.xml.sax.SAXException;
 public class WebpageContentHandler implements ContentHandler {
 	private Log logger = LogFactory.getLog(WebpageContentHandler.class);
 	
-	@Override
 	public Content<?> handle(Content<?> content) {
 		DomTreeContent domTreeContent = null;
 		try {

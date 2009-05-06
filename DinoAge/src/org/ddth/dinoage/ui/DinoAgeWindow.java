@@ -207,7 +207,6 @@ public class DinoAgeWindow implements ConnectionListener {
 		};
 		
 		profileModifyListener = new ModifyListener() {
-			@Override
 			public void modifyText(ModifyEvent arg0) {
 				String profileName = profilesCombo.getText();
 				Profile profile = dinoage.getWorkspace().getProfile(profileName);
@@ -337,7 +336,6 @@ public class DinoAgeWindow implements ConnectionListener {
 			
 		// Add menu detection listener to tray icon.
 		item.addMenuDetectListener(new MenuDetectListener() {
-			@Override
 			public void menuDetected(MenuDetectEvent e) {
 				menu.setVisible(true);
 			}
@@ -461,7 +459,6 @@ public class DinoAgeWindow implements ConnectionListener {
 		removeProfileButton.setEnabled(isEnabled);
 	}
 
-	@Override
 	public void notifyFinished(ConnectionEvent event) {
 		final String sURL = event.getRequest().getURL();
 		shell.getDisplay().asyncExec(new Runnable() {
@@ -473,7 +470,6 @@ public class DinoAgeWindow implements ConnectionListener {
 		});
 	}
 
-	@Override
 	public void notifyRequesting(ConnectionEvent event) {
 		final String sURL = event.getRequest().getURL();
 		shell.getDisplay().syncExec(new Runnable() {
@@ -483,7 +479,6 @@ public class DinoAgeWindow implements ConnectionListener {
 		});
 	}
 
-	@Override
 	public void notifyResponding(ConnectionEvent event) {
 	}
 	
