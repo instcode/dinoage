@@ -12,7 +12,7 @@ import java.util.Map;
 
 import org.ddth.blogging.BasicBlog;
 import org.ddth.blogging.BlogComment;
-import org.ddth.blogging.BlogEntry;
+import org.ddth.blogging.BlogPost;
 
 import redstone.xmlrpc.XmlRpcClient;
 
@@ -50,7 +50,7 @@ public class WordpressBlog extends BasicBlog {
 		return categoryId;
 	}
 	
-	public boolean createEntry(BlogEntry entry) {
+	public boolean createEntry(BlogPost entry) {
 		boolean success = false;
 		try {
 			XmlRpcClient client = new XmlRpcClient(getBlogURL(), true);
