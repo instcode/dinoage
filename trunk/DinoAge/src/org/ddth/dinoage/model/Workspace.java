@@ -98,7 +98,6 @@ public class Workspace {
 			throw new IOException("Workspace is in used.");
 		}
 		File[] children = workspaceFolder.listFiles(new FileFilter() {
-			@Override
 			public boolean accept(File pathname) {
 				return pathname.isDirectory();
 			}

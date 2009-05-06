@@ -103,17 +103,14 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 		httpClient = createHttpClient();
 	}
 
-	@Override
 	public void open() {
 		executor = Executors.newScheduledThreadPool(((Integer)props.get(NUMBER_OF_CONCURRENT_CONNECTIONS)).intValue());
 	}
 
-	@Override
 	public boolean running() {
 		return executor != null;
 	}
 	
-	@Override
 	public void close() {
 		if (running()) {
 			executor.shutdown();
@@ -121,11 +118,9 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 		}
 	}
 
-	@Override
 	public RequestFuture sendRequest(final Request request) {
 		final HttpUriRequest httpRequest = createHttpRequest(request);
 		final Future<Response> future = executor.submit(new Callable<Response>() {
-			@Override
 			public Response call() throws Exception {
 				return request(request, httpRequest);
 			}
@@ -223,7 +218,6 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 		ConnManagerParams.setMaxConnectionsPerRoute(params, new ConnPerRoute() {
 			private final int connectionCount = ((Integer)props.get(NUMBER_OF_CONNECTIONS_PER_ROUTE)).intValue();
 			
-			@Override
 			public int getMaxForRoute(HttpRoute route) {
 				return connectionCount;
 			}

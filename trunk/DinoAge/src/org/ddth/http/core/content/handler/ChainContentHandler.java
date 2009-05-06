@@ -36,7 +36,6 @@ public class ChainContentHandler implements ContentHandler {
 	 */
 	private List<ContentHandler> handlers = new CopyOnWriteArrayList<ContentHandler>();
 
-	@Override
 	public Content<?> handle(Content<?> content) {
 		Content<?> token = content;
 		for (ContentHandler handler : handlers) {
