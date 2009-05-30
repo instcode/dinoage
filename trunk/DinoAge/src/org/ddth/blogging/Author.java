@@ -1,17 +1,35 @@
 package org.ddth.blogging;
 
 public class Author {
-
+	private String userId;
 	private String name;
+	private String email;
 	private String url;
 	private String avatar;
 
-	public Author(String name, String url, String avatar) {
+	public Author(String userId, String name, String url, String avatar) {
+		setUserId(userId);
 		setName(name);
 		setUrl(url);
 		setAvatar(avatar);
 	}
 
+	public String getUserId() {
+		return userId;
+	}
+	
+	public void setUserId(String userId) {
+		this.userId = userId;
+	}
+	
+	public String getEmail() {
+		return email;
+	}
+	
+	public void setEmail(String email) {
+		this.email = email;
+	}
+	
 	public String getName() {
 		return name;
 	}
