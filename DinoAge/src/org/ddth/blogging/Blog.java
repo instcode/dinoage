@@ -7,34 +7,68 @@
  **************************************************/
 package org.ddth.blogging;
 
-public interface Blog {
+import java.util.ArrayList;
+import java.util.List;
 
-	public String getAuthor();
-	public String getPassword();
-	public String getBlogURL();
+public class Blog {
+
+	private int blogId;
+	private List<Author> authors = new ArrayList<Author>();
+	private String title;
+	private String url;
+	private String description;
+	private List<Entry> entries = new ArrayList<Entry>();
+
+	public int getBlogId() {
+		return blogId;
+	}
 	
-	/**
-	 * Setup blog account :D
-	 * 
-	 * @param blogURL
-	 * @param author
-	 * @param password
-	 */
-	public void setup(String blogURL, String author, String password);
+	public void setBlogId(int blogId) {
+		this.blogId = blogId;
+	}
 	
-	/**
-	 * Create blog entry :D
-	 * 
-	 * @param entry
-	 * @return
-	 */
-	public boolean createEntry(BlogPost entry);
+	public List<Author> getAuthors() {
+		return authors;
+	}
+
+	public void addAuthor(Author author) {
+		authors.add(author);
+	}
 	
-	/**
-	 * Create a comment :D
-	 * 
-	 * @param comment
-	 * @return
-	 */
-	public boolean createComment(BlogComment comment);
+	public boolean removeAuthor(Author author) {
+		return authors.remove(author);
+	}
+
+	public String getTitle() {
+		return title;
+	}
+	
+	public void setTitle(String title) {
+		this.title = title;
+	}
+	
+	public String getUrl() {
+		return url;
+	}
+
+	public void setUrl(String url) {
+		this.url = url;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public List<Entry> getEntries() {
+		return entries;
+	}
+
+	public void addEntry(Entry entry) {
+		entries.add(entry);
+	}
+
 }

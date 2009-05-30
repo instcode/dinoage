@@ -7,23 +7,24 @@
  **************************************************/
 package org.ddth.blogging;
 
-public class BlogPost extends Post {
-	private String title;
-	private String tags;
-
-	public String getTags() {
-		return tags;
+public class Comment extends Post {
+	private long commentId;
+	
+	public Comment(Author author, String content) {
+		setAuthor(author);
+		setContent(content);
 	}
 
-	public void setTags(String tags) {
-		this.tags = tags;
+	public long getCommentId() {
+		return commentId;
 	}
-
-	public String getTitle() {
-		return title;
+	
+	public void setCommentId(long commentId) {
+		this.commentId = commentId;
 	}
-
-	public void setTitle(String title) {
-		this.title = title;
+	
+	@Override
+	public String toString() {
+		return getAuthor() + " " + getContent();
 	}
 }
