@@ -10,13 +10,13 @@ package org.ddth.blogging.wordpress;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.ddth.blogging.BasicBlog;
-import org.ddth.blogging.BlogComment;
-import org.ddth.blogging.BlogPost;
+import org.ddth.blogging.Comment;
+import org.ddth.blogging.Entry;
+import org.ddth.blogging.api.BasicBlogAPI;
 
 import redstone.xmlrpc.XmlRpcClient;
 
-public class WordpressBlog extends BasicBlog {
+public class WordpressBlogAPI extends BasicBlogAPI {
 	private static final String WORDPRESS_BLOG_ID = "1";
 
 	// XML-RPC methods are supported by Wordpress  
@@ -42,7 +42,6 @@ public class WordpressBlog extends BasicBlog {
 			Object[] params = new Object[] { WORDPRESS_BLOG_ID, getAuthor(), getPassword(), map};
 			Object value = client.invoke(WP_NEW_CATEGORY_METHOD_NAME, params);
 			categoryId = Integer.parseInt(value.toString());
-			System.out.println(categoryId);
 		}
 		catch (Exception e) {
 			e.printStackTrace();
@@ -50,16 +49,16 @@ public class WordpressBlog extends BasicBlog {
 		return categoryId;
 	}
 	
-	public boolean createEntry(BlogPost entry) {
+	public boolean createEntry(Entry entry) {
 		boolean success = false;
 		try {
 			XmlRpcClient client = new XmlRpcClient(getBlogURL(), true);
 			Map<String, Object> map = new HashMap<String, Object>();
-			map.put("title", entry.getTitle());
-			map.put("description", entry.getContent());
+			map.put("title", entry.getPost().getTitle());
+			map.put("description", entry.getPost().getContent());
 			map.put("categories", new String[] {category});
-			map.put("mt_keywords", entry.getTags());
-			map.put("dateCreated", entry.getDate());
+			map.put("mt_keywords", entry.getPost().getTags());
+			map.put("dateCreated", entry.getPost().getDate());
 
 			Object[] params = new Object[] { WORDPRESS_BLOG_ID, getAuthor(), getPassword(), map, publish };
 
@@ -75,7 +74,7 @@ public class WordpressBlog extends BasicBlog {
 		return success;
 	}
 
-	public boolean createComment(BlogComment comment) {
+	public boolean createComment(Comment comment) {
 		throw new UnsupportedOperationException("Unsupported operation");
 	}
 }

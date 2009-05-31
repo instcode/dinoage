@@ -11,21 +11,20 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.TimeZone;
 
-import org.ddth.blogging.BasicBlog;
-import org.ddth.blogging.BlogComment;
-import org.ddth.blogging.BlogPost;
+import org.ddth.blogging.Comment;
+import org.ddth.blogging.Entry;
+import org.ddth.blogging.api.BasicBlogAPI;
 
 import com.google.gdata.client.GoogleService;
 import com.google.gdata.data.Category;
 import com.google.gdata.data.DateTime;
-import com.google.gdata.data.Entry;
 import com.google.gdata.data.Feed;
 import com.google.gdata.data.Person;
 import com.google.gdata.data.PlainTextConstruct;
 import com.google.gdata.util.AuthenticationException;
 import com.google.gdata.util.ServiceException;
 
-public class Blogger extends BasicBlog {
+public class BloggerAPI extends BasicBlogAPI {
 	private static final String BLOGGER_POST_AUTHOR = "Post author";
 	private static final String URI_BLOGGER_NAMESPACE = "http://www.blogger.com/atom/ns#";
 	private static final String METAFEED_URL = "http://www.blogger.com/feeds/default/blogs";
@@ -62,26 +61,26 @@ public class Blogger extends BasicBlog {
 
 		// If the user has a blog then return the id (which comes after 'blog-')
 		if (resultFeed.getEntries().size() > 0) {
-			Entry entry = resultFeed.getEntries().get(0);
+			com.google.gdata.data.Entry entry = resultFeed.getEntries().get(0);
 			return entry.getId().split("blog-")[1];
 		}
 		throw new IOException("User has no blogs!");
 	}
 
-	public boolean createEntry(BlogPost entry) {
+	public boolean createEntry(Entry entry) {
 		boolean success = false; 
-		Entry blogEntry = new Entry();
-		blogEntry.setTitle(new PlainTextConstruct(entry.getTitle()));
-		blogEntry.setContent(new PlainTextConstruct(entry.getContent()));
+		com.google.gdata.data.Entry blogEntry = new com.google.gdata.data.Entry();
+		blogEntry.setTitle(new PlainTextConstruct(entry.getPost().getTitle()));
+		blogEntry.setContent(new PlainTextConstruct(entry.getPost().getContent()));
 		blogEntry.setDraft(isDraft);
-		blogEntry.setPublished(new DateTime(entry.getDate(), TimeZone.getDefault()));
+		blogEntry.setPublished(new DateTime(entry.getPost().getDate(), TimeZone.getDefault()));
 		
 		Person author = new Person(BLOGGER_POST_AUTHOR, null, getAuthor());
 		blogEntry.getAuthors().add(author);
 		
 		Category category = new Category();
 		category.setScheme(URI_BLOGGER_NAMESPACE);
-		category.setTerm(entry.getTags());
+		category.setTerm(entry.getPost().getTags());
 		blogEntry.getCategories().add(category);
 		
 		// Ask the service to insert the new entry
@@ -100,14 +99,14 @@ public class Blogger extends BasicBlog {
 		return success;
 	}
 
-	public boolean createComment(BlogComment comment) {
+	public boolean createComment(Comment comment) {
 		// Build the comment feed URI
 		String commentsFeedUri = getBlogURL() + "/" + comment.getPostId() + COMMENTS_FEED_URI_SUFFIX;
 		boolean success = false;
 		try {
 			URL feedUrl = new URL(commentsFeedUri);
 			// Create a new entry for the comment and submit it to the GoogleService
-			Entry entry = new Entry();
+			com.google.gdata.data.Entry entry = new com.google.gdata.data.Entry();
 			entry.setContent(new PlainTextConstruct(comment.getContent()));
 			if (service.insert(feedUrl, entry) != null) {
 				success = true;

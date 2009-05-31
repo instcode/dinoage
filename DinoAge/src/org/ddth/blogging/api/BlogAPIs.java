@@ -5,39 +5,41 @@
  * $Author:: khoanguyen                           $
  * $Comment::                                      $
  **************************************************/
-package org.ddth.blogging;
+package org.ddth.blogging.api;
 
 import java.util.HashMap;
 import java.util.Map;
 
-import org.ddth.blogging.google.Blogger;
-import org.ddth.blogging.wordpress.WordpressBlog;
+import org.ddth.blogging.google.BloggerAPI;
+import org.ddth.blogging.wordpress.WordpressBlogAPI;
 
-public class BlogProvider {
+public class BlogAPIs {
 	public static final String BLOG_TYPE_BLOGGER = "blogger";
 	public static final String BLOG_TYPE_WORDPRESS = "wordpress";
+	public static final String BLOG_TYPE_OPERA = "opera";
+	public static final String BLOG_TYPE_FACEBOOK = "facebook";
 	
-	private static BlogProvider instance;
+	private static BlogAPIs instance;
 	private Map<String, Class<?>> blogs = new HashMap<String, Class<?>>();
 
-	public static BlogProvider getInstance() {
+	public static BlogAPIs getInstance() {
 		if (instance == null) {
-			instance = new BlogProvider();
-			instance.registerBlog(BLOG_TYPE_WORDPRESS, WordpressBlog.class);
-			instance.registerBlog(BLOG_TYPE_BLOGGER, Blogger.class);
+			instance = new BlogAPIs();
+			instance.registerBlogAPI(BLOG_TYPE_WORDPRESS, WordpressBlogAPI.class);
+			instance.registerBlogAPI(BLOG_TYPE_BLOGGER, BloggerAPI.class);
 		}
 		return instance;
 	}
 	
-	public void registerBlog(String blogType, Class<?> clazz) {
+	public void registerBlogAPI(String blogType, Class<?> clazz) {
 		blogs.put(blogType, clazz);
 	}
 	
-	public Blog createBlog(String blogType) {
+	public BlogAPI createBlogAPI(String blogType) {
 		try {
 			Class<?> clazz = blogs.get(blogType);
 			if (clazz != null) {
-				return (Blog) clazz.newInstance();
+				return (BlogAPI) clazz.newInstance();
 			}
 		}
 		catch (InstantiationException e) {

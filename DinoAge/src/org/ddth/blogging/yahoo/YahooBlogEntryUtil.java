@@ -27,7 +27,7 @@ import javax.xml.xpath.XPathFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ddth.blogging.Author;
-import org.ddth.blogging.BlogComment;
+import org.ddth.blogging.Comment;
 import org.ddth.blogging.BlogPost;
 import org.ddth.dinoage.grabber.yahoo.YBrowsingSession;
 import org.ddth.dinoage.grabber.yahoo.handler.YahooBlogContentHandler;
@@ -194,7 +194,7 @@ public class YahooBlogEntryUtil {
 				int spamCount = 0;
 
 				for (int i = 0; i < comments.getLength(); i++) {
-					BlogComment blogComment = parseComment(authors.item(i), comments.item(i));
+					Comment blogComment = parseComment(authors.item(i), comments.item(i));
 					if (spammer.equals(blogComment.getAuthor().getName())) {
 						spamCount++;
 						if (!spamContent.equals(blogComment.getContent())) {
@@ -246,7 +246,7 @@ public class YahooBlogEntryUtil {
 				buffer.append(node.getNodeValue()).append((i < length - 1) ? ", " : "");
 			}
 		}
-		blogPost.setPostId(postId);
+		blogPost.setPostId(Long.parseLong(postId));
 		blogPost.setTitle(title);
 		blogPost.setTags(buffer.toString());
 		blogPost.setContent(getRawText(body));
@@ -254,7 +254,7 @@ public class YahooBlogEntryUtil {
 		return blogPost;
 	}
 
-	private static BlogComment parseComment(Node author, Node comment) throws ParseException {
+	private static Comment parseComment(Node author, Node comment) throws ParseException {
 		String text = YahooBlogKey.COMMENTS_COMMENT_TEXT.getText(comment);
 		String time = YahooBlogKey.COMMENTS_COMMENT_DATE.getText(comment);
 
@@ -267,9 +267,7 @@ public class YahooBlogEntryUtil {
 			author_photo = photo;
 		}
 		
-		BlogComment blogComment = new BlogComment(new Author(author_name, author_url, author_photo), text);
-		blogComment.setDate(BLOG_DATE_FORMAT.parse(time));
-		return blogComment;
+		return new Comment(new Author("", author_name, author_url, author_photo), text, BLOG_DATE_FORMAT.parse(time));
 	}
 	
 	private static String getRawText(Node node) {
@@ -301,8 +299,8 @@ public class YahooBlogEntryUtil {
 				"\nBody: " + post.getContent() +
 				"\nTags: " + post.getTags() +
 				"\nDate: " + post.getDate());
-		List<BlogComment> comments = entry.getComments();
-		for (BlogComment comment : comments) {
+		List<Comment> comments = entry.getComments();
+		for (Comment comment : comments) {
 			logger.debug(comment);
 		}
 	}
