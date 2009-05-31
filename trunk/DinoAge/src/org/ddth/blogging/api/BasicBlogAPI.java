@@ -5,9 +5,9 @@
  * $Author:: khoanguyen                           $
  * $Comment::                                      $
  **************************************************/
-package org.ddth.blogging;
+package org.ddth.blogging.api;
 
-public abstract class BasicBlog implements Blog {
+public abstract class BasicBlogAPI implements BlogAPI {
 
 	private String author;
 	private String password;

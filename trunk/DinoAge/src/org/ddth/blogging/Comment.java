@@ -7,12 +7,15 @@
  **************************************************/
 package org.ddth.blogging;
 
+import java.util.Date;
+
 public class Comment extends Post {
 	private long commentId;
 	
-	public Comment(Author author, String content) {
+	public Comment(Author author, String content, Date date) {
 		setAuthor(author);
 		setContent(content);
+		setDate(date);
 	}
 
 	public long getCommentId() {

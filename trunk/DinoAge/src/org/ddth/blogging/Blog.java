@@ -12,18 +12,18 @@ import java.util.List;
 
 public class Blog {
 
-	private int blogId;
+	private String blogId;
 	private List<Author> authors = new ArrayList<Author>();
 	private String title;
 	private String url;
 	private String description;
 	private List<Entry> entries = new ArrayList<Entry>();
 
-	public int getBlogId() {
+	public String getBlogId() {
 		return blogId;
 	}
 	
-	public void setBlogId(int blogId) {
+	public void setBlogId(String blogId) {
 		this.blogId = blogId;
 	}
 	

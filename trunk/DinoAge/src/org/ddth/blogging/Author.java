@@ -1,3 +1,10 @@
+/****************************************************
+ * $Project: DinoAge
+ * $Date:: Mar 21, 2008
+ * $Revision: 
+ * $Author:: khoanguyen
+ * $Comment::
+ **************************************************/
 package org.ddth.blogging;
 
 public class Author {
