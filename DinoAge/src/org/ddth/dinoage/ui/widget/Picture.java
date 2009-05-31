@@ -1,3 +1,10 @@
+/****************************************************
+ * $Project: DinoAge                     $
+ * $Date:: Jan 5, 2008 11:48:11 AM                  $
+ * $Revision: $	
+ * $Author:: khoanguyen                           $
+ * $Comment::                                      $
+ **************************************************/
 package org.ddth.dinoage.ui.widget;
 
 import org.eclipse.swt.events.PaintEvent;

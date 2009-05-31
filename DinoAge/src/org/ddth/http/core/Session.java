@@ -38,6 +38,11 @@ public interface Session {
 	public abstract void start();
 
 	/**
+	 * Restore previous session
+	 */
+	public abstract void restore();
+
+	/**
 	 * Shutdown the session. No more queue put/poll until next {@link #start()}.
 	 */
 	public abstract void shutdown();
@@ -49,5 +54,10 @@ public interface Session {
 	 * 		true if the session is actually running :D
 	 */
 	public abstract boolean isRunning();
-
+	
+	/**
+	 * Check if the session is resumable.
+	 * @return
+	 */
+	public abstract boolean isRestorable();
 }

@@ -9,22 +9,29 @@ package org.ddth.dinoage.grabber.yahoo;
 
 import java.util.Properties;
 
-import org.ddth.blogging.yahoo.YahooBlog;
-import org.ddth.dinoage.model.Profile;
+import org.ddth.blogging.Blog;
+import org.ddth.blogging.Comment;
+import org.ddth.blogging.Entry;
+import org.ddth.blogging.yahoo.YahooBlogAPI;
+import org.ddth.dinoage.data.DataManager;
+import org.ddth.dinoage.grabber.SessionProfile;
 
-public class YahooProfile extends Profile {
+public class YahooProfile extends SessionProfile {
 	
 	private static final String PROFILE_URLS_BEGINNING = "profile.urls.beginning";
 	
 	private String profileId;
 	private String beginningURL;
 	private boolean isNewlyCreated = true;
+
+	private DataManager manager = new DataManager();
+	private Blog blog;
 	
 	@Override
 	public void setProfileURL(String profileURL) {
 		super.setProfileURL(profileURL);
 		this.profileId = getProfileId(getProfileURL());
-		this.beginningURL = YahooBlog.YAHOO_360_BLOG_URL + getProfileId();
+		this.beginningURL = YahooBlogAPI.YAHOO_360_BLOG_URL + profileId;
 	}
 
 	@Override
@@ -44,10 +51,6 @@ public class YahooProfile extends Profile {
 	public boolean isNewlyCreated() {
 		return isNewlyCreated;
 	}
-	
-	public String getProfileId() {
-		return profileId;
-	}
 
 	public String getBeginningURL() {
 		return beginningURL;
@@ -55,7 +58,7 @@ public class YahooProfile extends Profile {
 	
 	public void saveURL(String url) {
 		if (url == null) {
-			beginningURL = YahooBlog.YAHOO_360_BLOG_URL + getProfileId();
+			beginningURL = YahooBlogAPI.YAHOO_360_BLOG_URL + profileId;
 			return;
 		}
 		beginningURL = url;
@@ -63,9 +66,22 @@ public class YahooProfile extends Profile {
 	}
 	
 	private final String getProfileId(String profileURL) {
-		int begin = YahooBlog.YAHOO_360_PROFILE_URL.length();
+		int begin = YahooBlogAPI.YAHOO_360_PROFILE_URL.length();
 		int end = profileURL.indexOf("?", begin);
 		end = (end < 0) ? profileURL.length() : end;
 		return end <= begin ? "" : profileURL.substring(begin, end);
+	}
+	
+	public void saveBlog(Blog blog) {
+		this.blog = blog;
+		manager.createAuthor(blog.getAuthors().get(0));
+		manager.createBlog(blog);
+	}
+	
+	public void saveEntry(Entry entry) {
+		manager.createEntry(blog.getBlogId(), entry);
+		for (Comment comment : entry.getComments()) {
+			manager.createComment(entry.getEntryId(), comment);
+		}
 	}
 }

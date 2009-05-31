@@ -14,29 +14,22 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.ddth.dinoage.grabber.BrowsingSession;
 import org.ddth.dinoage.grabber.yahoo.YBrowsingSession;
-import org.ddth.dinoage.grabber.yahoo.handler.YBlogEntryContentHandler;
-import org.ddth.dinoage.grabber.yahoo.handler.YEntryListContentHandler;
 import org.ddth.dinoage.model.Profile;
 import org.ddth.dinoage.model.Workspace;
 import org.ddth.dinoage.model.WorkspaceManager;
 import org.ddth.dinoage.ui.DinoAgeWindow;
 import org.ddth.dinoage.ui.widget.ChooseWorkspaceDlg;
 import org.ddth.http.core.Session;
-import org.ddth.http.core.content.handler.ContentHandlerDispatcher;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Shell;
 
 public class DinoAge {
-	private static final String CONFIG_FILE_PATH = "dinoage.conf";
-	
 	private Log logger = LogFactory.getLog(DinoAge.class);
 	private List<Session> sessions = new CopyOnWriteArrayList<Session>();
-	private DinoAgeSettings settings;
 	private Workspace workspace;
 	private DinoAgeWindow mainWindow;
-
-	private ContentHandlerDispatcher dispatcher;
 
 	public static final void main(String[] args) {
 		ResourceManager.createResources();
@@ -46,18 +39,10 @@ public class DinoAge {
  	}
 
 	private void run() {
-		settings = new DinoAgeSettings(CONFIG_FILE_PATH);
-		try {
-			settings.loadConfiguration();
-		}
-		catch (IOException e) {
-		}
-		
 		if (!chooseWorkspace()) {
 			System.exit(0);
 		}
 		
-		dispatcher = createDispatcher();
 		mainWindow = new DinoAgeWindow(this);
 		mainWindow.open();
 	}
@@ -77,12 +62,9 @@ public class DinoAge {
 		for (Session session : sessions) {
 			session.shutdown();
 		}
+		sessions.clear();
 	}
 	
-	public ContentHandlerDispatcher getDispatcher() {
-		return dispatcher;
-	}
-
 	public Workspace getWorkspace() {
 		return workspace;
 	}
@@ -91,13 +73,6 @@ public class DinoAge {
 		return mainWindow;
 	}
 	
-	private ContentHandlerDispatcher createDispatcher() {
-		ContentHandlerDispatcher dispatcher = new ContentHandlerDispatcher();
-		dispatcher.registerHandler("http://.*/blog-.*\\?.*p=(\\d+).*", new YBlogEntryContentHandler());
-		dispatcher.registerHandler("http://.*/blog-[^?]*", new YEntryListContentHandler());
-		return dispatcher;
-	}
-
 	public boolean chooseWorkspace() {
 		return chooseWorkspace(null);
 	}
@@ -112,17 +87,17 @@ public class DinoAge {
 	public boolean chooseWorkspace(Shell parent) {
 		boolean success = false;
 		try {
-			String recentWorkspaces = settings.getRecentWorkspaces();
+			String recentWorkspaces = DinoAgeSettings.getInstance().getRecentWorkspaces();
 			WorkspaceManager workspaces = new WorkspaceManager();
 			workspaces.setRecentWorkspaces(recentWorkspaces);
 			ChooseWorkspaceDlg dlg = new ChooseWorkspaceDlg(parent, workspaces);
 			if (dlg.open() == SWT.OK) {
-				settings.setRecentWorkspaces(workspaces.getRecentWorkspaces());
-				settings.saveConfiguration();
+				DinoAgeSettings.getInstance().setRecentWorkspaces(workspaces.getRecentWorkspaces());
+				DinoAgeSettings.getInstance().saveConfiguration();
 				if (workspace != null) {
 					workspace.closeWorkspace();
 				}
-				workspace = new Workspace(new File(workspaces.getSelection()), new DinoAgeProfileLoader());
+				workspace = new Workspace(new File(workspaces.getSelection()), new YBrowsingSession.YProfileLoader());
 				workspace.loadWorkspace();
 				success = true;
 			}
@@ -133,11 +108,9 @@ public class DinoAge {
 		return success;
 	}
 
-	public YBrowsingSession createSession(String profileName) {
-		Profile profile = getWorkspace().getProfile(profileName);
-		//FIXME It's better to lookup an existing session other than create/add a new one
-		YBrowsingSession session = (profile == null) ? null : new YBrowsingSession(
-				profile, getWorkspace(), getDispatcher());
+	public BrowsingSession createSession(Profile profile) {
+		//FIXME It's better to lookup an existing session other than to create/add a new one
+		BrowsingSession session = (profile == null) ? null : new YBrowsingSession(profile, getWorkspace());
 		session.registerConnectionListener(getMainWindow());
 		sessions.add(session);
 		return session;
