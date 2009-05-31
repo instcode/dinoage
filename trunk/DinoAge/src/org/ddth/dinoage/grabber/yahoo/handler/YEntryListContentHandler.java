@@ -8,9 +8,9 @@
 package org.ddth.dinoage.grabber.yahoo.handler;
 
 import org.ddth.blogging.yahoo.YahooBlogEntryUtil;
+import org.ddth.dinoage.grabber.yahoo.YBlogContent;
 import org.ddth.http.core.content.Content;
 import org.ddth.http.impl.content.DomTreeContent;
-import org.ddth.http.impl.content.NavigationContent;
 import org.w3c.dom.Document;
 
 public class YEntryListContentHandler extends YahooBlogContentHandler {
@@ -20,8 +20,8 @@ public class YEntryListContentHandler extends YahooBlogContentHandler {
 		DomTreeContent domTreeContent = (DomTreeContent) super.handle(content);
 		Document doc = domTreeContent.getDocument();
 		String firstEntryURL = YahooBlogEntryUtil.parseNavigationLink(doc);
-		NavigationContent navigationContent = new NavigationContent(new String[] { firstEntryURL });
-		navigationContent.setContent(domTreeContent);
-		return navigationContent;
+		YBlogContent yahooBlogContent = new YBlogContent(new String[] { firstEntryURL }, null);
+		yahooBlogContent.setContent(domTreeContent);
+		return yahooBlogContent;
 	}
 }

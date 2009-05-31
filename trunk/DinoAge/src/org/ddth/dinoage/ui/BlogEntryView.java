@@ -1,3 +1,10 @@
+/****************************************************
+ * $Project: DinoAge                     $
+ * $Date:: Jan 5, 2008 11:48:11 AM                  $
+ * $Revision: $	
+ * $Author:: khoanguyen                           $
+ * $Comment::                                      $
+ **************************************************/
 package org.ddth.dinoage.ui;
 
 import java.text.DateFormat;
@@ -113,7 +120,9 @@ public class BlogEntryView extends Composite {
 		});
 
 		for (int i = 0; i < 5; i++) {
-			BlogPost entry = new BlogPost("Blog " + i, "<<Empty>>...");
+			BlogPost entry = new BlogPost();
+			entry.setTitle("Title " + i);
+			entry.setContent("Content " + i);
 			createTableItem(entry);
 		}
 	}

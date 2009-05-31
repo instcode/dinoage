@@ -177,6 +177,10 @@ public class ResourceManager {
 		ResourceManager.BUSY_COLOR.dispose();
 	}
 
+	public static InputStream getDbScriptStream() {
+		String scriptFile = "dinoage_" + DinoAgeSettings.getInstance().getDbType() + ".sql";
+		return ResourceManager.class.getClassLoader().getResourceAsStream(scriptFile);
+	}
 	/**
 	 * Loads an image using a resource name. A new image is returned every time.
 	 * The caller is responsible for disposing of the image when it is no longer

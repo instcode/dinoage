@@ -32,6 +32,13 @@ public class Grabber {
 			protected void content(Content<?> content) {
 				System.out.println("Handle the given content goes here!");
 			}
+
+			public boolean isRestorable() {
+				return false;
+			}
+
+			public void restore() {
+			}
 		};
 		session.start();
 		

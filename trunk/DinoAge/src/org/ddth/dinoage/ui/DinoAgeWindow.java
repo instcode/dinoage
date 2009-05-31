@@ -7,11 +7,12 @@
  **************************************************/
 package org.ddth.dinoage.ui;
 
+import java.io.File;
 import java.util.Collection;
 
 import org.ddth.dinoage.DinoAge;
 import org.ddth.dinoage.ResourceManager;
-import org.ddth.dinoage.grabber.yahoo.YBrowsingSession;
+import org.ddth.dinoage.grabber.BrowsingSession;
 import org.ddth.dinoage.model.Profile;
 import org.ddth.dinoage.model.Workspace;
 import org.ddth.http.core.ConnectionEvent;
@@ -210,11 +211,11 @@ public class DinoAgeWindow implements ConnectionListener {
 			public void modifyText(ModifyEvent arg0) {
 				String profileName = profilesCombo.getText();
 				Profile profile = dinoage.getWorkspace().getProfile(profileName);
-				String sURL = "";
-				String sFolder = "";
+				String url = "";
+				String folder = "";
 				if (profile != null) {
-					sURL = profile.getProfileURL();
-					sFolder = "file:///" + dinoage.getWorkspace().getWorkspaceLocation() + "/" + profileName;
+					url = profile.getProfileURL();
+					folder = "file:///" + dinoage.getWorkspace().getWorkspaceLocation() + "/" + profileName;
 					editProfileButton.setText(ResourceManager.getMessage(
 							ResourceManager.KEY_LABEL_EDIT_ELLIPSIS));
 				}
@@ -223,30 +224,32 @@ public class DinoAgeWindow implements ConnectionListener {
 							ResourceManager.KEY_LABEL_NEW_ELLIPSIS));
 				}
 				profileURLText.setText(
-						ResourceManager.getMessage(ResourceManager.KEY_MESSAGE_FULL_HREF, new String [] {sFolder, sURL}));
+						ResourceManager.getMessage(ResourceManager.KEY_MESSAGE_FULL_HREF, new String [] {folder, url}));
 			}
 		};
 		
 		backupListener = new SelectionAdapter() {
 			public void widgetSelected(final SelectionEvent arg0) {
 				String profileName = profilesCombo.getText();
-				YBrowsingSession session = dinoage.createSession(profileName);
+				Workspace workspace = dinoage.getWorkspace();
+				Profile profile = workspace.getProfile(profileName);
+				BrowsingSession session = dinoage.createSession(profile);
 				if (session == null) {
 					return;
 				}
 				int answer = SWT.YES;
-				if (!session.getProfile().isNewlyCreated()) {
+				if (!session.isRestorable()) {
+					File profileFolder = workspace.getProfileFolder(profile);
 					String message = ResourceManager.getMessage(
 							ResourceManager.KEY_RESUME_RETRIEVING_CONFIRM,
-							new String[] {session.getProfile().getProfileId(), session.getProfile().getProfileName()}
+							new String[] {profile.getProfileName(), profileFolder.getAbsolutePath()}
 					);
 					answer = UniversalUtil.showConfirmDlg(shell, shell.getText(), message);
 				}
-				if (answer == SWT.NO) {
-					session.getProfile().saveURL(null);
-					session.reset();
+				if (answer == SWT.YES) {
+					session.restore();
 				}
-				if (answer != SWT.CANCEL) {
+				else if (answer == SWT.NO) {
 					session.start();
 				}
 				
