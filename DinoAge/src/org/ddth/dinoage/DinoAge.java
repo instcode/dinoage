@@ -17,6 +17,7 @@ import org.apache.commons.logging.LogFactory;
 import org.ddth.dinoage.grabber.BrowsingSession;
 import org.ddth.dinoage.grabber.yahoo.YBrowsingSession;
 import org.ddth.dinoage.model.Profile;
+import org.ddth.dinoage.model.ProfileLoader;
 import org.ddth.dinoage.model.Workspace;
 import org.ddth.dinoage.model.WorkspaceManager;
 import org.ddth.dinoage.ui.DinoAgeWindow;
@@ -30,6 +31,7 @@ public class DinoAge {
 	private List<Session> sessions = new CopyOnWriteArrayList<Session>();
 	private Workspace workspace;
 	private DinoAgeWindow mainWindow;
+	private ProfileLoader profileLoader = new YBrowsingSession.YProfileLoader();
 
 	public static final void main(String[] args) {
 		ResourceManager.createResources();
@@ -38,11 +40,7 @@ public class DinoAge {
 		ResourceManager.disposeResources();
  	}
 
-	private void run() {
-		if (!chooseWorkspace()) {
-			System.exit(0);
-		}
-		
+	public void run() {
 		mainWindow = new DinoAgeWindow(this);
 		mainWindow.open();
 	}
@@ -72,47 +70,76 @@ public class DinoAge {
 	public DinoAgeWindow getMainWindow() {
 		return mainWindow;
 	}
-	
-	public boolean chooseWorkspace() {
-		return chooseWorkspace(null);
-	}
-	
-	/**
-	 * Bring up workspace chooser. Update configuration file after user
-	 * selects a workspace.
-	 * 
-	 * @param parent
-	 * @return
-	 */
-	public boolean chooseWorkspace(Shell parent) {
-		boolean success = false;
-		try {
-			String recentWorkspaces = DinoAgeSettings.getInstance().getRecentWorkspaces();
-			WorkspaceManager workspaces = new WorkspaceManager();
-			workspaces.setRecentWorkspaces(recentWorkspaces);
-			ChooseWorkspaceDlg dlg = new ChooseWorkspaceDlg(parent, workspaces);
-			if (dlg.open() == SWT.OK) {
-				DinoAgeSettings.getInstance().setRecentWorkspaces(workspaces.getRecentWorkspaces());
-				DinoAgeSettings.getInstance().saveConfiguration();
-				if (workspace != null) {
-					workspace.closeWorkspace();
-				}
-				workspace = new Workspace(new File(workspaces.getSelection()), new YBrowsingSession.YProfileLoader());
-				workspace.loadWorkspace();
-				success = true;
-			}
-		}
-		catch (IOException e) {
-			logger.error(e);
-		}
-		return success;
-	}
 
 	public BrowsingSession createSession(Profile profile) {
 		//FIXME It's better to lookup an existing session other than to create/add a new one
-		BrowsingSession session = (profile == null) ? null : new YBrowsingSession(profile, getWorkspace());
+		BrowsingSession session = (profile == null) ? null : new YBrowsingSession(profile, workspace);
 		session.registerConnectionListener(getMainWindow());
 		sessions.add(session);
 		return session;
+	}
+
+	/**
+	 * Select the most recently opened workspace in the given
+	 * {@link WorkspaceManager}. If new workspace is loaded
+	 * successfully, current workspace will be closed. If any
+	 * error happens, the current workspace won't change.<br>
+	 * <br>
+	 * @param workspaces
+	 * @return
+	 * 		<code>true</code> if new workspace is loaded successfully.
+	 */
+	public boolean selectWorkspace(WorkspaceManager workspaces) {
+		// Save current workspace...
+		Workspace currentWorkspace = workspace;
+		try {
+			if (workspaces.getSelection() != null) {
+				workspace = new Workspace(new File(workspaces.getSelection()), profileLoader);
+				workspace.loadWorkspace();
+				return true;
+			}
+		}
+		catch (IOException e) {
+			logger.error("Error when selecting workspace", e);
+			workspace = currentWorkspace;
+			currentWorkspace = null;
+		}
+		finally {
+			// Close current workspace if it's okay
+			if (currentWorkspace != null) {
+				currentWorkspace.closeWorkspace();
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Bring up a Workspace Chooser dialog which doesn't associate with
+	 * any parent window.<br>
+	 * <br> 
+	 * @see #chooseWorkspace(Shell, WorkspaceManager)
+	 */
+	public boolean chooseWorkspace(WorkspaceManager workspaces) {
+		return chooseWorkspace(null, workspaces);
+	}
+	
+	/**
+	 * Show Workspace Chooser dialog and preinitialize recent workspaces
+	 * by using the given {@link WorkspaceManager} information.<br>
+	 * <br>
+	 * @param parent A parent shell of this dialog
+	 * @param workspaces A manager that contains a list of recently opened
+	 * workspaces.
+	 * @return
+	 * 		<code>true</code> if there is at least one workspace
+	 * loaded successfully. 		
+	 */
+	public boolean chooseWorkspace(Shell parent, WorkspaceManager workspaces) {
+		ChooseWorkspaceDlg dlg = new ChooseWorkspaceDlg(parent, workspaces);
+		boolean success = false;
+		if (dlg.open() == SWT.OK) {
+			success = selectWorkspace(workspaces);
+		}
+		return success;
 	}
 }

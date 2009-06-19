@@ -16,13 +16,15 @@ import java.io.OutputStream;
 import java.util.Properties;
 
 public class DinoAgeSettings {
-	private static final String PROPERTY_WORKSPACE_RECENTS = "workspace.recents";
-	private static final String PROPERTY_WORKSPACE_LOAD_PROFILES = "workspace.profile.load";
-	private static final String PROPERTY_DB_TYPE = "db.type";
-	private static final String PROPERTY_DB_JDBC_DRIVER = "db.jdbc";
-	private static final String PROPERTY_DB_CONNECTION_URL = "db.url";
-	private static final String PROPERTY_DB_USERNAME = "db.username";
-	private static final String PROPERTY_DB_PASSWORD = "db.password";
+	public static final String PROPERTY_WORKSPACE_RECENTS = "workspace.recents";
+	public static final String PROPERTY_WORKSPACE_SHOW_CHOOSER_DIALOG = "workspace.chooser";
+	public static final String PROPERTY_WORKSPACE_LOAD_PROFILES = "workspace.profile.load";
+	
+	public static final String PROPERTY_DB_TYPE = "db.type";
+	public static final String PROPERTY_DB_JDBC_DRIVER = "db.jdbc";
+	public static final String PROPERTY_DB_CONNECTION_URL = "db.url";
+	public static final String PROPERTY_DB_USERNAME = "db.username";
+	public static final String PROPERTY_DB_PASSWORD = "db.password";
 
 	private static final String DEFAULT_DB_TYPE = "derby";
 	private static final String DEFAULT_DB_JDBC_DRIVER = "org.apache.derby.jdbc.EmbeddedDriver";
