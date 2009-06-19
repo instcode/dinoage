@@ -9,6 +9,7 @@ package org.ddth.dinoage.ui;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 
@@ -29,9 +30,14 @@ public class UniversalUtil {
 	}
 	
 	public static void centerWindow(Shell shell) {
+		Composite parent = shell.getParent();
 		Rectangle displayBounds = shell.getDisplay().getBounds();
-		int nLeft = (displayBounds.width - shell.getSize().x) / 2;
-		int nTop = (displayBounds.height - shell.getSize().y) / 2;
+		if (parent != null) {
+			displayBounds = parent.getBounds();
+		}
+		
+		int nLeft = displayBounds.x + (displayBounds.width - shell.getSize().x) / 2;
+		int nTop = displayBounds.y + (displayBounds.height - shell.getSize().y) / 2;
 		shell.setBounds(nLeft, nTop, shell.getSize().x, shell.getSize().y);
 	}
 }

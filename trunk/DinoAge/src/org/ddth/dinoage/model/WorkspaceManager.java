@@ -19,7 +19,7 @@ public class WorkspaceManager {
 	private String[] workspaces;
 	private String selection;
 
-	public void setRecentWorkspaces(String recentWorkspaces) {
+	public WorkspaceManager(String recentWorkspaces) {
 		StringTokenizer tokenizer = new StringTokenizer(recentWorkspaces, WORKSPACE_SEPARATOR);
 		List<String> workspaces = new ArrayList<String>();
 		while (tokenizer.hasMoreElements()) {

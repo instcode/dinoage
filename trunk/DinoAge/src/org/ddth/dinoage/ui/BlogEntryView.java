@@ -8,9 +8,9 @@
 package org.ddth.dinoage.ui;
 
 import java.text.DateFormat;
-import java.util.Date;
 
-import org.ddth.blogging.BlogPost;
+import org.ddth.blogging.Entry;
+import org.ddth.dinoage.eclipse.ui.providers.BlogModel;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
@@ -28,16 +28,15 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 
 public class BlogEntryView extends Composite {
-	public enum BlogEntryData {
+	public enum BlogEntryColumn {
 		CHECK("", 30),
 		ENTRY("Entry", 400),
-		DATE("Date", 120),
-		PROFILE("Profile", 80);
+		DATE("Date", 120);
 
 		private String name;
 		private int width;
 
-		private BlogEntryData(String name, int width) {
+		private BlogEntryColumn(String name, int width) {
 			this.name = name;
 			this.width = width;
 		}
@@ -58,8 +57,15 @@ public class BlogEntryView extends Composite {
 		setLayout(new FillLayout());
 		createTable();
 		createTableMenu();
+		setModel(new BlogModel());
 	}
 
+	public void setModel(BlogModel model) {
+		for (Entry entry : model.getEntries()) {
+			createTableItem(entry);
+		}
+	}
+	
 	/**
 	 * Creates the table. A table is used to show individual files and folders
 	 * within a directory. The table is created with columns for the file and
@@ -72,7 +78,7 @@ public class BlogEntryView extends Composite {
 		m_table.setHeaderVisible(true);
 
 		/* Create the columns */
-		for (BlogEntryData data : BlogEntryData.values()) {
+		for (BlogEntryColumn data : BlogEntryColumn.values()) {
 			final TableColumn column = new TableColumn(m_table, SWT.CENTER);
 			column.setText(data.name);
 			column.setWidth(data.width);
@@ -118,13 +124,6 @@ public class BlogEntryView extends Composite {
 				}
 			}
 		});
-
-		for (int i = 0; i < 5; i++) {
-			BlogPost entry = new BlogPost();
-			entry.setTitle("Title " + i);
-			entry.setContent("Content " + i);
-			createTableItem(entry);
-		}
 	}
 
 	/**
@@ -135,18 +134,17 @@ public class BlogEntryView extends Composite {
 	 *            the file to provide data for the item
 	 * @return the new table item
 	 */
-	public TableItem createTableItem(BlogPost entry) {
+	public TableItem createTableItem(Entry entry) {
 		if (getShell().isDisposed())
 			return null;
 		TableItem item = new TableItem(m_table, SWT.NULL);
 		item.setData(entry);
-		item.setText(BlogEntryData.CHECK.index(), "");
-		item.setText(BlogEntryData.ENTRY.index(), entry.getTitle());
-		item.setText(BlogEntryData.PROFILE.index(), "instcode");
+		item.setText(BlogEntryColumn.CHECK.index(), "");
+		item.setText(BlogEntryColumn.ENTRY.index(), entry.getPost().getTitle());
 
 		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.MEDIUM);
-		String date = dateFormat.format(new Date());
-		item.setText(BlogEntryData.DATE.index(), date);
+		String date = dateFormat.format(entry.getPost().getDate());
+		item.setText(BlogEntryColumn.DATE.index(), date);
 
 		return item;
 	}

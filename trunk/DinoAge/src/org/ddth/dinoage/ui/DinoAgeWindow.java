@@ -11,10 +11,12 @@ import java.io.File;
 import java.util.Collection;
 
 import org.ddth.dinoage.DinoAge;
+import org.ddth.dinoage.DinoAgeSettings;
 import org.ddth.dinoage.ResourceManager;
 import org.ddth.dinoage.grabber.BrowsingSession;
 import org.ddth.dinoage.model.Profile;
 import org.ddth.dinoage.model.Workspace;
+import org.ddth.dinoage.model.WorkspaceManager;
 import org.ddth.http.core.ConnectionEvent;
 import org.ddth.http.core.ConnectionListener;
 import org.eclipse.swt.SWT;
@@ -161,7 +163,8 @@ public class DinoAgeWindow implements ConnectionListener {
 		
 		switchWorkspaceListener = new SelectionAdapter() {
 			public void widgetSelected(final SelectionEvent arg0) {
-				if (dinoage.chooseWorkspace(shell)) {
+				WorkspaceManager workspaces = new WorkspaceManager(DinoAgeSettings.getInstance().getRecentWorkspaces());
+				if (dinoage.chooseWorkspace(workspaces)) {
 					initializeValues();
 				}
 			}

@@ -27,8 +27,8 @@ import javax.xml.xpath.XPathFactory;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ddth.blogging.Author;
-import org.ddth.blogging.Comment;
 import org.ddth.blogging.BlogPost;
+import org.ddth.blogging.Comment;
 import org.ddth.dinoage.grabber.yahoo.YBrowsingSession;
 import org.ddth.dinoage.grabber.yahoo.handler.YahooBlogContentHandler;
 import org.ddth.http.impl.content.DomTreeContent;
@@ -36,8 +36,6 @@ import org.ddth.http.impl.content.WebpageContent;
 import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-
-import com.ibm.icu.text.Normalizer;
 
 public class YahooBlogEntryUtil {
 	private static Log logger = LogFactory.getLog(YBrowsingSession.class);
@@ -232,8 +230,6 @@ public class YahooBlogEntryUtil {
 			postId = matcher.group(1);
 		}
 		String title = YahooBlogKey.BLOG_ENTRY_TITLE.getText(ymglBlog);
-		// For testing purpose
-		Normalizer.normalize(title, Normalizer.NFD);
 		String date = YahooBlogKey.BLOG_ENTRY_CREATED_DATE.getText(ymglBlog);
 		Node body = YahooBlogKey.BLOG_ENTRY_BODY.getNode(ymglBlog);
 		NodeList tags = YahooBlogKey.BLOG_ENTRY_TAGS.getNodeList(ymglBlog);
