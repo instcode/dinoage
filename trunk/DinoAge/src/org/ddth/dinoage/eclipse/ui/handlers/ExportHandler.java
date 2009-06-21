@@ -1,4 +1,4 @@
-package org.ddth.dinoage.eclipse.handler;
+package org.ddth.dinoage.eclipse.ui.handlers;
 
 import java.util.Iterator;
 
@@ -11,7 +11,7 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.handlers.HandlerUtil;
 
-public class Export extends AbstractHandler {
+public class ExportHandler extends AbstractHandler {
 
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		IWorkbenchWindow window = HandlerUtil.getActiveWorkbenchWindow(event);

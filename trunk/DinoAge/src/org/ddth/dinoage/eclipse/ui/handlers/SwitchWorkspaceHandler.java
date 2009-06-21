@@ -1,4 +1,4 @@
-package org.ddth.dinoage.eclipse.handler;
+package org.ddth.dinoage.eclipse.ui.handlers;
 
 import org.ddth.dinoage.DinoAge;
 import org.ddth.dinoage.DinoAgeSettings;

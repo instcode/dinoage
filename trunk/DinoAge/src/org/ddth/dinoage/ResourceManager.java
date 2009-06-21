@@ -7,18 +7,9 @@
  **************************************************/
 package org.ddth.dinoage;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.text.MessageFormat;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
-
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.SWTException;
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Cursor;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.widgets.Display;
 
 public class ResourceManager {
 	public static final String KEY_PRODUCT_NAME = "DinoAge";
@@ -49,11 +40,11 @@ public class ResourceManager {
 	public static final String KEY_MESSAGE_READY_HREF = "Ready!";
 	public static final String KEY_MESSAGE_REQUESTING_HREF = "<a href=\"{0}\">{1}... Requesting...</a>";
 	public static final String KEY_MESSAGE_DONE_HREF = "<a href=\"{0}\">{1}... Done!</a>";
-	public static final String KEY_LABEL_Y360_PROFILE = "Y360 Profile URL";
+	public static final String KEY_LABEL_PROFILE_URL = "Profile URL";
 	public static final String KEY_WAIT_FOR_STOPPING = "Waiting for the current request to finish...";
 	public static final String KEY_LABEL_GUESTBOOK = "Backup all Yahoo 360 guestbooks";
 	public static final String KEY_LABEL_BLOG_ENTRY = "Backup all Yahoo 360 entries";
-	public static final String KEY_BACKUP_SETTINGS_DIALOG_TITLE = "Backup Settings";
+	public static final String KEY_PROFILE_DIALOG_TITLE = "Profile";
 	public static final String KEY_READ_WARNING_CONFIRM_MESSAGE = "I warned you already, ok!!??";
 	public static final String KEY_DUPLICATE_PROFILE_NAME_DETECTED_MESSAGE =
 		"The profile you entered is already existed in {0} workspace. If you\n" +
@@ -132,12 +123,7 @@ public class ResourceManager {
 	public static final String KEY_LABEL_SHOW_WINDOW = "Show";
 	public static final String KEY_LABEL_EXIT = "Exit";
 	
-	public static ResourceBundle resources;
-
-	public static Color BUSY_COLOR;
-	public static Cursor WAIT_CURSOR;
-	public static Cursor BUSY_CURSOR;
-	public static Image EXPORT_ICON;
+	private static ResourceBundle resources;
 
 	static {
 		try {
@@ -146,74 +132,6 @@ public class ResourceManager {
 		catch (MissingResourceException e) {
 			// Empty
 		}
-	}
-
-	/**
-	 * Creates all of the default images, cursors and colors used within the program.
-	 * 
-	 * @param display
-	 *            the display where the images are created
-	 */
-	public static void createResources() {
-		Display display = Display.getDefault();
-		Class<?> clazz = ResourceManager.class;
-		EXPORT_ICON = ResourceManager.loadImage(display, clazz, "export.gif");
-		
-		WAIT_CURSOR = new Cursor(display, SWT.CURSOR_WAIT);
-		BUSY_CURSOR = new Cursor(display, SWT.CURSOR_APPSTARTING);
-		
-		BUSY_COLOR = display.getSystemColor(SWT.COLOR_DARK_GRAY);
-	}
-
-	/**
-	 * Disposes all of the default images used within the program.
-	 */
-	public static void disposeResources() {
-		EXPORT_ICON.dispose();
-		
-		ResourceManager.WAIT_CURSOR.dispose();
-		ResourceManager.BUSY_CURSOR.dispose();
-		
-		ResourceManager.BUSY_COLOR.dispose();
-	}
-
-	public static InputStream getDbScriptStream() {
-		String scriptFile = "dinoage_" + DinoAgeSettings.getInstance().getDbType() + ".sql";
-		return ResourceManager.class.getClassLoader().getResourceAsStream(scriptFile);
-	}
-	/**
-	 * Loads an image using a resource name. A new image is returned every time.
-	 * The caller is responsible for disposing of the image when it is no longer
-	 * needed.
-	 * 
-	 * @param display
-	 *            the display where the image is be created
-	 * @param clazz
-	 *            the class that is used to locate the resource
-	 * @param string
-	 *            the name of the resource
-	 * @return the new image
-	 */
-	public static Image loadImage(Display display, Class<?> clazz, String string) {
-		InputStream stream = clazz.getResourceAsStream("/images/" + string);
-		if (stream == null)
-			return null;
-		Image image = null;
-		try {
-			image = new Image(display, stream);
-		}
-		catch (SWTException ex) {
-			// Empty
-		}
-		finally {
-			try {
-				stream.close();
-			}
-			catch (IOException ex) {
-				// Empty
-			}
-		}
-		return image;
 	}
 
 	/**
