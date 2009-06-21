@@ -30,7 +30,12 @@ public class ConnectionManager {
 	public static ConnectionManager getInstance() {
 		return manager;
 	}
-	
+
+	public static InputStream getDbScriptStream() {
+		String scriptFile = "dinoage_" + DinoAgeSettings.getInstance().getDbType() + ".sql";
+		return ResourceManager.class.getClassLoader().getResourceAsStream(scriptFile);
+	}
+
 	private ConnectionManager() {
 		try {
 			Class.forName(DinoAgeSettings.getInstance().getDriverClass())
@@ -39,7 +44,7 @@ public class ConnectionManager {
 					.getInstance().getDbConnectionURL(), DinoAgeSettings
 					.getInstance().getDbUsername(), DinoAgeSettings
 					.getInstance().getDbPassword());
-			executeSQLScript(connection, ResourceManager.getDbScriptStream());
+			executeSQLScript(connection, getDbScriptStream());
 		}
 		catch (Exception e) {
 		}

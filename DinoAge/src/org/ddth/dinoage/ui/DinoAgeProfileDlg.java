@@ -57,7 +57,7 @@ public class DinoAgeProfileDlg extends Dialog {
 	 */
 	public int open() {
 		shell = new Shell(getParent(), SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.CENTER);
-		shell.setText(ResourceManager.getMessage(ResourceManager.KEY_BACKUP_SETTINGS_DIALOG_TITLE));
+		shell.setText(ResourceManager.getMessage(ResourceManager.KEY_PROFILE_DIALOG_TITLE));
 		shell.setLayout(new FillLayout());
 		
 		createListeners();
@@ -129,20 +129,15 @@ public class DinoAgeProfileDlg extends Dialog {
 		layout.numColumns = 3;
 		composite.setLayout(layout);
 
-		final Label label = new Label(composite, SWT.NONE);
-		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, 3, 1));
-		label.setText(ResourceManager.getMessage(
-				ResourceManager.KEY_BACKUP_SETTING_INFORMATION_MESSAGE,
-				new String[] {ResourceManager.KEY_PRODUCT_NAME}));
-
 		final Label profileURLLabel = new Label(composite, SWT.NONE);
 		final GridData gd_profileURLLabel = new GridData(SWT.LEFT, SWT.CENTER, false, true);
 		profileURLLabel.setLayoutData(gd_profileURLLabel);
-		profileURLLabel.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_Y360_PROFILE));
+		profileURLLabel.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_PROFILE_URL));
 
 		profileURLText = new Text(composite, SWT.BORDER);
 		final GridData gd_profileURLText = new GridData(SWT.FILL, SWT.CENTER, true, true, 2, 1);
 		gd_profileURLText.heightHint = 15;
+		gd_profileURLText.widthHint = 300;
 		profileURLText.setLayoutData(gd_profileURLText);
 		profileURLText.addModifyListener(checkModifyListener);
 

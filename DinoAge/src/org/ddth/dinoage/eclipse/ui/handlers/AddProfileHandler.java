@@ -1,4 +1,4 @@
-package org.ddth.dinoage.eclipse.handler;
+package org.ddth.dinoage.eclipse.ui.handlers;
 
 import org.ddth.dinoage.eclipse.Activator;
 import org.ddth.dinoage.model.Workspace;

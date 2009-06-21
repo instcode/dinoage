@@ -165,24 +165,24 @@
    </extension>
    <extension point="org.eclipse.ui.handlers">
    	   <handler
-            class="org.ddth.dinoage.eclipse.handler.SwitchWorkspaceHandler"
+            class="org.ddth.dinoage.eclipse.ui.handlers.SwitchWorkspaceHandler"
             commandId="org.ddth.dinoage.handlers.workspace.switch">
       </handler>
       <handler
-            class="org.ddth.dinoage.eclipse.handler.Export"
+            class="org.ddth.dinoage.eclipse.ui.handlers.ExportHandler"
             commandId="org.ddth.dinoage.handlers.export">
          <enabledWhen>
             <reference
-                  definitionId="org.ddth.ui.editors.blogview">
+                  definitionId="org.ddth.ui.editors.blogview.active">
             </reference>
          </enabledWhen>
       </handler>
       <handler
-            class="org.ddth.dinoage.eclipse.handler.AddProfileHandler"
+            class="org.ddth.dinoage.eclipse.ui.handlers.AddProfileHandler"
             commandId="org.ddth.dinoage.handlers.profile.add">
       </handler>
       <handler
-            class="org.ddth.dinoage.eclipse.handler.RemoveProfileHandler"
+            class="org.ddth.dinoage.eclipse.ui.handlers.RemoveProfileHandler"
             commandId="org.ddth.dinoage.handlers.profile.remove">
          <enabledWhen>
             <reference
@@ -191,10 +191,10 @@
          </enabledWhen>
       </handler>
       <handler
-            class="org.ddth.dinoage.eclipse.handler.ExecuteProfileHandler"
+            class="org.ddth.dinoage.eclipse.ui.handlers.ExecuteProfileHandler"
             commandId="org.ddth.dinoage.handlers.profile.execute">
          <enabledWhen>
-            <reference
+         <reference
                   definitionId="org.ddth.ui.views.profile.selected">
             </reference>
          </enabledWhen>
@@ -210,28 +210,15 @@
    </extension>
    <extension
          point="org.eclipse.core.expressions.definitions">
-      <definition
-            id="org.ddth.ui.editors.blogview">
-         <with
-               variable="activeEditor">
-            <instanceof
-                  value="org.ddth.dinoage.eclipse.ui.editors.BlogViewEditor">
-            </instanceof>
+      <definition id="org.ddth.ui.editors.blogview.active">
+         <with variable="activeEditor">
+            <instanceof value="org.ddth.dinoage.eclipse.ui.editors.BlogViewEditor"/>
          </with>
       </definition>
-      <definition
-            id="org.ddth.ui.views.profile.selected">
-         <or>
-            <with
-                  variable="activeMenuSelection">
-               <count
-                     value="1">
-               </count>
-            </with>
-            <reference
-                  definitionId="org.ddth.ui.editors.blogview">
-            </reference>
-         </or>
+      <definition id="org.ddth.ui.views.profile.selected">
+            <test
+                  property="org.ddth.dinoage.viewer.profileSelected">
+            </test>
       </definition>
    </extension>
    
@@ -239,5 +226,15 @@
       <initializer
             class="org.ddth.dinoage.eclipse.PreferenceInitializer">
       </initializer>
+   </extension>
+      <extension
+         point="org.eclipse.core.expressions.propertyTesters">
+      <propertyTester
+            class="org.ddth.dinoage.eclipse.ui.views.ProfileSelectionPropertyTester"
+            id="org.ddth.dinoage.viewer.PropertyTest"
+            namespace="org.ddth.dinoage.viewer"
+            properties="profileSelected"
+            type="java.lang.Object">
+      </propertyTester>
    </extension>
 </plugin>

@@ -1,4 +1,4 @@
-package org.ddth.dinoage.eclipse.handler;
+package org.ddth.dinoage.eclipse.ui.handlers;
 
 import java.util.Iterator;
 

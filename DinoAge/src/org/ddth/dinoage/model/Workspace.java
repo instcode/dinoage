@@ -22,10 +22,11 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
 public class Workspace {
+	private static final Log logger = LogFactory.getLog(Workspace.class);
+	
 	private static final String LOCK_FILE = ".lock";
 	private static final String PROFILE_FILE_NAME = ".profile";
 		
-	private static final Log logger = LogFactory.getLog(Workspace.class);
 	private Map<String, Profile> map = new HashMap<String, Profile>();
 	private File workspaceFolder;
 	private FileLock lock;

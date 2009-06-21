@@ -20,7 +20,6 @@ import org.ddth.dinoage.model.Profile;
 import org.ddth.dinoage.model.ProfileLoader;
 import org.ddth.dinoage.model.Workspace;
 import org.ddth.dinoage.model.WorkspaceManager;
-import org.ddth.dinoage.ui.DinoAgeWindow;
 import org.ddth.dinoage.ui.widget.ChooseWorkspaceDlg;
 import org.ddth.http.core.Session;
 import org.eclipse.swt.SWT;
@@ -30,20 +29,7 @@ public class DinoAge {
 	private Log logger = LogFactory.getLog(DinoAge.class);
 	private List<Session> sessions = new CopyOnWriteArrayList<Session>();
 	private Workspace workspace;
-	private DinoAgeWindow mainWindow;
 	private ProfileLoader profileLoader = new YBrowsingSession.YProfileLoader();
-
-	public static final void main(String[] args) {
-		ResourceManager.createResources();
-		DinoAge dinoage = new DinoAge();
-		dinoage.run();
-		ResourceManager.disposeResources();
- 	}
-
-	public void run() {
-		mainWindow = new DinoAgeWindow(this);
-		mainWindow.open();
-	}
 
 	public boolean isRunning() {
 		boolean isRunning = false;
@@ -67,14 +53,9 @@ public class DinoAge {
 		return workspace;
 	}
 
-	public DinoAgeWindow getMainWindow() {
-		return mainWindow;
-	}
-
 	public BrowsingSession createSession(Profile profile) {
 		//FIXME It's better to lookup an existing session other than to create/add a new one
 		BrowsingSession session = (profile == null) ? null : new YBrowsingSession(profile, workspace);
-		session.registerConnectionListener(getMainWindow());
 		sessions.add(session);
 		return session;
 	}
