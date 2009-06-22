@@ -1,4 +1,4 @@
-package org.ddth.dinoage.eclipse.ui.providers;
+package org.ddth.dinoage.eclipse.model;
 
 import java.util.Date;
 import java.util.List;

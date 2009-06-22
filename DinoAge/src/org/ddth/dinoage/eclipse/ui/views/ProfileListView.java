@@ -2,8 +2,7 @@ package org.ddth.dinoage.eclipse.ui.views;
 
 import org.ddth.dinoage.eclipse.ui.editors.BlogViewEditor;
 import org.ddth.dinoage.eclipse.ui.editors.ProfileEditorInput;
-import org.ddth.dinoage.eclipse.ui.providers.ProjectExplorerContentProvider;
-import org.ddth.dinoage.eclipse.ui.providers.ViewLabelProvider;
+import org.ddth.dinoage.eclipse.ui.model.ProjectExplorerContentProvider;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -28,29 +27,10 @@ import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.part.DrillDownAdapter;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.services.IEvaluationService;
-
-
-
-/**
- * This sample class demonstrates how to plug-in a new
- * workbench view. The view shows data obtained from the
- * model. The sample creates a dummy model on the fly,
- * but a real implementation would connect to the model
- * available either in this or another plug-in (e.g. the workspace).
- * The view is connected to the model using a content provider.
- * <p>
- * The view uses a label provider to define how model
- * objects should be presented in the view. Each
- * view can present the same model objects using
- * different labels and icons, if needed. Alternatively,
- * a single label provider can be shared between views
- * in order to ensure that objects of the same type are
- * presented in the same way everywhere.
- * <p>
- */
 
 public class ProfileListView extends ViewPart {
 	public static final String ID = "org.ddth.dinoage.ui.views.profile.list";
@@ -75,7 +55,7 @@ public class ProfileListView extends ViewPart {
 		viewer = new TreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		drillDownAdapter = new DrillDownAdapter(viewer);
 		viewer.setContentProvider(new ProjectExplorerContentProvider());
-		viewer.setLabelProvider(new ViewLabelProvider());
+		viewer.setLabelProvider(new WorkbenchLabelProvider());
 		viewer.setSorter(new ViewerSorter());
 		viewer.setInput(getViewSite());
 		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
@@ -83,7 +63,7 @@ public class ProfileListView extends ViewPart {
 				IEvaluationService service = (IEvaluationService) getSite()
 						.getService(IEvaluationService.class);
 				service
-						.requestEvaluation("org.ddth.dinoage.viewer.profileSelected");
+						.requestEvaluation("org.ddth.dinoage.viewer.selection");
 			}
 		});
 		getSite().setSelectionProvider(viewer);
