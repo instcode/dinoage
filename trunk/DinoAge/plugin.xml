@@ -216,9 +216,12 @@
          </with>
       </definition>
       <definition id="org.ddth.ui.views.profile.selected">
+      <with variable="activeWorkbenchWindow">
             <test
-                  property="org.ddth.dinoage.viewer.profileSelected">
+                  args="org.ddth.dinoage.ui.views.profile.list, org.ddth.dinoage.eclipse.ui.providers.TreeParent"
+                  property="org.ddth.dinoage.viewer.selection">
             </test>
+            </with>
       </definition>
    </extension>
    
@@ -230,11 +233,11 @@
       <extension
          point="org.eclipse.core.expressions.propertyTesters">
       <propertyTester
-            class="org.ddth.dinoage.eclipse.ui.views.ProfileSelectionPropertyTester"
-            id="org.ddth.dinoage.viewer.PropertyTest"
+            class="org.ddth.dinoage.eclipse.ui.views.SelectionPropertyTester"
+            id="org.ddth.dinoage.viewer.selectionPropertyTester"
             namespace="org.ddth.dinoage.viewer"
-            properties="profileSelected"
-            type="java.lang.Object">
+            properties="selection"
+            type="org.eclipse.ui.IWorkbenchWindow">
       </propertyTester>
    </extension>
 </plugin>
