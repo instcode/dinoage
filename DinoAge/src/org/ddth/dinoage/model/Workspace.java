@@ -14,14 +14,16 @@ import java.io.OutputStream;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-public class Workspace {
+public final class Workspace {
 	private static final Log logger = LogFactory.getLog(Workspace.class);
 	
 	private static final String LOCK_FILE = ".lock";
@@ -31,6 +33,7 @@ public class Workspace {
 	private File workspaceFolder;
 	private FileLock lock;
 	private ProfileLoader profileLoader;
+	private List<WorkspaceChangeListener> listeners = new ArrayList<WorkspaceChangeListener>();
 
 	public static final int WORKSPACE_IS_AVAILABLE = 0;
 	public static final int WORKSPACE_IS_INVALID = 1;
@@ -40,7 +43,7 @@ public class Workspace {
 		this.workspaceFolder = workspaceFolder;
 		this.profileLoader = loader;
 	}
-	
+
 	/**
 	 * Check if the given workspace by its path is available for using
 	 *  
@@ -113,9 +116,10 @@ public class Workspace {
 				map.put(profile.getProfileName().toLowerCase(), profile);
 			}
 			catch (Exception e) {
-				logger.debug("'" + directory.getName() + "' directory doesn't appear as a valid profile storage", e);
+				logger.debug("'" + directory.getName() + "' directory doesn't appear as a valid profile storage");
 			}
 		}
+		fireWorkspaceReloaded();
 	}
 	
 	public boolean saveProfile(Profile profile) {
@@ -127,6 +131,7 @@ public class Workspace {
 			File resumeFile = new File(profileFolder, Workspace.PROFILE_FILE_NAME);
 			outputStream = profile.store(resumeFile);
 			map.put(profile.getProfileName().toLowerCase(), profile);
+			fireProfileAdded(profile);
 			success = true;
 		}
 		catch (IOException e) {
@@ -149,10 +154,14 @@ public class Workspace {
 		return new File(workspaceFolder, profile.getProfileName());
 	}
 
-	public Profile removeProfile(String profileName) {
-		File profileFile = new File(new File(workspaceFolder, profileName), Workspace.PROFILE_FILE_NAME);
+	public Profile removeProfile(Profile profile) {
+		File profileFile = new File(new File(workspaceFolder, profile.getProfileName()), Workspace.PROFILE_FILE_NAME);
 		profileFile.delete();
-		return map.remove(profileName.toLowerCase());
+		Profile success = map.remove(profile.getProfileName().toLowerCase());
+		if (success != null) {
+			fireProfileRemoved(profile);
+		}
+		return success;
 	}
 	
 	public Profile getProfile(String profileName) {
@@ -169,5 +178,34 @@ public class Workspace {
 
 	public Profile createEmptyProfile() {
 		return profileLoader.createProfile();
+	}
+	
+	public void addWorkspaceChangeListener(WorkspaceChangeListener listener) {
+		listeners.add(listener);
+	}
+	
+	public boolean removeWorkspaceChangeListener(WorkspaceChangeListener listener) {
+		return listeners.remove(listener);
+	}
+	
+	private void fireWorkspaceChanged(WorkspaceChangeEvent event) {
+		for (WorkspaceChangeListener listener : listeners) {
+			listener.workspaceChanged(event);
+		}
+	}
+	
+	private void fireProfileAdded(Profile profile) {
+		WorkspaceChangeEvent event = new WorkspaceChangeEvent(this, profile, WorkspaceChangeEvent.PROFILE_ADDED_CHANGE);
+		fireWorkspaceChanged(event);
+	}
+	
+	private void fireProfileRemoved(Profile profile) {
+		WorkspaceChangeEvent event = new WorkspaceChangeEvent(this, profile, WorkspaceChangeEvent.PROFILE_REMOVED_CHANGE);
+		fireWorkspaceChanged(event);
+	}
+	
+	private void fireWorkspaceReloaded() {
+		WorkspaceChangeEvent event = new WorkspaceChangeEvent(this, null, WorkspaceChangeEvent.WORKSPACE_RELOADED_CHANGE);
+		fireWorkspaceChanged(event);
 	}
 }

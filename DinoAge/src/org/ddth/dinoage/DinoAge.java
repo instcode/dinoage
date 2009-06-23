@@ -19,6 +19,7 @@ import org.ddth.dinoage.grabber.yahoo.YBrowsingSession;
 import org.ddth.dinoage.model.Profile;
 import org.ddth.dinoage.model.ProfileLoader;
 import org.ddth.dinoage.model.Workspace;
+import org.ddth.dinoage.model.WorkspaceChangeListener;
 import org.ddth.dinoage.model.WorkspaceManager;
 import org.ddth.dinoage.ui.widget.ChooseWorkspaceDlg;
 import org.ddth.http.core.Session;
@@ -30,6 +31,7 @@ public class DinoAge {
 	private List<Session> sessions = new CopyOnWriteArrayList<Session>();
 	private Workspace workspace;
 	private ProfileLoader profileLoader = new YBrowsingSession.YProfileLoader();
+	private WorkspaceChangeListener listener;
 
 	public boolean isRunning() {
 		boolean isRunning = false;

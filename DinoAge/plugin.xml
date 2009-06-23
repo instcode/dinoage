@@ -36,8 +36,8 @@
    <extension
          point="org.eclipse.ui.views">
       <view
-            class="org.ddth.dinoage.eclipse.ui.views.ProfileListView"
-            id="org.ddth.dinoage.ui.views.profile.list"
+            class="org.ddth.dinoage.eclipse.ui.views.WorkspaceView"
+            id="org.ddth.dinoage.ui.views.workspace"
             name="Profile List">
       </view>
    </extension>
@@ -145,7 +145,7 @@
          </toolbar>
       </menuContribution>
       <menuContribution
-            locationURI="toolbar:org.ddth.dinoage.ui.views.profile.list?before=additions">
+            locationURI="toolbar:org.ddth.dinoage.ui.views.workspace?before=additions">
          <command
                commandId="org.ddth.dinoage.handlers.profile.add"
                icon="icons/add.gif"
@@ -218,7 +218,7 @@
       <definition id="org.ddth.ui.views.profile.selected">
       <with variable="activeWorkbenchWindow">
             <test
-                  args="org.ddth.dinoage.ui.views.profile.list, org.ddth.dinoage.eclipse.ui.providers.TreeParent"
+                  args="org.ddth.dinoage.ui.views.workspace, org.ddth.dinoage.eclipse.ui.model.WorkspaceNode"
                   property="org.ddth.dinoage.viewer.selection">
             </test>
             </with>

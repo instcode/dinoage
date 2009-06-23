@@ -31,8 +31,8 @@ import org.eclipse.ui.part.DrillDownAdapter;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.services.IEvaluationService;
 
-public class ProfileListView extends ViewPart {
-	public static final String ID = "org.ddth.dinoage.ui.views.profile.list";
+public class WorkspaceView extends ViewPart {
+	public static final String ID = "org.ddth.dinoage.ui.views.workspace";
 	
 	private TreeViewer viewer;
 	private DrillDownAdapter drillDownAdapter;
@@ -43,7 +43,7 @@ public class ProfileListView extends ViewPart {
 	/**
 	 * The constructor.
 	 */
-	public ProfileListView() {
+	public WorkspaceView() {
 	}
 
 	/**
@@ -54,7 +54,7 @@ public class ProfileListView extends ViewPart {
 		viewer = new TreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		drillDownAdapter = new DrillDownAdapter(viewer);
 		viewer.setContentProvider(new ProjectExplorerContentProvider());
-		viewer.setLabelProvider(new WorkbenchLabelProvider());
+		viewer.setLabelProvider(new ViewLabelProvider());
 		viewer.setSorter(new ViewerSorter());
 		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
@@ -83,7 +83,7 @@ public class ProfileListView extends ViewPart {
 		menuMgr.setRemoveAllWhenShown(true);
 		menuMgr.addMenuListener(new IMenuListener() {
 			public void menuAboutToShow(IMenuManager manager) {
-				ProfileListView.this.fillContextMenu(manager);
+				WorkspaceView.this.fillContextMenu(manager);
 			}
 		});
 		Menu menu = menuMgr.createContextMenu(viewer.getControl());
