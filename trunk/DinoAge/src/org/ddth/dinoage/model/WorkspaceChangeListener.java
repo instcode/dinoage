@@ -1,16 +1,16 @@
 /****************************************************
  * $Project: DinoAge
- * $Date:: Jun 22, 2009
+ * $Date:: Jun 23, 2009
  * $Revision:
  * $Author:: khoanguyen
  * $Comment::
  **************************************************/
-package org.ddth.dinoage.eclipse.ui.model;
+package org.ddth.dinoage.model;
 
 /**
  * @author khoanguyen
  *
  */
-public class WorkbenchProfile extends WorkbenchNode {
-
+public interface WorkspaceChangeListener {
+	public void workspaceChanged(WorkspaceChangeEvent event);
 }

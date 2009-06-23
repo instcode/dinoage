@@ -1,7 +1,7 @@
 package org.ddth.dinoage.eclipse.ui.handlers;
 
 import org.ddth.dinoage.eclipse.Activator;
-import org.ddth.dinoage.eclipse.ui.model.WorkbenchProfile;
+import org.ddth.dinoage.eclipse.ui.model.ProfileNode;
 import org.ddth.dinoage.model.Workspace;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -18,8 +18,8 @@ public class RemoveProfileHandler extends AbstractHandler {
 		ISelection selection = window.getActivePage().getSelection();
 		if (selection != null & selection instanceof IStructuredSelection) {
 			Workspace workspace = Activator.getDefault().getDinoAge().getWorkspace();
-			WorkbenchProfile profile = (WorkbenchProfile)((IStructuredSelection)selection).getFirstElement();
-			workspace.removeProfile(null);
+			ProfileNode profile = (ProfileNode)((IStructuredSelection)selection).getFirstElement();
+			workspace.removeProfile(profile.getData());
 		}
 		return null;
 	}

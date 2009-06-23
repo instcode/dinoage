@@ -10,7 +10,7 @@ package org.ddth.dinoage.ui;
 import java.text.DateFormat;
 
 import org.ddth.blogging.Entry;
-import org.ddth.dinoage.eclipse.ui.providers.BlogModel;
+import org.ddth.dinoage.eclipse.model.BlogModel;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;

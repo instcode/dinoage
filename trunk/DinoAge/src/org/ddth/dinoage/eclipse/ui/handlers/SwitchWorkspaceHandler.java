@@ -3,7 +3,7 @@ package org.ddth.dinoage.eclipse.ui.handlers;
 import org.ddth.dinoage.DinoAge;
 import org.ddth.dinoage.DinoAgeSettings;
 import org.ddth.dinoage.eclipse.Activator;
-import org.ddth.dinoage.eclipse.ui.views.ProfileListView;
+import org.ddth.dinoage.eclipse.ui.views.WorkspaceView;
 import org.ddth.dinoage.model.WorkspaceManager;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
@@ -23,7 +23,7 @@ public class SwitchWorkspaceHandler extends AbstractHandler {
 		String recentWorkspaces = prefs.get(DinoAgeSettings.PROPERTY_WORKSPACE_RECENTS, "");
 		WorkspaceManager workspaces = new WorkspaceManager(recentWorkspaces);
 		if (dinoage.chooseWorkspace(window.getShell(), workspaces)) {
-			((ProfileListView)window.getActivePage().findView(ProfileListView.ID)).setInput(dinoage.getWorkspace());
+			((WorkspaceView)window.getActivePage().findView(WorkspaceView.ID)).setInput(dinoage.getWorkspace());
 			// The current workspace has been changed...
 			prefs.put(DinoAgeSettings.PROPERTY_WORKSPACE_RECENTS, workspaces.getRecentWorkspaces());
 			try {

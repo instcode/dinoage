@@ -17,7 +17,6 @@ public class AddProfileHandler extends AbstractHandler {
 		Workspace workspace = Activator.getDefault().getDinoAge().getWorkspace();
 		DinoAgeProfileDlg dlg = new DinoAgeProfileDlg(window.getShell(), workspace);
 		if (dlg.open() == SWT.OK) {
-			workspace.saveProfile(dlg.getProfile());
 		}
 		return null;
 	}
