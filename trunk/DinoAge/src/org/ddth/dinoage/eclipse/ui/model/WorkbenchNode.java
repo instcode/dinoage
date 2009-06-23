@@ -1,5 +1,7 @@
 package org.ddth.dinoage.eclipse.ui.model;
 
+import org.ddth.dinoage.model.Profile;
+import org.ddth.dinoage.model.Workspace;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
@@ -13,7 +15,10 @@ public class WorkbenchNode extends WorkbenchAdapter {
 	 * @see org.eclipse.ui.model.IWorkbenchAdapter#getChildren(java.lang.Object)
 	 */
 	public Object[] getChildren(Object o) {
-		return null;
+		if (o instanceof Workspace) {
+			return ((Workspace)o).getProfiles().toArray();
+		}
+		return NO_CHILDREN;
 	}
 
 	/* (non-Javadoc)
@@ -30,6 +35,9 @@ public class WorkbenchNode extends WorkbenchAdapter {
 	 * @see org.eclipse.ui.model.IWorkbenchAdapter#getLabel(java.lang.Object)
 	 */
 	public String getLabel(Object o) {
+		if (o instanceof Profile) {
+			return ((Profile)o).getProfileName();
+		}
 		return o == null ? "" : o.toString();
 	}
 

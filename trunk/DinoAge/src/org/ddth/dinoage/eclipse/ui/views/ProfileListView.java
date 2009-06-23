@@ -2,7 +2,6 @@ package org.ddth.dinoage.eclipse.ui.views;
 
 import org.ddth.dinoage.eclipse.ui.editors.BlogViewEditor;
 import org.ddth.dinoage.eclipse.ui.editors.ProfileEditorInput;
-import org.ddth.dinoage.eclipse.ui.model.ProjectExplorerContentProvider;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
@@ -57,7 +56,6 @@ public class ProfileListView extends ViewPart {
 		viewer.setContentProvider(new ProjectExplorerContentProvider());
 		viewer.setLabelProvider(new WorkbenchLabelProvider());
 		viewer.setSorter(new ViewerSorter());
-		viewer.setInput(getViewSite());
 		viewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
 				IEvaluationService service = (IEvaluationService) getSite()
@@ -76,6 +74,10 @@ public class ProfileListView extends ViewPart {
 		contributeToActionBars();
 	}
 
+	public void setInput(Object input) {
+		viewer.setInput(input);
+	}
+	
 	private void hookContextMenu() {
 		MenuManager menuMgr = new MenuManager("#PopupMenu");
 		menuMgr.setRemoveAllWhenShown(true);
