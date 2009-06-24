@@ -1,4 +1,4 @@
-package org.ddth.dinoage.eclipse.model;
+package org.ddth.dinoage.eclipse.ui.editors;
 
 import java.util.Date;
 import java.util.List;
@@ -9,11 +9,11 @@ import org.ddth.blogging.BlogPost;
 import org.ddth.blogging.Comment;
 import org.ddth.blogging.Entry;
 
-public class BlogModel {
+public class ProfileContentProvider {
 
 	Blog blog = new Blog();
 	
-	public BlogModel() {
+	public ProfileContentProvider() {
 		
 		blog.setTitle("instcode's blog");
 		blog.setUrl("http://instcode.wordpress.com");

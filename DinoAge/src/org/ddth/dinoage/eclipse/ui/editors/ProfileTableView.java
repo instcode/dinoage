@@ -5,12 +5,12 @@
  * $Author:: khoanguyen                           $
  * $Comment::                                      $
  **************************************************/
-package org.ddth.dinoage.ui;
+package org.ddth.dinoage.eclipse.ui.editors;
 
 import java.text.DateFormat;
 
 import org.ddth.blogging.Entry;
-import org.ddth.dinoage.eclipse.model.BlogModel;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
@@ -20,14 +20,13 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.FillLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 
-public class BlogEntryView extends Composite {
+public class ProfileTableView extends Composite {
 	public enum BlogEntryColumn {
 		CHECK("", 30),
 		ENTRY("Entry", 400),
@@ -52,15 +51,15 @@ public class BlogEntryView extends Composite {
 
 	private Table m_table;
 
-	public BlogEntryView(Composite parent, int style) {
+	public ProfileTableView(Composite parent, int style) {
 		super(parent, style);
 		setLayout(new FillLayout());
 		createTable();
 		createTableMenu();
-		setModel(new BlogModel());
+		setModel(new ProfileContentProvider());
 	}
 
-	public void setModel(BlogModel model) {
+	public void setModel(ProfileContentProvider model) {
 		for (Entry entry : model.getEntries()) {
 			createTableItem(entry);
 		}
@@ -73,8 +72,8 @@ public class BlogEntryView extends Composite {
 	 * in ascending order by name.
 	 */
 	private final void createTable() {
-		m_table = new Table(this, SWT.BORDER | SWT.MULTI | SWT.FULL_SELECTION
-				| SWT.CHECK);
+		CheckboxTableViewer tableViewer = CheckboxTableViewer.newCheckList(this, SWT.BORDER | SWT.FULL_SELECTION);
+		m_table = tableViewer.getTable();
 		m_table.setHeaderVisible(true);
 
 		/* Create the columns */
@@ -84,7 +83,7 @@ public class BlogEntryView extends Composite {
 			column.setWidth(data.width);
 			column.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent event) {
-					tableColumnSelected(column);
+					
 				}
 			});
 		}
@@ -159,25 +158,5 @@ public class BlogEntryView extends Composite {
 		MenuItem item2 = new MenuItem(menu, SWT.NONE);
 		item2.setText("Item2");
 		m_table.setMenu(menu);
-	}
-
-	/**
-	 * Performs the table column selected action. When a table column is
-	 * selected, the table is sorted based on the column. If the same column is
-	 * reselected, the sorting order is inverted.
-	 * 
-	 * @param column
-	 *            the table column that was selected
-	 */
-	private void tableColumnSelected(TableColumn column) {
-		// TODO - use a sort icon to show the sorting order
-	}
-
-	public Item[] getSelection() {
-		return m_table.getSelection();
-	}
-
-	public void selectAll() {
-		m_table.selectAll();
 	}
 }

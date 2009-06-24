@@ -107,7 +107,7 @@ public class ResourceManager {
 		"\n" +
 		"Do you want to continue?";
 	public static final String KEY_CONFIRM_REMOVE_WORKSPACE_PROFILE =
-		"You're gonna remove the ''{0}'' profile in profile list.\n" +
+		"You''re gonna remove the *{0}* profile in profile list.\n" +
 		"This deletes *only* resume information (but cannot be undone).\n" +
 		"Your data will be kept untouched.\n" +
 		"\n" +

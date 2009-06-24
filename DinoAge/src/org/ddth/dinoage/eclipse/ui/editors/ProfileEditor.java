@@ -1,6 +1,5 @@
 package org.ddth.dinoage.eclipse.ui.editors;
 
-import org.ddth.dinoage.ui.BlogEntryView;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.JFaceResources;
@@ -17,11 +16,13 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
 
-public class BlogViewEditor extends EditorPart {
+public class ProfileEditor extends EditorPart {
 	public static final String ID = "org.ddth.ui.editors.blogview";
 	
-	public BlogViewEditor() {
+	public ProfileEditor() {
 		// TODO Auto-generated constructor stub
 	}
 
@@ -77,35 +78,23 @@ public class BlogViewEditor extends EditorPart {
 		Font boldFont = JFaceResources.getFontRegistry().getBold(JFaceResources.DEFAULT_FONT);    
 		
 		Label l = new Label(banner, SWT.WRAP);
-		l.setText("Subject:");
+		l.setText("Profile");
 		l.setFont(boldFont);
 		l = new Label(banner, SWT.WRAP);
-		l.setText("This is a message about the cool Eclipse RCP!");
+		l.setText("Profile Name");
 		
 		l = new Label(banner, SWT.WRAP);
-		l.setText("From:");
+		l.setText("Profile URL");
 		l.setFont(boldFont);
     
 		final Link link = new Link(banner, SWT.NONE);
-		link.setText("<a>nicole@mail.org</a>");
-		link.addSelectionListener(new SelectionAdapter() {    
-			public void widgetSelected(SelectionEvent e) {
-				MessageDialog.openInformation(getSite().getShell(), "Not Implemented", "Imagine the address book or a new message being created now.");
-			}    
-		});
-    
-		l = new Label(banner, SWT.WRAP);
-		l.setText("Date:");
-		l.setFont(boldFont);
-		l = new Label(banner, SWT.WRAP);
-		l.setText("10:34 am");
-		new BlogEntryView(top, SWT.NONE);
+		link.setText("<a>http://dinoage.googlecode.com</a>");
+		
+		ProfileTableView view = new ProfileTableView(top, SWT.NONE);
+		view.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 	}
 
 	@Override
 	public void setFocus() {
-		// TODO Auto-generated method stub
-
 	}
-
 }

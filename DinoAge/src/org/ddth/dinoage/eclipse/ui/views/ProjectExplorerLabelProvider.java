@@ -7,10 +7,10 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
-public class ViewLabelProvider extends LabelProvider {
+public class ProjectExplorerLabelProvider extends LabelProvider {
 
 	public String getText(Object obj) {
-		return ((TreeNode)obj).getName();
+		return ((TreeNode)obj).getLabel();
 	}
 
 	public Image getImage(Object obj) {
