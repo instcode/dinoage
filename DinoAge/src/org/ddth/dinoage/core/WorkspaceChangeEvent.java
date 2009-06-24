@@ -5,7 +5,7 @@
  * $Author:: khoanguyen
  * $Comment::
  **************************************************/
-package org.ddth.dinoage.model;
+package org.ddth.dinoage.core;
 
 
 /**

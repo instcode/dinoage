@@ -2,9 +2,9 @@ package org.ddth.dinoage.eclipse.ui.handlers;
 
 import org.ddth.dinoage.DinoAge;
 import org.ddth.dinoage.DinoAgeSettings;
+import org.ddth.dinoage.core.WorkspaceManager;
 import org.ddth.dinoage.eclipse.Activator;
 import org.ddth.dinoage.eclipse.ui.views.WorkspaceView;
-import org.ddth.dinoage.model.WorkspaceManager;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;

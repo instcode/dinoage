@@ -8,9 +8,9 @@
 package org.ddth.dinoage.eclipse.ui.widget;
 
 import org.ddth.dinoage.ResourceManager;
+import org.ddth.dinoage.core.Profile;
+import org.ddth.dinoage.core.Workspace;
 import org.ddth.dinoage.eclipse.ui.UniversalUtil;
-import org.ddth.dinoage.model.Profile;
-import org.ddth.dinoage.model.Workspace;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;

@@ -1,8 +1,8 @@
 package org.ddth.dinoage.eclipse.ui.handlers;
 
+import org.ddth.dinoage.core.Workspace;
 import org.ddth.dinoage.eclipse.Activator;
 import org.ddth.dinoage.eclipse.ui.widget.DinoAgeProfileDlg;
-import org.ddth.dinoage.model.Workspace;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;

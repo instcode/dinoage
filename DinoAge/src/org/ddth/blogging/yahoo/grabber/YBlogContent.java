@@ -1,4 +1,4 @@
-package org.ddth.dinoage.grabber.yahoo;
+package org.ddth.blogging.yahoo.grabber;
 
 import org.ddth.blogging.Blog;
 import org.ddth.http.impl.content.NavigationContent;

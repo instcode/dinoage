@@ -2,13 +2,13 @@ package org.ddth.dinoage.eclipse.ui.views;
 
 import java.util.Collection;
 
+import org.ddth.dinoage.core.Profile;
+import org.ddth.dinoage.core.Workspace;
+import org.ddth.dinoage.core.WorkspaceChangeEvent;
+import org.ddth.dinoage.core.WorkspaceChangeListener;
 import org.ddth.dinoage.eclipse.ui.model.ProfileNode;
 import org.ddth.dinoage.eclipse.ui.model.TreeNode;
 import org.ddth.dinoage.eclipse.ui.model.WorkspaceNode;
-import org.ddth.dinoage.model.Profile;
-import org.ddth.dinoage.model.Workspace;
-import org.ddth.dinoage.model.WorkspaceChangeEvent;
-import org.ddth.dinoage.model.WorkspaceChangeListener;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;

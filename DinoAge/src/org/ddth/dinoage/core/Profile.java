@@ -1,4 +1,4 @@
-package org.ddth.dinoage.model;
+package org.ddth.dinoage.core;
 
 import java.io.File;
 import java.io.FileInputStream;

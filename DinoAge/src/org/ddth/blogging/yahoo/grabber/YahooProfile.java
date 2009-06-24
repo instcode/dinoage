@@ -5,7 +5,7 @@
  * $Author:: khoanguyen                           $
  * $Comment::                                      $
  **************************************************/
-package org.ddth.dinoage.grabber.yahoo;
+package org.ddth.blogging.yahoo.grabber;
 
 import java.util.Properties;
 
@@ -13,8 +13,8 @@ import org.ddth.blogging.Blog;
 import org.ddth.blogging.Comment;
 import org.ddth.blogging.Entry;
 import org.ddth.blogging.yahoo.YahooBlogAPI;
+import org.ddth.dinoage.core.SessionProfile;
 import org.ddth.dinoage.data.DataManager;
-import org.ddth.dinoage.grabber.SessionProfile;
 
 public class YahooProfile extends SessionProfile {
 	
