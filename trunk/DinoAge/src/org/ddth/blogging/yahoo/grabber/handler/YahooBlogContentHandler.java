@@ -5,7 +5,7 @@
  * $Author:: khoanguyen                           $
  * $Comment::                                      $
  **************************************************/
-package org.ddth.dinoage.grabber.yahoo.handler;
+package org.ddth.blogging.yahoo.grabber.handler;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

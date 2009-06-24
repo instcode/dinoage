@@ -9,7 +9,7 @@ package org.ddth.dinoage.eclipse;
 
 import org.ddth.dinoage.DinoAge;
 import org.ddth.dinoage.DinoAgeSettings;
-import org.ddth.dinoage.model.WorkspaceManager;
+import org.ddth.dinoage.core.WorkspaceManager;
 import org.eclipse.core.runtime.preferences.ConfigurationScope;
 import org.eclipse.equinox.app.IApplication;
 import org.eclipse.equinox.app.IApplicationContext;

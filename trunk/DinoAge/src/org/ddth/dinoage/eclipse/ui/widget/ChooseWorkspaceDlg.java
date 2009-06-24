@@ -10,9 +10,9 @@ package org.ddth.dinoage.eclipse.ui.widget;
 import java.io.File;
 
 import org.ddth.dinoage.ResourceManager;
+import org.ddth.dinoage.core.Workspace;
+import org.ddth.dinoage.core.WorkspaceManager;
 import org.ddth.dinoage.eclipse.ui.UniversalUtil;
-import org.ddth.dinoage.model.Workspace;
-import org.ddth.dinoage.model.WorkspaceManager;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -78,7 +78,7 @@ public class ChooseWorkspaceDlg {
 		messageLabel.setText(ResourceManager.getMessage(
 				ResourceManager.KEY_LABEL_CHOOSE_WORKSPACE_MESSAGE,
 				new String[] {
-					ResourceManager.KEY_PRODUCT_NAME,
+					ResourceManager.getMessage(ResourceManager.KEY_PRODUCT_NAME),
 					ResourceManager.getMessage(ResourceManager.KEY_DIRECTORY_DIALOG_MESSAGE)
 				}));
 

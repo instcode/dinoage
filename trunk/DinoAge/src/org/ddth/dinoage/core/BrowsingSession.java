@@ -1,9 +1,8 @@
-package org.ddth.dinoage.grabber;
+package org.ddth.dinoage.core;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import org.ddth.dinoage.model.Workspace;
 import org.ddth.http.core.connection.Request;
 import org.ddth.http.core.connection.RequestFuture;
 import org.ddth.http.core.content.handler.ContentHandlerDispatcher;

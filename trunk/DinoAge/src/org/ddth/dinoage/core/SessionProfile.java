@@ -1,6 +1,5 @@
-package org.ddth.dinoage.grabber;
+package org.ddth.dinoage.core;
 
-import org.ddth.dinoage.model.Profile;
 
 public abstract class SessionProfile extends Profile {
 

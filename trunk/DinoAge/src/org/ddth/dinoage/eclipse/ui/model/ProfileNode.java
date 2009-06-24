@@ -7,7 +7,7 @@
  **************************************************/
 package org.ddth.dinoage.eclipse.ui.model;
 
-import org.ddth.dinoage.model.Profile;
+import org.ddth.dinoage.core.Profile;
 
 
 /**

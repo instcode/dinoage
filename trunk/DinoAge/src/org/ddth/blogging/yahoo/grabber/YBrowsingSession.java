@@ -5,7 +5,7 @@
  * $Author:: khoanguyen                           $
  * $Comment::                                      $
  **************************************************/
-package org.ddth.dinoage.grabber.yahoo;
+package org.ddth.blogging.yahoo.grabber;
 
 import java.io.File;
 import java.io.IOException;
@@ -13,14 +13,14 @@ import java.io.IOException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ddth.blogging.yahoo.YahooBlogEntry;
-import org.ddth.dinoage.grabber.BrowsingSession;
-import org.ddth.dinoage.grabber.SessionProfile;
-import org.ddth.dinoage.grabber.yahoo.handler.YBlogEntryContentHandler;
-import org.ddth.dinoage.grabber.yahoo.handler.YEntryListContentHandler;
-import org.ddth.dinoage.model.Persistence;
-import org.ddth.dinoage.model.Profile;
-import org.ddth.dinoage.model.ProfileLoader;
-import org.ddth.dinoage.model.Workspace;
+import org.ddth.blogging.yahoo.grabber.handler.YBlogEntryContentHandler;
+import org.ddth.blogging.yahoo.grabber.handler.YEntryListContentHandler;
+import org.ddth.dinoage.core.BrowsingSession;
+import org.ddth.dinoage.core.Persistence;
+import org.ddth.dinoage.core.Profile;
+import org.ddth.dinoage.core.ProfileLoader;
+import org.ddth.dinoage.core.SessionProfile;
+import org.ddth.dinoage.core.Workspace;
 import org.ddth.http.core.connection.Request;
 import org.ddth.http.core.content.Content;
 import org.ddth.http.core.content.handler.ContentHandlerDispatcher;

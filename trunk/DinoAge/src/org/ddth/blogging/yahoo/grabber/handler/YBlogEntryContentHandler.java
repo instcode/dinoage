@@ -5,11 +5,11 @@
  * $Author:: khoanguyen                           $
  * $Comment::                                      $
  **************************************************/
-package org.ddth.dinoage.grabber.yahoo.handler;
+package org.ddth.blogging.yahoo.grabber.handler;
 
 import org.ddth.blogging.yahoo.YahooBlogEntry;
 import org.ddth.blogging.yahoo.YahooBlogEntryUtil;
-import org.ddth.dinoage.grabber.yahoo.YBlogEntryContent;
+import org.ddth.blogging.yahoo.grabber.YBlogEntryContent;
 import org.ddth.http.core.content.Content;
 import org.ddth.http.impl.content.DomTreeContent;
 import org.w3c.dom.Document;
