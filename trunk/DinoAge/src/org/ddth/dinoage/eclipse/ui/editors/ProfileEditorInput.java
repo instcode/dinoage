@@ -32,7 +32,7 @@ public class ProfileEditorInput implements IEditorInput {
 
 	public String getToolTipText() {
 		// TODO Auto-generated method stub
-		return profileName + " Hehehe";
+		return profileName;
 	}
 
 	public Object getAdapter(Class adapter) {

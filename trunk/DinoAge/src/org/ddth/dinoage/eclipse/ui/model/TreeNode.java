@@ -34,7 +34,7 @@ public class TreeNode {
 		return false;
 	}
 	
-	public String getName() {
+	public String getLabel() {
 		return toString();
 	}
 }

@@ -5,7 +5,7 @@
  * $Author:: khoanguyen                           $
  * $Comment::                                      $
  **************************************************/
-package org.ddth.dinoage.ui.widget;
+package org.ddth.dinoage.eclipse.ui.widget;
 
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;

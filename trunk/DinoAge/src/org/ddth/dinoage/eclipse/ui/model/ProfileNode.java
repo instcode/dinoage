@@ -22,7 +22,7 @@ public class ProfileNode extends TreeNode {
 		this.profile = profile;
 	}
 
-	public String getName() {
+	public String getLabel() {
 		return profile.getProfileName();
 	}
 

@@ -5,14 +5,14 @@
  * $Author:: khoanguyen                           $
  * $Comment::                                      $
  **************************************************/
-package org.ddth.dinoage.ui.widget;
+package org.ddth.dinoage.eclipse.ui.widget;
 
 import java.io.File;
 
 import org.ddth.dinoage.ResourceManager;
+import org.ddth.dinoage.eclipse.ui.UniversalUtil;
 import org.ddth.dinoage.model.Workspace;
 import org.ddth.dinoage.model.WorkspaceManager;
-import org.ddth.dinoage.ui.UniversalUtil;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;

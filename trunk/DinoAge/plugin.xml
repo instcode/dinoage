@@ -56,7 +56,7 @@
    <extension
          point="org.eclipse.ui.editors">
       <editor
-            class="org.ddth.dinoage.eclipse.ui.editors.BlogViewEditor"
+            class="org.ddth.dinoage.eclipse.ui.editors.ProfileEditor"
             default="false"
             id="org.ddth.ui.editors.blogview"
             name="BlogView">
@@ -91,6 +91,10 @@
             categoryId="org.ddth.dinoage.commands.category"
             id="org.ddth.dinoage.handlers.profile.remove"
             name="Remove">
+      </command>
+      <command
+            id="org.ddth.dinoage.command.profile.open"
+            name="Open">
       </command>
    </extension>
    <extension point="org.eclipse.ui.menus">
@@ -159,7 +163,24 @@
          <command
                commandId="org.ddth.dinoage.handlers.profile.execute"
                icon="icons/execute.gif"
-               style="toggle">
+               style="push">
+         </command>
+      </menuContribution>
+      <menuContribution
+            locationURI="popup:org.ddth.dinoage.ui.views.workspace?before=additions">
+         <command
+               commandId="org.ddth.dinoage.command.profile.open"
+               style="push">
+         </command>
+         <command
+               commandId="org.ddth.dinoage.handlers.profile.execute"
+               icon="icons/execute.gif"
+               style="push">
+         </command>
+         <command
+               commandId="org.ddth.dinoage.handlers.profile.remove"
+               icon="icons/remove.gif"
+               style="push">
          </command>
       </menuContribution>
    </extension>
@@ -180,6 +201,15 @@
       <handler
             class="org.ddth.dinoage.eclipse.ui.handlers.AddProfileHandler"
             commandId="org.ddth.dinoage.handlers.profile.add">
+      </handler>
+      <handler
+            class="org.ddth.dinoage.eclipse.ui.handlers.OpenProfileHandler"
+            commandId="org.ddth.dinoage.command.profile.open">
+         <enabledWhen>
+            <reference
+                  definitionId="org.ddth.ui.views.profile.selected">
+            </reference>
+         </enabledWhen>
       </handler>
       <handler
             class="org.ddth.dinoage.eclipse.ui.handlers.RemoveProfileHandler"
@@ -212,13 +242,13 @@
          point="org.eclipse.core.expressions.definitions">
       <definition id="org.ddth.ui.editors.blogview.active">
          <with variable="activeEditor">
-            <instanceof value="org.ddth.dinoage.eclipse.ui.editors.BlogViewEditor"/>
+            <instanceof value="org.ddth.dinoage.eclipse.ui.editors.ProfileEditor"/>
          </with>
       </definition>
       <definition id="org.ddth.ui.views.profile.selected">
       <with variable="activeWorkbenchWindow">
             <test
-                  args="org.ddth.dinoage.ui.views.workspace, org.ddth.dinoage.eclipse.ui.model.WorkspaceNode"
+                  args="org.ddth.dinoage.ui.views.workspace, org.ddth.dinoage.eclipse.ui.model.ProfileNode"
                   property="org.ddth.dinoage.viewer.selection">
             </test>
             </with>

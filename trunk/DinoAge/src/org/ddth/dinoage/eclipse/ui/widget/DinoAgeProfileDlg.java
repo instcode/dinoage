@@ -5,9 +5,10 @@
  * $Author:: khoanguyen                           $
  * $Comment::                                      $
  **************************************************/
-package org.ddth.dinoage.ui;
+package org.ddth.dinoage.eclipse.ui.widget;
 
 import org.ddth.dinoage.ResourceManager;
+import org.ddth.dinoage.eclipse.ui.UniversalUtil;
 import org.ddth.dinoage.model.Profile;
 import org.ddth.dinoage.model.Workspace;
 import org.eclipse.swt.SWT;
@@ -46,7 +47,7 @@ public class DinoAgeProfileDlg extends Dialog {
 	 * @param parent
 	 */
 	public DinoAgeProfileDlg(Shell parent, Workspace workspace) {
-		super(parent, SWT.NONE);
+		super(parent, SWT.CENTER);
 		this.workspace = workspace;
 		this.profile = workspace.createEmptyProfile();
 	}

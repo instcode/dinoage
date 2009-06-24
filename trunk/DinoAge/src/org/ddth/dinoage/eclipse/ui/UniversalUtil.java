@@ -5,7 +5,7 @@
  * $Author:: khoanguyen                           $
  * $Comment::                                      $
  **************************************************/
-package org.ddth.dinoage.ui;
+package org.ddth.dinoage.eclipse.ui;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Rectangle;
