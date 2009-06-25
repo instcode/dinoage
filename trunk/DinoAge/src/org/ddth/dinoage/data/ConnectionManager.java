@@ -16,35 +16,28 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-import org.ddth.dinoage.DinoAgeSettings;
-import org.ddth.dinoage.ResourceManager;
-
 /**
  * @author khoa.nguyen
  * 
  */
 public class ConnectionManager {
 	private Connection connection = null;
-	private static ConnectionManager manager = new ConnectionManager();
+	private static ConnectionManager manager;
 
 	public static ConnectionManager getInstance() {
 		return manager;
 	}
-
-	public static InputStream getDbScriptStream() {
-		String scriptFile = "dinoage_" + DinoAgeSettings.getInstance().getDbType() + ".sql";
-		return ResourceManager.class.getClassLoader().getResourceAsStream(scriptFile);
+	
+	public static void setup(String driverClass, String connectionURL, String dbType, String username, String password) {
+		manager = new ConnectionManager(driverClass, connectionURL, dbType, username, password);
 	}
 
-	private ConnectionManager() {
+	private ConnectionManager(String driverClass, String connectionURL, String dbType, String username, String password) {
 		try {
-			Class.forName(DinoAgeSettings.getInstance().getDriverClass())
-					.newInstance();
-			connection = DriverManager.getConnection(DinoAgeSettings
-					.getInstance().getDbConnectionURL(), DinoAgeSettings
-					.getInstance().getDbUsername(), DinoAgeSettings
-					.getInstance().getDbPassword());
-			executeSQLScript(connection, getDbScriptStream());
+			Class.forName(driverClass).newInstance();
+			connection = DriverManager.getConnection(connectionURL, username, password);
+			String scriptFile = "dinoage_" + dbType + ".sql";
+			executeSQLScript(connection, ConnectionManager.class.getClassLoader().getResourceAsStream(scriptFile));
 		}
 		catch (Exception e) {
 		}
