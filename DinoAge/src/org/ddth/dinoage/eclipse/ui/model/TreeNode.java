@@ -12,23 +12,33 @@ public class TreeNode {
 		return NO_CHILDREN;
 	}
 
+	/**
+	 * Add child node
+	 * 
+	 * @param child
+	 */
 	public void add(TreeNode child) {
 		
 	}
 	
+	/**
+	 * Remove child node
+	 * 
+	 * @param child
+	 */
 	public void remove(TreeNode child) {
 		
 	}
 	
 	/**
-	 * @return
+	 * @return parent node
 	 */
-	public Object getParent() {
+	public TreeNode getParent() {
 		return parent;
 	}
 
 	/**
-	 * @return
+	 * @return true if this node has children
 	 */
 	public boolean hasChildren() {
 		return false;
