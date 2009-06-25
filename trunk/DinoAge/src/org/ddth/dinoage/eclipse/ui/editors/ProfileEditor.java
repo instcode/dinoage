@@ -61,6 +61,10 @@ public class ProfileEditor extends EditorPart {
 		return false;
 	}
 
+	public CheckboxTableViewer getViewer() {
+		return viewer;
+	}
+	
 	@Override
 	public void createPartControl(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
