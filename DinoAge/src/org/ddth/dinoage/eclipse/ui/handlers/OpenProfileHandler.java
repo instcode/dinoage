@@ -22,7 +22,7 @@ public class OpenProfileHandler extends AbstractHandler {
 			IStructuredSelection selection = (IStructuredSelection) view.getSite().getSelectionProvider().getSelection();
 			ProfileNode profile = (ProfileNode)selection.getFirstElement();
 			try {
-				activePage.openEditor(new ProfileEditorInput(profile.getData().getProfileName()), ProfileEditor.ID);
+				activePage.openEditor(new ProfileEditorInput(profile.getData()), ProfileEditor.ID);
 			}
 			catch (PartInitException e) {
 			}

@@ -1,8 +1,13 @@
 package org.ddth.dinoage.eclipse.ui.editors;
 
+import org.ddth.dinoage.ResourceManager;
+import org.ddth.dinoage.core.Profile;
+import org.ddth.dinoage.eclipse.ui.editors.ProfileLabelProvider.BlogEntryColumn;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.ColumnWeightData;
+import org.eclipse.jface.viewers.TableLayout;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -12,89 +17,167 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
+import org.eclipse.swt.widgets.Table;
+import org.eclipse.swt.widgets.TableColumn;
+import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.part.EditorPart;
-import org.eclipse.swt.widgets.Table;
-import org.eclipse.jface.viewers.CheckboxTableViewer;
 
 public class ProfileEditor extends EditorPart {
 	public static final String ID = "org.ddth.ui.editors.blogview";
-	
+	private CheckboxTableViewer viewer;
+
 	public ProfileEditor() {
 		// TODO Auto-generated constructor stub
 	}
 
 	@Override
 	public void doSave(IProgressMonitor monitor) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void doSaveAs() {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void init(IEditorSite site, IEditorInput input)
 			throws PartInitException {
 		setSite(site);
-	    setInput(input);
-	    setPartName(input.getName());
+		setInput(input);
+		setPartName(input.getName());
 	}
 
 	@Override
 	public boolean isDirty() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public boolean isSaveAsAllowed() {
-		// TODO Auto-generated method stub
 		return false;
 	}
 
 	@Override
 	public void createPartControl(Composite parent) {
-		Composite top = new Composite(parent, SWT.NONE);
+		Composite composite = new Composite(parent, SWT.NONE);
 		GridLayout layout = new GridLayout();
 		layout.marginHeight = 0;
 		layout.marginWidth = 0;
-		top.setLayout(layout);
-		// top banner
-		Composite banner = new Composite(top, SWT.NONE);
-		banner.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL, GridData.VERTICAL_ALIGN_BEGINNING, true, false));
-		layout = new GridLayout();
+		composite.setLayout(layout);
+
+		Composite banner = createBanner(composite);
+		banner.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL,
+				GridData.VERTICAL_ALIGN_BEGINNING, true, false));
+		
+		viewer = createTableViewer(composite);
+		viewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+	}
+
+	private Composite createBanner(Composite composite) {
+		Profile profile = (Profile) getEditorInput().getAdapter(Profile.class);
+		
+		Composite banner = new Composite(composite, SWT.NONE);
+		
+		GridLayout layout = new GridLayout();
 		layout.marginHeight = 5;
 		layout.marginWidth = 10;
 		layout.numColumns = 2;
 		banner.setLayout(layout);
+
+		Font boldFont = JFaceResources.getFontRegistry().getBold(JFaceResources.DEFAULT_FONT);
+
+		Label profileLabel = new Label(banner, SWT.WRAP);
+		profileLabel.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_PROFILE_NAME));
+		profileLabel.setFont(boldFont);
+		Label profileText = new Label(banner, SWT.WRAP);
+		profileText.setText(profile.getProfileName());
+
+		Label profileUrlLabel = new Label(banner, SWT.WRAP);
+		profileUrlLabel.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_PROFILE_URL));
+		profileUrlLabel.setFont(boldFont);
+
+		Link profileUrlLink = new Link(banner, SWT.NONE);
+		profileUrlLink.setText(ResourceManager.getMessage(ResourceManager.KEY_MESSAGE_FULL_HREF,
+			new Object[] { profile.getProfileURL(), profile.getProfileURL() })
+		);
+		return banner;
+	}
+	
+	private final CheckboxTableViewer createTableViewer(Composite parent) {
+		CheckboxTableViewer viewer = CheckboxTableViewer.newCheckList(parent, SWT.BORDER | SWT.FULL_SELECTION | SWT.VIRTUAL | SWT.MULTI);
+		viewer.getTable().setHeaderVisible(true);
 		
-		// setup bold font
-		Font boldFont = JFaceResources.getFontRegistry().getBold(JFaceResources.DEFAULT_FONT);    
+		TableLayout layout = new TableLayout();
+		for (BlogEntryColumn data : BlogEntryColumn.values()) {
+			final TableColumn column = new TableColumn(viewer.getTable(), SWT.CENTER);
+			column.setText(data.toString());
+			layout.addColumnData(new ColumnWeightData(data.weight(), true));
+		}
+		viewer.getTable().setLayout(layout);
 		
-		Label l = new Label(banner, SWT.WRAP);
-		l.setText("Profile");
-		l.setFont(boldFont);
-		l = new Label(banner, SWT.WRAP);
-		l.setText("Profile Name");
-		
-		l = new Label(banner, SWT.WRAP);
-		l.setText("Profile URL");
-		l.setFont(boldFont);
-    
-		final Link link = new Link(banner, SWT.NONE);
-		link.setText("<a>http://dinoage.googlecode.com</a>");
-		
-		ProfileTableView view = new ProfileTableView(top, SWT.NONE);
-		view.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+		viewer.setContentProvider(new ProfileContentProvider());
+		viewer.setLabelProvider(new ProfileLabelProvider());
+		viewer.setInput(new Object());
+		createMenu(viewer.getTable());
+		return viewer;
 	}
 
+	/**
+	 * Creates and assigns the popup menu for the component.
+	 */
+	private void createMenu(Composite composite) {
+		Menu menu = new Menu(composite.getShell(), SWT.POP_UP);
+		
+		MenuItem checkAllItem = new MenuItem(menu, SWT.NONE);
+		checkAllItem.setText("Select All");
+		checkAllItem.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				/*
+				 * Right now, we can't use viewer.setAllChecked(true)
+				 * because getTable().getItems() won't work with lazy
+				 * load table view. Waiting for this bug fixed.
+				 */
+				Table table = viewer.getTable();
+				int itemCount = table.getItemCount();
+				for(int i = 0; i < itemCount; i++){
+	                TableItem item = table.getItem(i);
+	                // Invoke #getChecked() to fix a silly bug by
+	                // using lazy load table view
+	                item.getChecked();
+	                item.setChecked(true);
+	            }
+			}
+		});
+		
+		MenuItem checkNoneItem = new MenuItem(menu, SWT.NONE);
+		checkNoneItem.setText("Select None");
+		checkNoneItem.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				viewer.setAllChecked(false);
+			}
+		});
+		
+		MenuItem invertSelectionItem = new MenuItem(menu, SWT.NONE);
+		invertSelectionItem.setText("Invert Selection");
+		invertSelectionItem.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				Table table = viewer.getTable();
+				int itemCount = table.getItemCount();
+				for(int i = 0; i < itemCount; i++){
+	                TableItem item = table.getItem(i);
+	                item.setChecked(!item.getChecked());
+	            }
+			}
+		});
+		composite.setMenu(menu);
+	}
+	
 	@Override
 	public void setFocus() {
+		viewer.getControl().setFocus();
 	}
 }
