@@ -1,14 +1,15 @@
 package org.ddth.dinoage.eclipse.ui.editors;
 
+import org.ddth.dinoage.core.Profile;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IPersistableElement;
 
 public class ProfileEditorInput implements IEditorInput {
-	private String profileName;
+	private Profile profile;
 
-	public ProfileEditorInput(String profile) {
-		this.profileName = profile;
+	public ProfileEditorInput(Profile profile) {
+		this.profile = profile;
 	}
 
 	public boolean exists() {
@@ -16,27 +17,26 @@ public class ProfileEditorInput implements IEditorInput {
 	}
 
 	public ImageDescriptor getImageDescriptor() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	public String getName() {
-		// TODO Auto-generated method stub
-		return profileName;
+		return profile.getProfileName();
 	}
 
 	public IPersistableElement getPersistable() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
 	public String getToolTipText() {
-		// TODO Auto-generated method stub
-		return profileName;
+		return profile.getProfileURL();
 	}
 
+	@SuppressWarnings("unchecked")
 	public Object getAdapter(Class adapter) {
-		// TODO Auto-generated method stub
+		if (adapter == Profile.class) {
+			return profile;
+		}
 		return null;
 	}
 
@@ -46,10 +46,10 @@ public class ProfileEditorInput implements IEditorInput {
 		if (!(obj instanceof ProfileEditorInput))
 			return false;
 		ProfileEditorInput other = (ProfileEditorInput) obj;
-		return profileName.equals(other.profileName);
+		return profile.equals(other.profile);
 	}
 
 	public int hashCode() {
-		return profileName.hashCode();
+		return profile.hashCode();
 	}
 }
