@@ -30,11 +30,11 @@ import org.ddth.dinoage.data.DataManager;
  */
 public class WXR {
 	
-	public void export(Blog blog) throws Exception {
+	public static void export(Blog blog) throws Exception {
 		export(blog, new PrintWriter(new OutputStreamWriter(System.out)));
 	}
 	
-	public void export(Blog blog, Writer writer) throws Exception {
+	public static void export(Blog blog, Writer writer) throws Exception {
 		VelocityEngine ve = new VelocityEngine();
 		ve.init();
 		InputStreamReader reader = new InputStreamReader(WXR.class.getResourceAsStream("wordpress.xml"));
@@ -46,32 +46,6 @@ public class WXR {
 		writer.flush();
 	}
 
-	private Blog createBlog() {
-		Blog blog = new Blog();
-		blog.setTitle("instcode's blog");
-		blog.setUrl("http://instcode.wordpress.com");
-		blog.setDescription("Welcome to my blog :D");
-		Author author = new Author("instcode", "instcode", "http://instcode.wordpress.com",
-				"http://en.gravatar.com/userimage/2251513/e5a20d2422b54b45befee4a92ccd4ae5.jpg");
-		blog.addAuthor(author);
-		
-		BlogPost blogPost = new BlogPost();
-		blogPost.setAuthor(author);
-		blogPost.setTitle("Đây là tiêu đề");
-		blogPost.setContent("Đừng xa em đêm nay khi má em đã ngủ say");
-		blogPost.setTags("computer, misc, hello, tagne");
-		blogPost.setPostId(12);
-		blogPost.setDate(new Date());
-		
-		Comment blogComment = new Comment(new Author("test", "Test", "http://yahoo.com", "http://avatar.com/avatar.png"), "Comment ne", new Date(3434343L));
-		
-		Entry blogEntry = new Entry(blogPost);
-		blogEntry.addComment(blogComment);
-		
-		blog.addEntry(blogEntry);
-		return blog;
-	}
-	
 	public static void main(String[] args) throws Exception {
 		//WXR generator = new WXR(new OutputStreamWriter(new FileOutputStream("wp.xml"), "utf-8"));
 		//WXR generator = new WXR();
