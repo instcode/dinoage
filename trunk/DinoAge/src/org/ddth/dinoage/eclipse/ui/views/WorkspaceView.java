@@ -46,8 +46,8 @@ public class WorkspaceView extends ViewPart {
 			public void selectionChanged(SelectionChangedEvent event) {
 				IEvaluationService service = (IEvaluationService) getSite()
 						.getService(IEvaluationService.class);
-				service
-						.requestEvaluation("org.ddth.dinoage.viewer.selection");
+				service.requestEvaluation("org.ddth.dinoage.viewer.selection");
+				service.requestEvaluation("org.ddth.dinoage.viewer.running");
 			}
 		});
 		getSite().setSelectionProvider(viewer);

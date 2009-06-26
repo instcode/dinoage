@@ -156,13 +156,33 @@
                style="push">
          </command>
          <command
-               commandId="org.ddth.dinoage.handlers.profile.remove"
-               icon="icons/remove.gif"
+               commandId="org.ddth.dinoage.handlers.profile.execute"
+               icon="icons/execute.gif"
                style="push">
+            <visibleWhen
+                  checkEnabled="false">
+               <not>
+                  <reference
+                        definitionId="org.ddth.dinoage.core.profile.running">
+                  </reference>
+               </not>
+            </visibleWhen>
          </command>
          <command
                commandId="org.ddth.dinoage.handlers.profile.execute"
-               icon="icons/execute.gif"
+               icon="icons/update.gif"
+               label="Stop"
+               style="push"
+               tooltip="Stop">
+            <visibleWhen>
+               <reference
+                     definitionId="org.ddth.dinoage.core.profile.running">
+               </reference>
+            </visibleWhen>
+         </command>
+         <command
+               commandId="org.ddth.dinoage.handlers.profile.remove"
+               icon="icons/remove.gif"
                style="push">
          </command>
       </menuContribution>
@@ -176,7 +196,30 @@
                commandId="org.ddth.dinoage.handlers.profile.execute"
                icon="icons/execute.gif"
                style="push">
+            <visibleWhen>
+               <not>
+                  <reference
+                        definitionId="org.ddth.dinoage.core.profile.running">
+                  </reference>
+               </not>
+            </visibleWhen>
          </command>
+         <command
+               commandId="org.ddth.dinoage.handlers.profile.execute"
+               icon="icons/update.gif"
+               label="Stop"
+               style="push"
+               tooltip="Stop">
+            <visibleWhen>
+               <reference
+                     definitionId="org.ddth.dinoage.core.profile.running">
+               </reference>
+            </visibleWhen>
+         </command>
+         <separator
+               name="separator"
+               visible="true">
+         </separator>
          <command
                commandId="org.ddth.dinoage.handlers.profile.remove"
                icon="icons/remove.gif"
@@ -253,6 +296,16 @@
             </test>
             </with>
       </definition>
+      <definition
+            id="org.ddth.dinoage.core.profile.running">
+         <with
+               variable="activeWorkbenchWindow">
+            <test
+                  args="org.ddth.dinoage.ui.views.workspace, org.ddth.dinoage.eclipse.ui.model.ProfileNode"
+                  property="org.ddth.dinoage.viewer.running">
+            </test>
+         </with>
+      </definition>
    </extension>
    
    <extension point="org.eclipse.core.runtime.preferences">
@@ -267,6 +320,13 @@
             id="org.ddth.dinoage.viewer.selectionPropertyTester"
             namespace="org.ddth.dinoage.viewer"
             properties="selection"
+            type="org.eclipse.ui.IWorkbenchWindow">
+      </propertyTester>
+      <propertyTester
+            class="org.ddth.dinoage.eclipse.ui.views.RunningPropertyTester"
+            id="org.ddth.dinoage.viewer.runningPropertyTester"
+            namespace="org.ddth.dinoage.viewer"
+            properties="running"
             type="org.eclipse.ui.IWorkbenchWindow">
       </propertyTester>
    </extension>

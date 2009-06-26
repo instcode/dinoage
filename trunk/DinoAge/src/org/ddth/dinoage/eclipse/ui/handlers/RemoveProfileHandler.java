@@ -23,7 +23,7 @@ public class RemoveProfileHandler extends AbstractHandler {
 		if (view != null) {
 			ISelection selection = view.getSite().getSelectionProvider().getSelection();
 			ProfileNode profile = (ProfileNode)((IStructuredSelection)selection).getFirstElement();
-			if (MessageDialog.openConfirm(workbenchWindow.getShell(),
+			if (MessageDialog.openQuestion(workbenchWindow.getShell(),
 					workbenchWindow.getShell().getText(),
 					ResourceManager.getMessage(ResourceManager.KEY_CONFIRM_REMOVE_WORKSPACE_PROFILE,
 							new Object[] {profile.getData().getProfileName()}))) {
