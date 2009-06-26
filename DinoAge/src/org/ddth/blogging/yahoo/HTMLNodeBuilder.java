@@ -21,7 +21,6 @@ public class HTMLNodeBuilder {
 		this.writer = writer;
 	}
 
-	@SuppressWarnings("null")
 	public void serialize(Node node) throws IOException {
 		if (node == null) {
 			return;

@@ -36,7 +36,8 @@ public class DomTreeContent extends ContentAdapter<InputStream> {
 	 * @param doc
 	 * 		The document root of the DOM tree. 
 	 */
-	public DomTreeContent(Document doc) {
+	public DomTreeContent(InputStream inputStream, Document doc) {
+		setContent(inputStream);
 		document = doc;
 	}
 	

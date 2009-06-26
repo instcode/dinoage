@@ -132,19 +132,24 @@ public class YahooBlogEntryUtil {
 	 * @param doc
 	 * @return
 	 */
-	public static String parseNavigationLink(Document doc) {
+	public static YahooBlog parseYahooBlog(Document doc) {
 		Node entry = YahooBlogKey.YMGL_BLOG.getNode(doc);
+		if (entry == null) {
+			return null;
+		}
 		NodeList links = YahooBlogKey.FIRST_BLOG_ENTRY_URL.getNodeList(entry);
 		int length = links.getLength();
-		String navigationURL = null;
+		String firstEntryURL = null;
 		for (int index = 0; index < length; index++) {
 			Node node = links.item(index);
 			String name = node.getFirstChild().getNodeValue();
 			if (TEXT_NODE_PERMANENT_LINK.equals(name)) {
-				navigationURL = node.getAttributes().getNamedItem("href").getNodeValue();
+				firstEntryURL = node.getAttributes().getNamedItem("href").getNodeValue();
 			}
 		}
-		return navigationURL;
+		YahooBlog blog = new YahooBlog();
+		blog.setFirstEntryURL(firstEntryURL);
+		return blog;
 	}
 
 	/**
@@ -284,7 +289,7 @@ public class YahooBlogEntryUtil {
 		WebpageContent webContent = new WebpageContent(inputStream, "utf-8");
 		DomTreeContent content = (DomTreeContent)contentHandler.handle(webContent);
 	
-		System.out.println(YahooBlogEntryUtil.parseNavigationLink(content.getDocument()));
+		System.out.println(YahooBlogEntryUtil.parseYahooBlog(content.getDocument()).getFirstEntryURL());
 
 		YahooBlogEntry entry = YahooBlogEntryUtil.parseEntry(content.getDocument());
 		BlogPost post = entry.getPost();
