@@ -61,6 +61,7 @@ public class ResourceManager {
 	public static final String KEY_CHOOSE_WORKSPACE_DIALOG_TITLE = "KEY_CHOOSE_WORKSPACE_DIALOG_TITLE";
 	public static final String KEY_LABEL_NEW_ELLIPSIS = "KEY_LABEL_NEW_ELLIPSIS";
 	public static final String KEY_MESSAGE_EXISTED_PROFILE = "KEY_MESSAGE_EXISTED_PROFILE";
+	public static final String KEY_CONFIRM_STOP_ACTIVE_PROFILE = "KEY_CONFIRM_STOP_ACTIVE_PROFILE";
 	
 	private static ResourceBundle resources;
 
