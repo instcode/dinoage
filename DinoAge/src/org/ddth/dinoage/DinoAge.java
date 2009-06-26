@@ -9,8 +9,8 @@ package org.ddth.dinoage;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -27,13 +27,13 @@ import org.eclipse.swt.widgets.Shell;
 
 public class DinoAge {
 	private Log logger = LogFactory.getLog(DinoAge.class);
-	private List<Session> sessions = new CopyOnWriteArrayList<Session>();
+	private Map<Profile, BrowsingSession> sessions = new HashMap<Profile, BrowsingSession>();
 	private Workspace workspace;
 	private ProfileLoader profileLoader = new YBrowsingSession.YProfileLoader();
 
 	public boolean isRunning() {
 		boolean isRunning = false;
-		for (Session session : sessions) {
+		for (Session session : sessions.values()) {
 			if (session.isRunning()) {
 				isRunning = true;
 				break;
@@ -43,7 +43,7 @@ public class DinoAge {
 	}
 	
 	public void stop() {
-		for (Session session : sessions) {
+		for (Session session : sessions.values()) {
 			session.shutdown();
 		}
 		sessions.clear();
@@ -54,9 +54,11 @@ public class DinoAge {
 	}
 
 	public BrowsingSession createSession(Profile profile) {
-		//FIXME It's better to lookup an existing session other than to create/add a new one
-		BrowsingSession session = (profile == null) ? null : new YBrowsingSession(profile, workspace);
-		sessions.add(session);
+		BrowsingSession session = sessions.get(profile);
+		if (session == null) {
+			session = new YBrowsingSession(profile, workspace);
+			sessions.put(profile, session);
+		}
 		return session;
 	}
 

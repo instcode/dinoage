@@ -26,7 +26,12 @@ public class DataManager {
 	private static Log logger = LogFactory.getLog(DataManager.class);
 	
 	private DataProvider provider = new DefaultDataProvider();
+	private static final DataManager instance = new DataManager();
 
+	public static DataManager getInstance() {
+		return instance;
+	}
+	
 	public void createAuthor(Author author) {
 		try {
 			provider.createAuthor(author);

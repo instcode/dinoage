@@ -24,7 +24,6 @@ public class PreferenceInitializer extends AbstractPreferenceInitializer {
 		prefs.put(DinoAgeSettings.PROPERTY_DB_USERNAME, "");
 		prefs.put(DinoAgeSettings.PROPERTY_DB_PASSWORD, "");
 		
-		//prefs.put(DinoAgeSettings.PROPERTY_WORKSPACE_RECENTS, "");
 		prefs.putBoolean(DinoAgeSettings.PROPERTY_WORKSPACE_SHOW_CHOOSER_DIALOG, true);
 	}
 }

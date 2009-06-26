@@ -129,9 +129,12 @@ public final class Workspace {
 			File profileFolder = getProfileFolder(profile);
 			profileFolder.mkdirs();
 			File resumeFile = new File(profileFolder, Workspace.PROFILE_FILE_NAME);
+			boolean exists = resumeFile.exists();
 			outputStream = profile.store(resumeFile);
 			map.put(profile.getProfileName().toLowerCase(), profile);
-			fireProfileAdded(profile);
+			if (!exists) {
+				fireProfileAdded(profile);
+			}
 			success = true;
 		}
 		catch (IOException e) {
