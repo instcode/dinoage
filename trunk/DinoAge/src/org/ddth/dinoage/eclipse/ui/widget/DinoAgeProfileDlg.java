@@ -11,6 +11,9 @@ import org.ddth.dinoage.ResourceManager;
 import org.ddth.dinoage.core.Profile;
 import org.ddth.dinoage.core.Workspace;
 import org.ddth.dinoage.eclipse.ui.UniversalUtil;
+import org.eclipse.jface.fieldassist.ControlDecoration;
+import org.eclipse.jface.fieldassist.FieldDecoration;
+import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -22,6 +25,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
@@ -41,6 +45,8 @@ public class DinoAgeProfileDlg extends Dialog {
 	
 	private SelectionListener saveListener;
 	private ModifyListener checkModifyListener;
+	private ControlDecoration profileURLDecoration;
+	private ControlDecoration profileTextDecoration;
 
 	/**
 	 * Create the dialog
@@ -93,7 +99,7 @@ public class DinoAgeProfileDlg extends Dialog {
 	 */
 	protected void createListeners() {
 		checkModifyListener = new ModifyListener() {
-			public void modifyText(ModifyEvent arg0) {
+			public void modifyText(ModifyEvent event) {
 				okButton.setEnabled(checkInputs());
 			}
 		};
@@ -120,7 +126,17 @@ public class DinoAgeProfileDlg extends Dialog {
 			}
 		};
 	}
-
+	
+	private ControlDecoration createControlDecoration(Control control, String hoverText) {
+		ControlDecoration controlDecoration = new ControlDecoration(control,
+				SWT.LEFT | SWT.TOP);
+		controlDecoration.setDescriptionText(hoverText);
+		FieldDecoration fieldDecoration = FieldDecorationRegistry.getDefault()
+				.getFieldDecoration(FieldDecorationRegistry.DEC_INFORMATION);
+		controlDecoration.setImage(fieldDecoration.getImage());
+		return controlDecoration;
+	}
+	
 	/**
 	 * Create contents of the dialog
 	 */
@@ -141,6 +157,7 @@ public class DinoAgeProfileDlg extends Dialog {
 		gd_profileURLText.widthHint = 300;
 		profileURLText.setLayoutData(gd_profileURLText);
 		profileURLText.addModifyListener(checkModifyListener);
+		profileURLDecoration = createControlDecoration(profileURLText, "Please enter profile URL");
 
 		final Label profileLabel = new Label(composite, SWT.NONE);
 		profileLabel.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_PROFILE_NAME));
@@ -150,8 +167,9 @@ public class DinoAgeProfileDlg extends Dialog {
 		profileText = new Text(composite, SWT.BORDER);
 		final GridData gd_profileText = new GridData(SWT.FILL, SWT.CENTER, true, true);
 		gd_profileText.heightHint = 15;
-		profileText.addModifyListener(checkModifyListener);
 		profileText.setLayoutData(gd_profileText);
+		profileText.addModifyListener(checkModifyListener);
+		profileTextDecoration = createControlDecoration(profileText, "Please enter profile name");
 
 		okButton = new Button(composite, SWT.NONE);
 		final GridData gd_okButton = new GridData(SWT.LEFT, SWT.CENTER, false, true);
@@ -159,6 +177,9 @@ public class DinoAgeProfileDlg extends Dialog {
 		okButton.setLayoutData(gd_okButton);
 		okButton.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_SAVE));
 		okButton.addSelectionListener(saveListener);
+		
+		profileURLDecoration.show();
+		profileTextDecoration.show();
 		
 		initializeValues();
 	}

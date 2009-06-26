@@ -25,6 +25,9 @@ public class ConnectionManager {
 	private static ConnectionManager manager;
 
 	public static ConnectionManager getInstance() {
+		if (manager == null) {
+			setup("org.apache.derby.jdbc.EmbeddedDriver", "jdbc:derby:database;create=true;", "derby", "", "");
+		}
 		return manager;
 	}
 	

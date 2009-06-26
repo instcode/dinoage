@@ -5,6 +5,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 import org.ddth.dinoage.ResourceManager;
@@ -16,6 +18,7 @@ public abstract class Profile {
 
 	private String profileURL;
 	private String profileName;
+	private List<ProfileChangeListener> listeners = new ArrayList<ProfileChangeListener>();
 
 	public void populate(Profile profile) {
 		setProfileName(profile.getProfileName());
@@ -24,6 +27,20 @@ public abstract class Profile {
 	
 	protected abstract void innerLoad(Properties properties);
 	protected abstract void innerStore(Properties properties);
+
+	public void addProfileChangeListener(ProfileChangeListener listener) {
+		listeners.add(listener);
+	}
+	
+	public boolean removeProfileChangeListener(ProfileChangeListener listener) {
+		return listeners.remove(listener);
+	}
+	
+	protected void fireProfileChanged(ProfileChangeEvent event) {
+		for (ProfileChangeListener listener : listeners) {
+			listener.profileChanged(event);
+		}
+	}
 	
 	public void load(File profileFile) throws IOException {
 		Properties properties = new Properties();
