@@ -31,8 +31,9 @@ public class NavigationContent extends ContentAdapter<DomTreeContent> {
 	 * @param urls
 	 *            The urls that can be used to travel next...
 	 */
-	public NavigationContent(String[] urls) {
+	public NavigationContent(DomTreeContent content, String[] urls) {
 		this.urls = urls;
+		this.setContent(content);
 	}
 
 	/**

@@ -12,6 +12,7 @@ import java.io.IOException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.ddth.blogging.yahoo.YahooBlog;
 import org.ddth.blogging.yahoo.YahooBlogEntry;
 import org.ddth.blogging.yahoo.grabber.handler.YBlogEntryContentHandler;
 import org.ddth.blogging.yahoo.grabber.handler.YEntryListContentHandler;
@@ -67,10 +68,12 @@ public class YBrowsingSession extends BrowsingSession {
 		YahooProfile yahooProfile = (YahooProfile)profile;
 		if (content instanceof YBlogContent) {
 			YBlogContent blogContent = (YBlogContent)content;
-			String[] urls = blogContent.getNextURLs();
-			nextURL = urls.length > 0 ? urls[0] : null;
 			persistence.write(blogContent.getContent().getContent(), BLOG_ENTRY, "list");
-			yahooProfile.saveBlog(blogContent.getBlog());
+			YahooBlog blog = blogContent.getBlog();
+			if (blog != null) {
+				nextURL = blog.getFirstEntryURL();
+				yahooProfile.saveBlog(blog);
+			}
 		}
 		else {
 			YBlogEntryContent blogEntry = (YBlogEntryContent) content;

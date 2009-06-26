@@ -21,8 +21,7 @@ public class YBlogEntryContentHandler extends YahooBlogContentHandler {
 		DomTreeContent domTreeContent = (DomTreeContent) super.handle(content);
 		Document doc = domTreeContent.getDocument();
 		YahooBlogEntry entry = YahooBlogEntryUtil.parseEntry(doc);
-		YBlogEntryContent blogEntryContent = new YBlogEntryContent(entry);
-		blogEntryContent.setContent(domTreeContent);
+		YBlogEntryContent blogEntryContent = new YBlogEntryContent(domTreeContent, entry);
 		return blogEntryContent;
 	}
 }

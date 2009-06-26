@@ -50,8 +50,7 @@ public class WebpageContentHandler implements ContentHandler {
 			InputStream byteStream = consume(webpage.getContent(), webpage.getCharset());
 			Document doc = parse(byteStream, webpage.getCharset());
 			byteStream.reset();
-			domTreeContent = new DomTreeContent(doc);
-			domTreeContent.setContent(byteStream);
+			domTreeContent = new DomTreeContent(byteStream, doc);
 		}
 		catch (Exception e) {
 			logger.error("Error", e);

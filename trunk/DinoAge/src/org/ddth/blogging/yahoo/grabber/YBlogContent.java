@@ -1,18 +1,19 @@
 package org.ddth.blogging.yahoo.grabber;
 
-import org.ddth.blogging.Blog;
-import org.ddth.http.impl.content.NavigationContent;
+import org.ddth.blogging.yahoo.YahooBlog;
+import org.ddth.http.core.content.ContentAdapter;
+import org.ddth.http.impl.content.DomTreeContent;
 
-public class YBlogContent extends NavigationContent {
+public class YBlogContent extends ContentAdapter<DomTreeContent> {
 
-	private Blog blog;
+	private YahooBlog blog;
 	
-	public YBlogContent(String[] urls, Blog blog) {
-		super(urls);
+	public YBlogContent(DomTreeContent content, YahooBlog blog) {
+		setContent(content);
 		this.blog = blog;
 	}
 
-	public Blog getBlog() {
+	public YahooBlog getBlog() {
 		return blog;
 	}
 }

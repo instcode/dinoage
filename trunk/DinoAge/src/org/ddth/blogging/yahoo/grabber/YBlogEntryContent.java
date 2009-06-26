@@ -8,8 +8,9 @@ public class YBlogEntryContent extends ContentAdapter<DomTreeContent> {
 
 	private YahooBlogEntry entry;
 
-	public YBlogEntryContent(YahooBlogEntry entry) {
+	public YBlogEntryContent(DomTreeContent content, YahooBlogEntry entry) {
 		this.entry = entry;
+		this.setContent(content);
 	}
 	
 	public YahooBlogEntry getEntry() {

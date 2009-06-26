@@ -31,6 +31,10 @@ public class Blog {
 	public List<Author> getAuthors() {
 		return authors;
 	}
+	
+	public Author getAuthor() {
+		return authors.size() > 0 ? authors.get(0) : null;
+	}
 
 	public void addAuthor(Author author) {
 		authors.add(author);

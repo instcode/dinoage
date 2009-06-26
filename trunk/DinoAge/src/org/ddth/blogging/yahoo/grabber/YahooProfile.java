@@ -13,6 +13,7 @@ import org.ddth.blogging.Blog;
 import org.ddth.blogging.Comment;
 import org.ddth.blogging.Entry;
 import org.ddth.blogging.yahoo.YahooBlogAPI;
+import org.ddth.dinoage.core.ProfileChangeEvent;
 import org.ddth.dinoage.core.SessionProfile;
 import org.ddth.dinoage.data.DataManager;
 
@@ -24,7 +25,6 @@ public class YahooProfile extends SessionProfile {
 	private String beginningURL;
 	private boolean isNewlyCreated = true;
 
-	private DataManager manager = new DataManager();
 	private Blog blog;
 	
 	@Override
@@ -74,14 +74,16 @@ public class YahooProfile extends SessionProfile {
 	
 	public void saveBlog(Blog blog) {
 		this.blog = blog;
-		manager.createAuthor(blog.getAuthors().get(0));
-		manager.createBlog(blog);
+		DataManager.getInstance().createAuthor(blog.getAuthor());
+		DataManager.getInstance().createBlog(blog);
+		fireProfileChanged(new ProfileChangeEvent(this, blog, ProfileChangeEvent.PROFILE_RELOADED_CHANGE));
 	}
 	
 	public void saveEntry(Entry entry) {
-		manager.createEntry(blog.getBlogId(), entry);
+		DataManager.getInstance().createEntry(blog.getBlogId(), entry);
 		for (Comment comment : entry.getComments()) {
-			manager.createComment(entry.getEntryId(), comment);
+			DataManager.getInstance().createComment(entry.getEntryId(), comment);
 		}
+		fireProfileChanged(new ProfileChangeEvent(this, entry, ProfileChangeEvent.ENTRY_ADDED_CHANGE));
 	}
 }
