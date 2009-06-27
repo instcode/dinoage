@@ -43,14 +43,16 @@ public class ExportHandler extends AbstractHandler {
 				WXR.export(blog, outputStreamWriter);
 			}
 			catch (Exception e) {
+				e.printStackTrace();
+			}
+			finally {
 				if (outputStreamWriter != null) {
 					try {
 						outputStreamWriter.close();
 					}
-					catch (IOException ex) {
+					catch (IOException e) {
 					}
 				}
-				e.printStackTrace();
 			}
 		}
 		return null;
