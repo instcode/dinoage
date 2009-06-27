@@ -88,7 +88,7 @@ public class ProfileEditor extends EditorPart {
 		viewer = createTableViewer(composite);
 		viewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
 		viewer.setInput(getEditorInput());
-		ToolTipSupport support = new ToolTipSupport(viewer, ToolTip.NO_RECREATE | SWT.SHADOW_ETCHED_OUT, false);
+		ToolTipSupport support = new ToolTipSupport(viewer, ToolTip.NO_RECREATE, false);
 		support.setHideOnMouseDown(false);
 	}
 
@@ -154,20 +154,23 @@ public class ProfileEditor extends EditorPart {
 		Menu menu = new Menu(composite.getShell(), SWT.POP_UP);
 		
 		MenuItem checkAllItem = new MenuItem(menu, SWT.NONE);
-		checkAllItem.setText("Select All");
+		checkAllItem.setText(ResourceManager.getMessage(ResourceManager.KEY_MESSAGE_SELECT_ALL));
 		checkAllItem.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				/*
 				 * Right now, we can't use viewer.setAllChecked(true)
 				 * because getTable().getItems() won't work with lazy
-				 * load table view. Waiting for this bug fixed.
+				 * load table view and it causes issues with the UI.
+				 * I filed a bug here & now waiting for it gets fixed.
+				 *  
+				 * https://bugs.eclipse.org/bugs/show_bug.cgi?id=281463
 				 */
 				Table table = viewer.getTable();
 				int itemCount = table.getItemCount();
 				for(int i = 0; i < itemCount; i++){
 	                TableItem item = table.getItem(i);
-	                // Invoke #getChecked() to fix a silly bug by
-	                // using lazy load table view
+	                // Invoke #getChecked() to fix a silly bug when
+	                // using a lazy-load-table-view
 	                item.getChecked();
 	                item.setChecked(true);
 	            }
@@ -175,7 +178,7 @@ public class ProfileEditor extends EditorPart {
 		});
 		
 		MenuItem checkNoneItem = new MenuItem(menu, SWT.NONE);
-		checkNoneItem.setText("Select None");
+		checkNoneItem.setText(ResourceManager.getMessage(ResourceManager.KEY_MESSAGE_SELECT_NONE));
 		checkNoneItem.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				viewer.setAllChecked(false);
@@ -183,7 +186,7 @@ public class ProfileEditor extends EditorPart {
 		});
 		
 		MenuItem invertSelectionItem = new MenuItem(menu, SWT.NONE);
-		invertSelectionItem.setText("Invert Selection");
+		invertSelectionItem.setText(ResourceManager.getMessage(ResourceManager.KEY_MESSAGE_INVERT_SELECTION));
 		invertSelectionItem.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				Table table = viewer.getTable();
