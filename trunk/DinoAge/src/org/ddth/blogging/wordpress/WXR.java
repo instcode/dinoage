@@ -7,6 +7,7 @@
  **************************************************/
 package org.ddth.blogging.wordpress;
 
+import java.io.File;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -54,7 +55,8 @@ public class WXR {
 	}
 
 	private static void database() {
-		DataManager manager = new DataManager();
+		File file = new File("D:\\Projects\\DinoAge\\workspaces\\");
+		DataManager manager = new DataManager(file.getAbsolutePath() + File.separator + "database");
 		
 		List<Entry> entries = manager.getEntries("http://360.yahoo.com/nullpointer82");
 		for (Entry entry : entries) {
