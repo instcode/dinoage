@@ -17,6 +17,8 @@ import org.apache.commons.logging.LogFactory;
 import org.ddth.http.core.ConnectionEvent;
 import org.ddth.http.core.ConnectionListener;
 import org.ddth.http.core.Session;
+import org.ddth.http.core.SessionChangeEvent;
+import org.ddth.http.core.SessionChangeListener;
 import org.ddth.http.core.connection.ConnectionModel;
 import org.ddth.http.core.connection.Request;
 import org.ddth.http.core.connection.RequestFuture;
@@ -70,6 +72,8 @@ public abstract class ThreadPoolSession implements ConnectionListener, Session {
 	 * A list of ConnectionListeners which are interested in requesting events.
 	 */
 	private List<ConnectionListener> listeners = new ArrayList<ConnectionListener>();
+	
+	private List<SessionChangeListener> sessionListeners = new ArrayList<SessionChangeListener>(); 
 
 	/**
 	 * Create a new session with the given content handle dispatcher.
@@ -94,6 +98,36 @@ public abstract class ThreadPoolSession implements ConnectionListener, Session {
 	}
 
 	/**
+	 * Add a session listener.
+	 * 
+	 * @param listener
+	 */
+	public void addSessionChangeListener(SessionChangeListener listener) {
+		sessionListeners.add(listener);
+	}
+	
+	/**
+	 * Remove a session listener.
+	 * 
+	 * @param listener
+	 * @return
+	 */
+	public boolean removeSessionChangeListener(SessionChangeListener listener) {
+		return sessionListeners.remove(listener);
+	}
+
+	/**
+	 * Fire a change event to all listener
+	 * 
+	 * @param event
+	 */
+	protected void fireSessionChanged(SessionChangeEvent event) {
+		for (SessionChangeListener listener : sessionListeners) {
+			listener.sessionChanged(event);
+		}
+	}
+	
+	/**
 	 * Register a listener.
 	 * 
 	 * @param listener
@@ -117,6 +151,7 @@ public abstract class ThreadPoolSession implements ConnectionListener, Session {
 	
 	public void start() {
 		connectionModel.open();
+		fireSessionChanged(new SessionChangeEvent(this, SessionChangeEvent.SESSION_START));
 	}
 
 	public boolean isRunning() {
@@ -129,6 +164,7 @@ public abstract class ThreadPoolSession implements ConnectionListener, Session {
 			future.cancel(true);
 		}
 		connectionModel.close();
+		fireSessionChanged(new SessionChangeEvent(this, SessionChangeEvent.SESSION_END));
 	}
 
 	public void notifyRequesting(ConnectionEvent event) {
