@@ -37,7 +37,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-public class YahooBlogEntryUtil {
+public class YahooBlogUtil {
 	private static Log logger = LogFactory.getLog(YBrowsingSession.class);
 
 	/**
@@ -93,7 +93,22 @@ public class YahooBlogEntryUtil {
 	}
 	
 	private static class YahooBlogKey {
-		static XPathKey YMGL_BLOG			= new XPathKey("//*[@id=\"ymgl-blog\"]");
+		/**
+		 * Start from beginning
+		 */
+		static XPathKey YMGL_PROFILE			= new XPathKey("//*[@id=\"ymgl-profile\"]");
+		
+		/**
+		 * Start from {@value #YMGL_PROFILE}
+		 */
+		static XPathKey PROFILE_NAME			= new XPathKey("DIV/DIV/H2/SPAN[2]");
+		static XPathKey PROFILE_URL				= new XPathKey("DIV/DIV/P/A/@href");
+		static XPathKey PROFILE_AVATAR		= new XPathKey("//*[@id=\"user-photos-full\"]/@src");
+		
+		/**
+		 * Start from beginning
+		 */
+		static XPathKey YMGL_BLOG				= new XPathKey("//*[@id=\"ymgl-blog\"]");
 		
 		/**
 		 * Start from {@value #YMGL_BLOG}
@@ -128,6 +143,16 @@ public class YahooBlogEntryUtil {
 		static XPathKey COMMENTS_COMMENT_DATE	= new XPathKey("P[2]");
 	}
 
+	public static Author parseYahooProfile(Document doc) {
+		Node profile = YahooBlogKey.YMGL_PROFILE.getNode(doc);
+		String profileName = YahooBlogKey.PROFILE_NAME.getText(profile);
+		String profileURL = YahooBlogKey.PROFILE_URL.getText(profile);
+		String avatar = YahooBlogKey.PROFILE_AVATAR.getText(profile);
+		String profileId = YahooBlogAPI.parseProfileId(profileURL);
+		
+		return new Author(profileId, profileName, profileURL, avatar);
+	}
+	
 	/**
 	 * @param doc
 	 * @return
@@ -149,6 +174,7 @@ public class YahooBlogEntryUtil {
 		}
 		YahooBlog blog = new YahooBlog();
 		blog.setFirstEntryURL(firstEntryURL);
+		blog.addAuthor(parseYahooProfile(doc));
 		return blog;
 	}
 
@@ -184,7 +210,8 @@ public class YahooBlogEntryUtil {
 		try {
 			Node entry = YahooBlogKey.YMGL_BLOG.getNode(doc);
 			BlogPost blogPost = parseBlogPost(entry);
-			blogEntry = new YahooBlogEntry(blogPost);
+			Author author = parseYahooProfile(doc);
+			blogEntry = new YahooBlogEntry(YahooBlogAPI.YAHOO_360_BLOG_URL + author.getUserId() + "?p=" + blogPost.getPostId(), blogPost);
 			
 			String nextURL = null;
 			Node comment = YahooBlogKey.BLOG_ENTRY_COMMENTS.getNode(doc);
@@ -228,8 +255,8 @@ public class YahooBlogEntryUtil {
 	private static BlogPost parseBlogPost(Node ymglBlog) throws ParseException {
 		BlogPost blogPost = new BlogPost();
 
-		String entryURL = YahooBlogKey.BLOG_ENTRY_TAG_ERROR_ID.getText(ymglBlog);
-		Matcher matcher = PATTERN_TO_EXTRACT_POST_ID.matcher(entryURL);
+		String entryTag = YahooBlogKey.BLOG_ENTRY_TAG_ERROR_ID.getText(ymglBlog);
+		Matcher matcher = PATTERN_TO_EXTRACT_POST_ID.matcher(entryTag);
 		String postId = "error";
 		if (matcher.matches()) {
 			postId = matcher.group(1);
@@ -285,13 +312,15 @@ public class YahooBlogEntryUtil {
 
 	public static void main(String[] args) throws IOException {
 		YahooBlogContentHandler contentHandler = new YahooBlogContentHandler();
-		FileInputStream inputStream = new FileInputStream("./workspaces/w1/instcode/entry/entry-1590.html");
+		FileInputStream inputStream = new FileInputStream("./workspaces/w1/khanhvan19/entry/entry-44.html");
 		WebpageContent webContent = new WebpageContent(inputStream, "utf-8");
 		DomTreeContent content = (DomTreeContent)contentHandler.handle(webContent);
 	
-		System.out.println(YahooBlogEntryUtil.parseYahooBlog(content.getDocument()).getFirstEntryURL());
+		YahooBlog yahooBlog = YahooBlogUtil.parseYahooBlog(content.getDocument());
+		System.out.println(yahooBlog.getAuthor());
+		System.out.println(yahooBlog.getFirstEntryURL());
 
-		YahooBlogEntry entry = YahooBlogEntryUtil.parseEntry(content.getDocument());
+		YahooBlogEntry entry = YahooBlogUtil.parseEntry(content.getDocument());
 		BlogPost post = entry.getPost();
 		System.out.println(
 				"Link: " + entry.getNextURL() +

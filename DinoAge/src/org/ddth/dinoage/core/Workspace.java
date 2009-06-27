@@ -32,14 +32,14 @@ public final class Workspace {
 	private Map<String, Profile> map = new HashMap<String, Profile>();
 	private File workspaceFolder;
 	private FileLock lock;
-	private ProfileLoader profileLoader;
+	private ProfileFactory profileLoader;
 	private List<WorkspaceChangeListener> listeners = new ArrayList<WorkspaceChangeListener>();
 
 	public static final int WORKSPACE_IS_AVAILABLE = 0;
 	public static final int WORKSPACE_IS_INVALID = 1;
 	public static final int WORKSPACE_IS_BEING_USED = 2;
 	
-	public Workspace(File workspaceFolder, ProfileLoader loader) {
+	public Workspace(File workspaceFolder, ProfileFactory loader) {
 		this.workspaceFolder = workspaceFolder;
 		this.profileLoader = loader;
 	}
@@ -133,6 +133,7 @@ public final class Workspace {
 			outputStream = profile.store(resumeFile);
 			map.put(profile.getProfileName().toLowerCase(), profile);
 			if (!exists) {
+				profile.load(resumeFile);
 				fireProfileAdded(profile);
 			}
 			success = true;
@@ -175,7 +176,7 @@ public final class Workspace {
 		return map.values();
 	}
 
-	public ProfileLoader getProfileLoader() {
+	public ProfileFactory getProfileLoader() {
 		return profileLoader;
 	}
 

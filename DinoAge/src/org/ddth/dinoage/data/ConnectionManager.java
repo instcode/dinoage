@@ -22,20 +22,8 @@ import java.sql.Statement;
  */
 public class ConnectionManager {
 	private Connection connection = null;
-	private static ConnectionManager manager;
 
-	public static ConnectionManager getInstance() {
-		if (manager == null) {
-			setup("org.apache.derby.jdbc.EmbeddedDriver", "jdbc:derby:database;create=true;", "derby", "", "");
-		}
-		return manager;
-	}
-	
-	public static void setup(String driverClass, String connectionURL, String dbType, String username, String password) {
-		manager = new ConnectionManager(driverClass, connectionURL, dbType, username, password);
-	}
-
-	private ConnectionManager(String driverClass, String connectionURL, String dbType, String username, String password) {
+	public ConnectionManager(String driverClass, String connectionURL, String dbType, String username, String password) {
 		try {
 			Class.forName(driverClass).newInstance();
 			connection = DriverManager.getConnection(connectionURL, username, password);

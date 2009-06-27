@@ -72,6 +72,10 @@ public class Blog {
 		return entries;
 	}
 
+	public void setEntries(List<Entry> entries) {
+		this.entries = entries;
+	}
+	
 	public void addEntry(Entry entry) {
 		entries.add(entry);
 	}

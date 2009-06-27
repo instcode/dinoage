@@ -17,7 +17,7 @@ import org.apache.commons.logging.LogFactory;
 import org.ddth.blogging.yahoo.grabber.YBrowsingSession;
 import org.ddth.dinoage.core.BrowsingSession;
 import org.ddth.dinoage.core.Profile;
-import org.ddth.dinoage.core.ProfileLoader;
+import org.ddth.dinoage.core.ProfileFactory;
 import org.ddth.dinoage.core.Workspace;
 import org.ddth.dinoage.core.WorkspaceManager;
 import org.ddth.dinoage.eclipse.ui.widget.ChooseWorkspaceDlg;
@@ -29,7 +29,7 @@ public class DinoAge {
 	private Log logger = LogFactory.getLog(DinoAge.class);
 	private Map<Profile, BrowsingSession> sessions = new HashMap<Profile, BrowsingSession>();
 	private Workspace workspace;
-	private ProfileLoader profileLoader = new YBrowsingSession.YProfileLoader();
+	private ProfileFactory profileLoader = new YBrowsingSession.YProfileLoader();
 
 	public boolean isRunning() {
 		boolean isRunning = false;

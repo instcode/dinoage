@@ -14,11 +14,20 @@ public class Entry {
 	private long entryId;
 	private BlogPost post;
 	private List<Comment> comments = new ArrayList<Comment>();
+	private String url;
 	
 	public Entry(BlogPost post) {
 		this.post = post;
 	}
 
+	public void setUrl(String url) {
+		this.url = url;
+	}
+	
+	public String getUrl() {
+		return url;
+	}
+	
 	public BlogPost getPost() {
 		return post;
 	}

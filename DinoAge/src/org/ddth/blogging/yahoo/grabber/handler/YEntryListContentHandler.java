@@ -8,7 +8,7 @@
 package org.ddth.blogging.yahoo.grabber.handler;
 
 import org.ddth.blogging.yahoo.YahooBlog;
-import org.ddth.blogging.yahoo.YahooBlogEntryUtil;
+import org.ddth.blogging.yahoo.YahooBlogUtil;
 import org.ddth.blogging.yahoo.grabber.YBlogContent;
 import org.ddth.http.core.content.Content;
 import org.ddth.http.impl.content.DomTreeContent;
@@ -20,7 +20,7 @@ public class YEntryListContentHandler extends YahooBlogContentHandler {
 	public Content<?> handle(Content<?> content) {
 		DomTreeContent domTreeContent = (DomTreeContent) super.handle(content);
 		Document doc = domTreeContent.getDocument();
-		YahooBlog yahooBlog = YahooBlogEntryUtil.parseYahooBlog(doc);
+		YahooBlog yahooBlog = YahooBlogUtil.parseYahooBlog(doc);
 		YBlogContent yahooBlogContent = new YBlogContent(domTreeContent, yahooBlog);
 		return yahooBlogContent;
 	}

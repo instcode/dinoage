@@ -7,8 +7,9 @@ public class YahooBlogEntry extends Entry {
 	private String nextURL;
 	private String blogId;
 	
-	public YahooBlogEntry(BlogPost post) {
+	public YahooBlogEntry(String entryURL, BlogPost post) {
 		super(post);
+		setUrl(entryURL);
 	}
 
 	public void setBlogId(String blogId) {

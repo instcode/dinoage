@@ -31,6 +31,7 @@ import org.ddth.dinoage.data.exception.UpdateDataException;
  * @author khoa.nguyen
  */
 class DefaultDataProvider implements DataProvider {
+	
 	private static final String CREATE_AUTHOR = "INSERT INTO Author (userId, name, url, email, avatar) VALUES (?,?,?,?,?)";
 	private static final String CREATE_BLOG = "INSERT INTO Blog (blogId, userId, url, title, description) VALUES (?,?,?,?,?)";
 	private static final String CREATE_POST = "INSERT INTO Post (userId, content, creation) VALUES (?,?,?)";
@@ -41,12 +42,19 @@ class DefaultDataProvider implements DataProvider {
 	private static final String GET_BLOG = "SELECT userid, url, title, description FROM Blog WHERE b.blogId=?";
 	private static final String GET_ENTRIES = "SELECT e.entryId, e.title, e.tags, p.postId, p.userId, p.content, p.creation FROM Entry AS e, Post AS p WHERE e.blogId=? AND e.postId=p.postId";
 	private static final String GET_COMMENTS = "SELECT c.commentId, p.postId, p.userId, p.content, p.creation FROM Comment AS c, Post AS p WHERE c.entryId=? AND c.postId=p.postId";
-
+	
+	private ConnectionManager manager;
+	
+	public DefaultDataProvider(ConnectionManager manager) {
+		this.manager = manager;
+	}
+	
 	public void createAuthor(Author author) throws UpdateDataException {
 		Connection con = null;
 		PreparedStatement pstmt = null;
+
 		try {
-			con = ConnectionManager.getInstance().getConnection();
+			con = manager.getConnection();
 			pstmt = con.prepareStatement(CREATE_AUTHOR);
 			pstmt.setString(1, author.getUserId());
 			pstmt.setString(2, author.getName());
@@ -57,7 +65,7 @@ class DefaultDataProvider implements DataProvider {
 		} catch (Exception e) {
 			throw new UpdateDataException(e);
 		} finally {
-			ConnectionManager.getInstance().close(pstmt);
+			manager.close(pstmt);
 		}
 	}
 
@@ -65,7 +73,7 @@ class DefaultDataProvider implements DataProvider {
 		Connection con = null;
 		PreparedStatement pstmt = null;
 		try {
-			con = ConnectionManager.getInstance().getConnection();
+			con = manager.getConnection();
 			pstmt = con.prepareStatement(CREATE_BLOG);
 
 			Author author = blog.getAuthors().get(0);
@@ -78,7 +86,7 @@ class DefaultDataProvider implements DataProvider {
 		} catch (Exception e) {
 			throw new UpdateDataException(e);
 		} finally {
-			ConnectionManager.getInstance().close(pstmt);
+			manager.close(pstmt);
 		}
 	}
 
@@ -86,7 +94,7 @@ class DefaultDataProvider implements DataProvider {
 		Connection con = null;
 		PreparedStatement pstmt = null;
 		try {
-			con = ConnectionManager.getInstance().getConnection();
+			con = manager.getConnection();
 			pstmt = con.prepareStatement(CREATE_POST,
 					Statement.RETURN_GENERATED_KEYS);
 			pstmt.setString(1, post.getAuthor().getUserId());
@@ -99,7 +107,7 @@ class DefaultDataProvider implements DataProvider {
 		} catch (Exception e) {
 			throw new UpdateDataException(e);
 		} finally {
-			ConnectionManager.getInstance().close(pstmt);
+			manager.close(pstmt);
 		}
 	}
 
@@ -109,7 +117,7 @@ class DefaultDataProvider implements DataProvider {
 		PreparedStatement pstmt = null;
 		try {
 			createPost(entry.getPost());
-			con = ConnectionManager.getInstance().getConnection();
+			con = manager.getConnection();
 			pstmt = con.prepareStatement(CREATE_ENTRY,
 					Statement.RETURN_GENERATED_KEYS);
 			pstmt.setString(1, blogId);
@@ -123,7 +131,7 @@ class DefaultDataProvider implements DataProvider {
 		} catch (Exception e) {
 			throw new UpdateDataException(e);
 		} finally {
-			ConnectionManager.getInstance().close(pstmt);
+			manager.close(pstmt);
 		}
 	}
 
@@ -133,7 +141,7 @@ class DefaultDataProvider implements DataProvider {
 		PreparedStatement pstmt = null;
 		try {
 			createPost(comment);
-			con = ConnectionManager.getInstance().getConnection();
+			con = manager.getConnection();
 			pstmt = con.prepareStatement(CREATE_COMMENT,
 					Statement.RETURN_GENERATED_KEYS);
 			pstmt.setLong(1, entryId);
@@ -145,7 +153,7 @@ class DefaultDataProvider implements DataProvider {
 		} catch (Exception e) {
 			throw new UpdateDataException(e);
 		} finally {
-			ConnectionManager.getInstance().close(pstmt);
+			manager.close(pstmt);
 		}
 	}
 
@@ -154,7 +162,7 @@ class DefaultDataProvider implements DataProvider {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try {
-			con = ConnectionManager.getInstance().getConnection();
+			con = manager.getConnection();
 			pstmt = con.prepareStatement(GET_AUTHOR);
 			pstmt.setString(1, userId);
 			rs = pstmt.executeQuery();
@@ -171,7 +179,7 @@ class DefaultDataProvider implements DataProvider {
 		} catch (Exception e) {
 			throw new QueryDataException(e);
 		} finally {
-			ConnectionManager.getInstance().close(pstmt);
+			manager.close(pstmt);
 		}
 	}
 	
@@ -180,7 +188,7 @@ class DefaultDataProvider implements DataProvider {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try {
-			con = ConnectionManager.getInstance().getConnection();
+			con = manager.getConnection();
 			pstmt = con.prepareStatement(GET_BLOG);
 			pstmt.setString(1, blogId);
 			rs = pstmt.executeQuery();
@@ -197,7 +205,7 @@ class DefaultDataProvider implements DataProvider {
 		} catch (Exception e) {
 			throw new QueryDataException(e);
 		} finally {
-			ConnectionManager.getInstance().close(pstmt);
+			manager.close(pstmt);
 		}
 	}
 
@@ -206,7 +214,7 @@ class DefaultDataProvider implements DataProvider {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try {
-			con = ConnectionManager.getInstance().getConnection();
+			con = manager.getConnection();
 			pstmt = con.prepareStatement(GET_ENTRIES);
 			pstmt.setString(1, blogId);
 			rs = pstmt.executeQuery();
@@ -229,7 +237,7 @@ class DefaultDataProvider implements DataProvider {
 			throw new QueryDataException(e);
 		}
 		finally {
-			ConnectionManager.getInstance().close(pstmt);
+			manager.close(pstmt);
 		}
 	}
 
@@ -238,7 +246,7 @@ class DefaultDataProvider implements DataProvider {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		try {
-			con = ConnectionManager.getInstance().getConnection();
+			con = manager.getConnection();
 			pstmt = con.prepareStatement(GET_COMMENTS);
 			pstmt.setLong(1, entryId);
 			rs = pstmt.executeQuery();
@@ -255,7 +263,7 @@ class DefaultDataProvider implements DataProvider {
 			throw new QueryDataException(e);
 		}
 		finally {
-			ConnectionManager.getInstance().close(pstmt);
+			manager.close(pstmt);
 		}
 	}
 }

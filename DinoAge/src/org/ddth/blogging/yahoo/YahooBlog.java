@@ -16,21 +16,6 @@ import org.ddth.blogging.Blog;
 public class YahooBlog extends Blog {
 
 	private String firstEntryURL;
-	private String guestbookURL;
-	
-	/**
-	 * @return the guestbookURL
-	 */
-	public String getGuestbookURL() {
-		return guestbookURL;
-	}
-	
-	/**
-	 * @param guestbookURL the guestbookURL to set
-	 */
-	public void setGuestbookURL(String guestbookURL) {
-		this.guestbookURL = guestbookURL;
-	}
 	
 	/**
 	 * @return the entryURL
