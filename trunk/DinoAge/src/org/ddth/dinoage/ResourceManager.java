@@ -62,6 +62,9 @@ public class ResourceManager {
 	public static final String KEY_LABEL_NEW_ELLIPSIS = "KEY_LABEL_NEW_ELLIPSIS";
 	public static final String KEY_MESSAGE_EXISTED_PROFILE = "KEY_MESSAGE_EXISTED_PROFILE";
 	public static final String KEY_CONFIRM_STOP_ACTIVE_PROFILE = "KEY_CONFIRM_STOP_ACTIVE_PROFILE";
+	public static final String KEY_MESSAGE_SELECT_ALL = "KEY_MESSAGE_SELECT_ALL";
+	public static final String KEY_MESSAGE_SELECT_NONE = "KEY_MESSAGE_SELECT_NONE";
+	public static final String KEY_MESSAGE_INVERT_SELECTION = "KEY_MESSAGE_INVERT_SELECTION";
 	
 	private static ResourceBundle resources;
 
