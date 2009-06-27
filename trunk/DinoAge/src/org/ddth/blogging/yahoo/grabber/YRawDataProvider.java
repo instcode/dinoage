@@ -138,6 +138,13 @@ class YRawDataProvider implements DataProvider {
 		List<Entry> entries = new ArrayList<Entry>();
 		try {
 			for (File file : files) {
+				if (Thread.currentThread().isInterrupted()) {
+					// This task consumes time and it's normally executed
+					// in a thread. To be nice to the caller, it should
+					// check for interrupted flag every step to make a
+					// decision on whether continue running or not.
+					break;
+				}
 				Document doc = getDocument(file);
 				YahooBlogEntry entry = YahooBlogUtil.parseEntry(doc);
 				Long postId = new Long(entry.getPost().getPostId());

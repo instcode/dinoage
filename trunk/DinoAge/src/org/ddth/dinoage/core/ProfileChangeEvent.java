@@ -13,8 +13,8 @@ package org.ddth.dinoage.core;
  */
 public class ProfileChangeEvent {
 	
-	public static final int ENTRY_ADDED_CHANGE = 1;
-	public static final int PROFILE_LOADED_CHANGE = 2;
+	public static final int PROFILE_CHANGED = 1;
+	public static final int PROFILE_FIRST_LOADED = 2;
 	
 	private Profile profile;
 	private Object data;

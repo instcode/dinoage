@@ -29,10 +29,10 @@ public class YahooPersistence extends Persistence {
 	private DataManager manager;
 	private DataManager manager2;
 	
-	public YahooPersistence(File profileFolder, DataLoadMonitor monitor) {
-		super(profileFolder, CATEGORIES);
-		manager = new DataManager(profileFolder.getAbsolutePath() + File.separator + CATEGORIES[BLOG_DATABASE]);
-		manager2 = new DataManager(new YRawDataProvider(profileFolder, monitor));
+	public YahooPersistence(File profileFile, DataLoadMonitor monitor) {
+		super(profileFile.getParentFile(), CATEGORIES);
+		manager = new DataManager(getFolder(BLOG_DATABASE).getAbsolutePath());
+		manager2 = new DataManager(new YRawDataProvider(profileFile.getParentFile(), monitor));
 	}
 	
 	public Blog load(String profileId) {

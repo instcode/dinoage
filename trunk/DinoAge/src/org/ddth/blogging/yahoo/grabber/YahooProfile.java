@@ -25,6 +25,7 @@ public class YahooProfile extends SessionProfile implements DataLoadMonitor {
 	private String profileId;
 	private String beginningURL;
 	private YahooPersistence persistence;
+	private Blog blog;
 
 	@Override
 	public void setProfileURL(String profileURL) {
@@ -36,7 +37,7 @@ public class YahooProfile extends SessionProfile implements DataLoadMonitor {
 	@Override
 	public void load(File profileFile) throws IOException {
 		super.load(profileFile);
-		persistence = new YahooPersistence(profileFile.getParentFile(), this);
+		persistence = new YahooPersistence(profileFile, this);
 	}
 	
 	@Override
@@ -68,19 +69,29 @@ public class YahooProfile extends SessionProfile implements DataLoadMonitor {
 	public void save(YBlogContent blogContent) {
 		if (persistence.save(blogContent)) {
 			fireProfileChanged(new ProfileChangeEvent(
-				this, blogContent.getBlog(), ProfileChangeEvent.PROFILE_LOADED_CHANGE));
+				this, blogContent.getBlog(), ProfileChangeEvent.PROFILE_FIRST_LOADED));
 		}
+		blog = blogContent.getBlog();
 	}
 
 	public void save(YBlogEntryContent blogEntry) {
 		if (persistence.save(blogEntry)) {
 			fireProfileChanged(new ProfileChangeEvent(
-				this, blogEntry.getEntry(), ProfileChangeEvent.ENTRY_ADDED_CHANGE));
+				this, blogEntry.getEntry(), ProfileChangeEvent.PROFILE_CHANGED));
+		}
+		if (blog != null) {
+			blog.addEntry(blogEntry.getEntry());
 		}
 	}
 	
 	public void load() {
-		persistence.load(profileId);
+		if (blog != null) {
+			fireProfileChanged(new ProfileChangeEvent(
+					this, blog, ProfileChangeEvent.PROFILE_FIRST_LOADED));
+		}
+		else {
+			blog = persistence.load(profileId);
+		}
 	}
 
 	public void loaded(DataLoadEvent event) {
@@ -89,11 +100,11 @@ public class YahooProfile extends SessionProfile implements DataLoadMonitor {
 			Object data = event.getData();
 			if (data instanceof Blog) {
 				fireProfileChanged(new ProfileChangeEvent(
-						this, data, ProfileChangeEvent.PROFILE_LOADED_CHANGE));				
+						this, data, ProfileChangeEvent.PROFILE_FIRST_LOADED));				
 			}
 			else {
 				fireProfileChanged(new ProfileChangeEvent(
-						this, data, ProfileChangeEvent.ENTRY_ADDED_CHANGE));
+						this, data, ProfileChangeEvent.PROFILE_CHANGED));
 			}
 
 			break;
