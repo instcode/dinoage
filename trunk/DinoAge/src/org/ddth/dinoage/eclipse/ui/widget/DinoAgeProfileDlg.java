@@ -15,6 +15,12 @@ import org.eclipse.jface.fieldassist.ControlDecoration;
 import org.eclipse.jface.fieldassist.FieldDecoration;
 import org.eclipse.jface.fieldassist.FieldDecorationRegistry;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DropTarget;
+import org.eclipse.swt.dnd.DropTargetAdapter;
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -136,6 +142,28 @@ public class DinoAgeProfileDlg extends Dialog {
 		controlDecoration.setImage(fieldDecoration.getImage());
 		return controlDecoration;
 	}
+
+	private void createDropTarget(final Text text) {
+		DropTarget target = new DropTarget(text, DND.DROP_DEFAULT | DND.DROP_COPY | DND.DROP_MOVE | DND.DROP_LINK);
+		target.setTransfer(new Transfer[] { TextTransfer.getInstance() });
+		target.addDropListener(new DropTargetAdapter() {
+			public void dragEnter(DropTargetEvent event) {
+				if (event.detail == DND.DROP_DEFAULT)
+					event.detail = DND.DROP_COPY;
+			}
+
+			public void dragOperationChanged(DropTargetEvent event) {
+				if (event.detail == DND.DROP_DEFAULT)
+					event.detail = DND.DROP_COPY;
+			}
+
+			public void drop(DropTargetEvent event) {
+				if (event.detail == DND.DROP_COPY) {
+					text.setText((String) event.data);
+				}
+			}
+		});
+	}
 	
 	/**
 	 * Create contents of the dialog
@@ -158,6 +186,7 @@ public class DinoAgeProfileDlg extends Dialog {
 		profileURLText.setLayoutData(gd_profileURLText);
 		profileURLText.addModifyListener(checkModifyListener);
 		profileURLDecoration = createControlDecoration(profileURLText, "Please enter profile URL");
+		createDropTarget(profileURLText);
 
 		final Label profileLabel = new Label(composite, SWT.NONE);
 		profileLabel.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_PROFILE_NAME));
@@ -170,6 +199,7 @@ public class DinoAgeProfileDlg extends Dialog {
 		profileText.setLayoutData(gd_profileText);
 		profileText.addModifyListener(checkModifyListener);
 		profileTextDecoration = createControlDecoration(profileText, "Please enter profile name");
+		createDropTarget(profileText);
 
 		okButton = new Button(composite, SWT.NONE);
 		final GridData gd_okButton = new GridData(SWT.LEFT, SWT.CENTER, false, true);
@@ -183,7 +213,7 @@ public class DinoAgeProfileDlg extends Dialog {
 		
 		initializeValues();
 	}
-	
+
 	private void initializeValues() {
 		boolean isEditable = (profile.getProfileName() == null);
 		profileText.setText((isEditable ? "" : profile.getProfileName()));
