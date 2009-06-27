@@ -10,7 +10,6 @@ package org.ddth.blogging.yahoo;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.StringWriter;
-import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
@@ -41,9 +40,13 @@ public class YahooBlogUtil {
 	private static Log logger = LogFactory.getLog(YBrowsingSession.class);
 
 	/**
-	 * Example: Monday December 24, 2007 - 11:36pm (ICT)
+	 * This can parse date time similar to the following
+	 * sample: Monday December 24, 2007 - 11:36pm (ICT)
+	 * <br>
+	 * Because {@link SimpleDateFormat} is not thread-safe,
+	 * the constant below only contains a parsing pattern.
 	 */
-	private static final DateFormat BLOG_DATE_FORMAT = new SimpleDateFormat("EEEE MMMM d, y - HH:mma (z)");
+	private static final String BLOG_DATE_FORMAT = "EEEE MMMM d, y - HH:mma (z)";
 	
 	/**
 	 * Pattern to extract post-id from tag-error-<b>#post-id</b>
@@ -83,7 +86,10 @@ public class YahooBlogUtil {
 		
 		private Object evaluate(Object item, QName returnType) {
 			try {
-				return expression.evaluate(item, returnType);
+				// Again, XPath evaluation is not thread-safe
+				synchronized (expression) {
+					return expression.evaluate(item, returnType);
+				}
 			}
 			catch (XPathExpressionException e) {
 				logger.debug("Error", e);
@@ -278,7 +284,7 @@ public class YahooBlogUtil {
 		blogPost.setTitle(title);
 		blogPost.setTags(buffer.toString());
 		blogPost.setContent(getRawText(body));
-		blogPost.setDate(BLOG_DATE_FORMAT.parse(date));
+		blogPost.setDate(new SimpleDateFormat(BLOG_DATE_FORMAT).parse(date));
 		return blogPost;
 	}
 
@@ -294,8 +300,9 @@ public class YahooBlogUtil {
 		if (photo != null) {
 			author_photo = photo;
 		}
-		
-		return new Comment(new Author("", author_name, author_url, author_photo), text, BLOG_DATE_FORMAT.parse(time));
+
+		return new Comment(new Author("", author_name, author_url, author_photo), text,
+				new SimpleDateFormat(BLOG_DATE_FORMAT).parse(time));
 	}
 	
 	private static String getRawText(Node node) {

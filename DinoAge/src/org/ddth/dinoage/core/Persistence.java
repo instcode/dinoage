@@ -32,6 +32,10 @@ public class Persistence {
 		}
 		this.categories = categories;
 	}
+	
+	protected File getFolder(int index) {
+		return folders[index];
+	}
 
 	private File generateFile(File directory, String name, String extension) {
 		File outputFile = null;

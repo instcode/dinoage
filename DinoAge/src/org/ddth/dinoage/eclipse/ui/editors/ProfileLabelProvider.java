@@ -7,6 +7,9 @@
  **************************************************/
 package org.ddth.dinoage.eclipse.ui.editors;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
 import org.ddth.blogging.Entry;
 import org.eclipse.jface.viewers.CellLabelProvider;
 import org.eclipse.jface.viewers.ViewerCell;
@@ -17,6 +20,8 @@ import org.eclipse.swt.graphics.Point;
  *
  */
 public class ProfileLabelProvider extends CellLabelProvider {
+
+	private static final DateFormat ENTRY_DATE_FORMAT = new SimpleDateFormat("dd-MMM-y");
 
 	public enum BlogEntryColumn {
 		CHECK("", 5),
@@ -57,7 +62,7 @@ public class ProfileLabelProvider extends CellLabelProvider {
 	}
 
 	public int getToolTipTimeDisplayed(Object object) {
-		return 60 * 1000;
+		return 60 * 60 * 1000; // 1 hour =))
 	}
 
 	public void update(ViewerCell cell) {
@@ -70,7 +75,7 @@ public class ProfileLabelProvider extends CellLabelProvider {
 			cell.setText(entry.getPost().getTitle());
 		}
 		else if (columnIndex == BlogEntryColumn.DATE.index()) {
-			cell.setText(entry.getPost().getDate().toString());
+			cell.setText(ENTRY_DATE_FORMAT.format(entry.getPost().getDate()));
 		}
 	}
 }
