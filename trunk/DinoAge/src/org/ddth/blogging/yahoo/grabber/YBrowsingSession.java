@@ -17,9 +17,8 @@ import org.ddth.blogging.yahoo.YahooBlogEntry;
 import org.ddth.blogging.yahoo.grabber.handler.YBlogEntryContentHandler;
 import org.ddth.blogging.yahoo.grabber.handler.YEntryListContentHandler;
 import org.ddth.dinoage.core.BrowsingSession;
-import org.ddth.dinoage.core.Persistence;
 import org.ddth.dinoage.core.Profile;
-import org.ddth.dinoage.core.ProfileLoader;
+import org.ddth.dinoage.core.ProfileFactory;
 import org.ddth.dinoage.core.SessionProfile;
 import org.ddth.dinoage.core.Workspace;
 import org.ddth.http.core.connection.Request;
@@ -32,7 +31,7 @@ import org.ddth.http.core.content.handler.ContentHandlerDispatcher;
  */
 public class YBrowsingSession extends BrowsingSession {
 	
-	public static class YProfileLoader implements ProfileLoader { 
+	public static class YProfileLoader implements ProfileFactory { 
 		public Profile createProfile() {
 			return new YahooProfile();
 		}
@@ -44,13 +43,8 @@ public class YBrowsingSession extends BrowsingSession {
 		}
 	}
 	
-	private static final int BLOG_ENTRY = 0;
-	private static final String[] CATEGORIES = {"entry"};
-	
 	private Log logger = LogFactory.getLog(YBrowsingSession.class);
 
-	private Persistence persistence;
-	
 	private static final ContentHandlerDispatcher YAHOO_360_CONTENT_DISPATCHER = new ContentHandlerDispatcher();
 	static {
 		YAHOO_360_CONTENT_DISPATCHER.registerHandler("http://.*/blog-.*\\?.*p=(\\d+).*", new YBlogEntryContentHandler());
@@ -59,38 +53,37 @@ public class YBrowsingSession extends BrowsingSession {
 
 	public YBrowsingSession(Profile profile, Workspace workspace) {
 		super((SessionProfile) profile, workspace, YAHOO_360_CONTENT_DISPATCHER);
-		this.persistence = new Persistence(workspace.getProfileFolder(profile), CATEGORIES);
 	}
 
 	@Override
 	protected void content(Content<?> content) {
 		String nextURL = null;
-		YahooProfile yahooProfile = (YahooProfile)profile;
-		if (content instanceof YBlogContent) {
-			YBlogContent blogContent = (YBlogContent)content;
-			persistence.write(blogContent.getContent().getContent(), BLOG_ENTRY, "list");
-			YahooBlog blog = blogContent.getBlog();
-			if (blog != null) {
-				nextURL = blog.getFirstEntryURL();
-				yahooProfile.saveBlog(blog);
+		YahooProfile yahooProfile = (YahooProfile) profile;
+		try {
+			if (content instanceof YBlogContent) {
+				YBlogContent blogContent = (YBlogContent) content;
+				yahooProfile.save(blogContent);
+				YahooBlog blog = blogContent.getBlog();
+				if (blog != null) {
+					nextURL = blog.getFirstEntryURL();
+				}
+			} else {
+				YBlogEntryContent blogEntry = (YBlogEntryContent) content;
+				YahooBlogEntry entry = blogEntry.getEntry();
+				nextURL = entry.getNextURL();
+				yahooProfile.save(blogEntry);
+			}
+
+			if (nextURL != null && nextURL.startsWith("http://")) {
+				queue(new Request(nextURL));
+			}
+			else {
+				throw new IllegalStateException("No next URL");
 			}
 		}
-		else {
-			YBlogEntryContent blogEntry = (YBlogEntryContent) content;
-			YahooBlogEntry entry = blogEntry.getEntry();
-			nextURL = entry.getNextURL();
-			persistence.write(
-					blogEntry.getContent().getContent(),
-					BLOG_ENTRY,
-					String.valueOf(entry.getPost().getPostId()));
-			yahooProfile.saveEntry(entry);
-		}
-		if (nextURL != null && nextURL.startsWith("http://")) {
-			queue(new Request(nextURL));
-		}
-		else {
+		catch (Exception e) {
 			// Something went wrong or there's nothing left to do...
-			logger.debug("Stopping current session...");
+			logger.debug("Stopping current session...", e);
 			shutdown();
 		}
 	}

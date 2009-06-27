@@ -13,4 +13,8 @@ public class UpdateDataException extends Exception {
 		super(e);
 	}
 
+	public UpdateDataException(String message) {
+		super(message);
+	}
+
 }

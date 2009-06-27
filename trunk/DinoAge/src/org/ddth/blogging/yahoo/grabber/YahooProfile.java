@@ -7,49 +7,50 @@
  **************************************************/
 package org.ddth.blogging.yahoo.grabber;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Properties;
 
 import org.ddth.blogging.Blog;
-import org.ddth.blogging.Comment;
-import org.ddth.blogging.Entry;
 import org.ddth.blogging.yahoo.YahooBlogAPI;
+import org.ddth.dinoage.core.DataLoadEvent;
 import org.ddth.dinoage.core.ProfileChangeEvent;
+import org.ddth.dinoage.core.DataLoadMonitor;
 import org.ddth.dinoage.core.SessionProfile;
-import org.ddth.dinoage.data.DataManager;
 
-public class YahooProfile extends SessionProfile {
+public class YahooProfile extends SessionProfile implements DataLoadMonitor {
 	
 	private static final String PROFILE_URLS_BEGINNING = "profile.urls.beginning";
 	
 	private String profileId;
 	private String beginningURL;
-	private boolean isNewlyCreated = true;
+	private YahooPersistence persistence;
 
-	private Blog blog;
-	
 	@Override
 	public void setProfileURL(String profileURL) {
-		super.setProfileURL(profileURL);
-		this.profileId = getProfileId(getProfileURL());
-		this.beginningURL = YahooBlogAPI.YAHOO_360_BLOG_URL + profileId;
+		profileId = YahooBlogAPI.parseProfileId(profileURL);
+		beginningURL = YahooBlogAPI.YAHOO_360_BLOG_URL + profileId;
+		super.setProfileURL(YahooBlogAPI.YAHOO_360_PROFILE_URL + profileId);
 	}
 
 	@Override
-	protected void innerLoad(Properties properties) {
-		beginningURL = properties.getProperty(PROFILE_URLS_BEGINNING);
-		if (!beginningURL.startsWith("http://")) {
-			saveURL(null);
-		}
-		isNewlyCreated = false;
+	public void load(File profileFile) throws IOException {
+		super.load(profileFile);
+		persistence = new YahooPersistence(profileFile.getParentFile(), this);
+	}
+	
+	@Override
+	protected void load(Properties properties) {
+		saveURL(properties.getProperty(PROFILE_URLS_BEGINNING));
 	}
 
 	@Override
-	protected void innerStore(Properties properties) {
+	protected void store(Properties properties) {
 		properties.put(PROFILE_URLS_BEGINNING, beginningURL);
 	}
 	
 	public boolean isNewlyCreated() {
-		return isNewlyCreated;
+		return (YahooBlogAPI.YAHOO_360_BLOG_URL + profileId).equals(beginningURL);
 	}
 
 	public String getBeginningURL() {
@@ -57,33 +58,45 @@ public class YahooProfile extends SessionProfile {
 	}
 	
 	public void saveURL(String url) {
-		if (url == null) {
+		if (url == null || !beginningURL.startsWith("http://")) {
 			beginningURL = YahooBlogAPI.YAHOO_360_BLOG_URL + profileId;
 			return;
 		}
 		beginningURL = url;
-		isNewlyCreated = false;
 	}
-	
-	private final String getProfileId(String profileURL) {
-		int begin = YahooBlogAPI.YAHOO_360_PROFILE_URL.length();
-		int end = profileURL.indexOf("?", begin);
-		end = (end < 0) ? profileURL.length() : end;
-		return end <= begin ? "" : profileURL.substring(begin, end);
-	}
-	
-	public void saveBlog(Blog blog) {
-		this.blog = blog;
-		DataManager.getInstance().createAuthor(blog.getAuthor());
-		DataManager.getInstance().createBlog(blog);
-		fireProfileChanged(new ProfileChangeEvent(this, blog, ProfileChangeEvent.PROFILE_RELOADED_CHANGE));
-	}
-	
-	public void saveEntry(Entry entry) {
-		DataManager.getInstance().createEntry(blog.getBlogId(), entry);
-		for (Comment comment : entry.getComments()) {
-			DataManager.getInstance().createComment(entry.getEntryId(), comment);
+
+	public void save(YBlogContent blogContent) {
+		if (persistence.save(blogContent)) {
+			fireProfileChanged(new ProfileChangeEvent(
+				this, blogContent.getBlog(), ProfileChangeEvent.PROFILE_LOADED_CHANGE));
 		}
-		fireProfileChanged(new ProfileChangeEvent(this, entry, ProfileChangeEvent.ENTRY_ADDED_CHANGE));
+	}
+
+	public void save(YBlogEntryContent blogEntry) {
+		if (persistence.save(blogEntry)) {
+			fireProfileChanged(new ProfileChangeEvent(
+				this, blogEntry.getEntry(), ProfileChangeEvent.ENTRY_ADDED_CHANGE));
+		}
+	}
+	
+	public void load() {
+		persistence.load(profileId);
+	}
+
+	public void loaded(DataLoadEvent event) {
+		switch (event.getType()) {
+		case DataLoadEvent.STEP_LOADED:
+			Object data = event.getData();
+			if (data instanceof Blog) {
+				fireProfileChanged(new ProfileChangeEvent(
+						this, data, ProfileChangeEvent.PROFILE_LOADED_CHANGE));				
+			}
+			else {
+				fireProfileChanged(new ProfileChangeEvent(
+						this, data, ProfileChangeEvent.ENTRY_ADDED_CHANGE));
+			}
+
+			break;
+		}
 	}
 }

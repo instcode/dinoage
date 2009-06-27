@@ -10,7 +10,7 @@ package org.ddth.dinoage.core;
 import java.io.File;
 import java.io.IOException;
 
-public interface ProfileLoader {
+public interface ProfileFactory {
 
 	/**
 	 * @return

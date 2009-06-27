@@ -25,8 +25,8 @@ public abstract class Profile {
 		setProfileURL(profile.getProfileURL());
 	}
 	
-	protected abstract void innerLoad(Properties properties);
-	protected abstract void innerStore(Properties properties);
+	protected abstract void load(Properties properties);
+	protected abstract void store(Properties properties);
 
 	public void addProfileChangeListener(ProfileChangeListener listener) {
 		listeners.add(listener);
@@ -48,7 +48,7 @@ public abstract class Profile {
 		
 		setProfileName(properties.getProperty(PROFILE_NAME, ""));
 		setProfileURL(properties.getProperty(PROFILE_URL, ""));
-		innerLoad(properties);
+		load(properties);
 	}
 
 	public OutputStream store(File profileFile) throws IOException {
@@ -56,7 +56,7 @@ public abstract class Profile {
 		
 		properties.put(PROFILE_NAME, profileName);
 		properties.put(PROFILE_URL, profileURL);
-		innerStore(properties);
+		store(properties);
 		
 		// Store all properties
 		OutputStream outputStream = new FileOutputStream(profileFile);

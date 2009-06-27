@@ -11,29 +11,19 @@ package org.ddth.dinoage.core;
  * @author khoanguyen
  *
  */
-public class ProfileChangeEvent {
+public class DataLoadEvent {
 	
-	public static final int ENTRY_ADDED_CHANGE = 1;
-	public static final int PROFILE_LOADED_CHANGE = 2;
+	public static final int STEP_LOADED = 2;
 	
-	private Profile profile;
 	private Object data;
 	private int type;
 	
 	/**
 	 * 
 	 */
-	public ProfileChangeEvent(Profile profile, Object data, int type) {
-		this.profile = profile;
+	public DataLoadEvent(Object data, int type) {
 		this.data = data;
 		this.type = type;
-	}
-	
-	/**
-	 * @return The workspace
-	 */
-	public Profile getProfile() {
-		return profile;
 	}
 	
 	/**

@@ -7,15 +7,16 @@
  **************************************************/
 package org.ddth.dinoage.eclipse.ui.editors;
 
-import org.eclipse.jface.viewers.ITableLabelProvider;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.swt.graphics.Image;
+import org.ddth.blogging.Entry;
+import org.eclipse.jface.viewers.CellLabelProvider;
+import org.eclipse.jface.viewers.ViewerCell;
+import org.eclipse.swt.graphics.Point;
 
 /**
  * @author khoanguyen
  *
  */
-public class ProfileLabelProvider extends LabelProvider implements ITableLabelProvider {
+public class ProfileLabelProvider extends CellLabelProvider {
 
 	public enum BlogEntryColumn {
 		CHECK("", 5),
@@ -43,28 +44,33 @@ public class ProfileLabelProvider extends LabelProvider implements ITableLabelPr
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java.lang.Object, int)
-	 */
-	public Image getColumnImage(Object element, int columnIndex) {
-		// TODO Auto-generated method stub
-		return null;
+	public String getToolTipText(Object element) {
+		return "<font face=\"verdana\" size=\"2\">" + ((Entry)element).getPost().getContent() + "</font>";
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object, int)
-	 */
-	public String getColumnText(Object element, int columnIndex) {
+	public Point getToolTipShift(Object object) {
+		return new Point(0, 0);
+	}
+
+	public int getToolTipDisplayDelayTime(Object object) {
+		return 0;
+	}
+
+	public int getToolTipTimeDisplayed(Object object) {
+		return 60 * 1000;
+	}
+
+	public void update(ViewerCell cell) {
+		Entry entry = (Entry) cell.getElement();
+		int columnIndex = cell.getColumnIndex();
 		if (columnIndex == BlogEntryColumn.CHECK.index()) {
-			return null;
+			return;
 		}
 		else if (columnIndex == BlogEntryColumn.ENTRY.index()) {
-			return "Helloooooooooo";
+			cell.setText(entry.getPost().getTitle());
 		}
 		else if (columnIndex == BlogEntryColumn.DATE.index()) {
-			return "KeKeKE";
+			cell.setText(entry.getPost().getDate().toString());
 		}
-		return null;
 	}
-
 }

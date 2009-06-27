@@ -63,6 +63,6 @@ public class Author {
 	
 	@Override
 	public String toString() {
-		return name + "/" + url + "/";
+		return userId + "/" + name + "/" + url + "/" + avatar;
 	}
 }

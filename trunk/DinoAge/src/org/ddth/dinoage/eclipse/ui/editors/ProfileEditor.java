@@ -1,20 +1,28 @@
 package org.ddth.dinoage.eclipse.ui.editors;
 
+import org.ddth.blogging.Entry;
 import org.ddth.dinoage.ResourceManager;
 import org.ddth.dinoage.core.Profile;
 import org.ddth.dinoage.eclipse.ui.editors.ProfileLabelProvider.BlogEntryColumn;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
+import org.eclipse.jface.viewers.ColumnViewer;
+import org.eclipse.jface.viewers.ColumnViewerToolTipSupport;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.TableLayout;
+import org.eclipse.jface.viewers.ViewerCell;
+import org.eclipse.jface.window.ToolTip;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.browser.Browser;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.program.Program;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Menu;
@@ -64,7 +72,7 @@ public class ProfileEditor extends EditorPart {
 	public CheckboxTableViewer getViewer() {
 		return viewer;
 	}
-	
+
 	@Override
 	public void createPartControl(Composite parent) {
 		Composite composite = new Composite(parent, SWT.NONE);
@@ -79,9 +87,12 @@ public class ProfileEditor extends EditorPart {
 		
 		viewer = createTableViewer(composite);
 		viewer.getTable().setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+		viewer.setInput(getEditorInput());
+		ToolTipSupport support = new ToolTipSupport(viewer, ToolTip.NO_RECREATE | SWT.SHADOW_ETCHED_OUT, false);
+		support.setHideOnMouseDown(false);
 	}
 
-	private Composite createBanner(Composite composite) {
+	private final Composite createBanner(Composite composite) {
 		Profile profile = (Profile) getEditorInput().getAdapter(Profile.class);
 		
 		Composite banner = new Composite(composite, SWT.NONE);
@@ -108,6 +119,12 @@ public class ProfileEditor extends EditorPart {
 		profileUrlLink.setText(ResourceManager.getMessage(ResourceManager.KEY_MESSAGE_FULL_HREF,
 			new Object[] { profile.getProfileURL(), profile.getProfileURL() })
 		);
+		profileUrlLink.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				Program.launch(e.text);
+			}
+		});
 		return banner;
 	}
 	
@@ -117,7 +134,7 @@ public class ProfileEditor extends EditorPart {
 		
 		TableLayout layout = new TableLayout();
 		for (BlogEntryColumn data : BlogEntryColumn.values()) {
-			final TableColumn column = new TableColumn(viewer.getTable(), SWT.CENTER);
+			final TableColumn column = new TableColumn(viewer.getTable(), SWT.LEFT);
 			column.setText(data.toString());
 			layout.addColumnData(new ColumnWeightData(data.weight(), true));
 		}
@@ -183,5 +200,46 @@ public class ProfileEditor extends EditorPart {
 	@Override
 	public void setFocus() {
 		viewer.getControl().setFocus();
+	}
+
+	private static class ToolTipSupport extends ColumnViewerToolTipSupport {
+
+		protected ToolTipSupport(ColumnViewer viewer, int style,
+				boolean manualActivation) {
+			super(viewer, style, manualActivation);
+		}
+
+		protected Composite createViewerToolTipContentArea(Event event,
+				ViewerCell cell, Composite parent) {
+			Composite composite = new Composite(parent, SWT.BORDER | SWT.RESIZE);
+			GridLayout layout = new GridLayout(1, false);
+			layout.horizontalSpacing = 5;
+			layout.marginWidth = 5;
+			layout.marginHeight = 5;
+			layout.verticalSpacing = 5;
+			composite.setLayout(layout);
+			
+			Label entryTitle = new Label(composite, SWT.NONE);
+			entryTitle.setText(((Entry)cell.getElement()).getPost().getTitle());
+			
+			Link entryLink = new Link(composite, SWT.NONE);
+			String entryURL = ((Entry)cell.getElement()).getUrl();
+			
+			entryLink.setText(ResourceManager.getMessage(ResourceManager.KEY_MESSAGE_FULL_HREF,
+				new Object[] { entryURL, entryURL})
+			);
+			entryLink.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					ToolTipSupport.this.hide();
+					Program.launch(e.text);
+				}
+			});
+			Browser browser = new Browser(composite, SWT.BORDER);
+			browser.setText(getText(event));
+			browser.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 1));
+			composite.setSize(400, 200);
+			return composite;
+		}
 	}
 }

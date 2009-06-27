@@ -24,12 +24,15 @@ import org.ddth.dinoage.data.exception.UpdateDataException;
  */
 public class DataManager {
 	private static Log logger = LogFactory.getLog(DataManager.class);
-	
-	private DataProvider provider = new DefaultDataProvider();
-	private static final DataManager instance = new DataManager();
+	private DataProvider provider;
 
-	public static DataManager getInstance() {
-		return instance;
+	public DataManager(String storagePath) {
+		ConnectionManager manager = new ConnectionManager("org.apache.derby.jdbc.EmbeddedDriver", "jdbc:derby:" + storagePath + ";create=true;", "derby", "", "");
+		provider = new DefaultDataProvider(manager);
+	}
+	
+	public DataManager(DataProvider provider) {
+		this.provider = provider;
 	}
 	
 	public void createAuthor(Author author) {

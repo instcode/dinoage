@@ -20,7 +20,7 @@ import org.ddth.dinoage.data.exception.UpdateDataException;
  * @author khoa.nguyen
  *
  */
-interface DataProvider {
+public interface DataProvider {
 	
 	public void createAuthor(Author author) throws UpdateDataException;
 

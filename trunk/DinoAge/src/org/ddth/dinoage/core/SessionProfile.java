@@ -8,4 +8,6 @@ public abstract class SessionProfile extends Profile {
 	public abstract String getBeginningURL();
 
 	public abstract boolean isNewlyCreated();
+	
+	public abstract void load();
 }
