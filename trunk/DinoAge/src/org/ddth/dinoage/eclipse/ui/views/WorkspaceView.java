@@ -1,6 +1,8 @@
 package org.ddth.dinoage.eclipse.ui.views;
 
 import org.ddth.dinoage.eclipse.Activator;
+import org.ddth.http.core.SessionChangeEvent;
+import org.ddth.http.core.SessionChangeListener;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -22,7 +24,7 @@ import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.services.IEvaluationService;
 
-public class WorkspaceView extends ViewPart {
+public class WorkspaceView extends ViewPart implements SessionChangeListener {
 	public static final String ID = "org.ddth.dinoage.ui.views.workspace";
 	private TreeViewer viewer;
 
@@ -108,5 +110,18 @@ public class WorkspaceView extends ViewPart {
 	 */
 	public void setFocus() {
 		viewer.getControl().setFocus();
+	}
+
+	public void sessionChanged(SessionChangeEvent event) {
+		// This method might be invoked in a worker thread, to eliminate
+		// illegal thread access, the invocation of evaluation service 
+		// should asynchronously run within UI thread. 
+		getSite().getShell().getDisplay().asyncExec(new Runnable() {
+			public void run() {
+				IEvaluationService service = (IEvaluationService) getSite().getService(
+						IEvaluationService.class);
+				service.requestEvaluation("org.ddth.dinoage.viewer.running");
+			}
+		});
 	}
 }

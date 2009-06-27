@@ -161,11 +161,16 @@
                style="push">
             <visibleWhen
                   checkEnabled="false">
+               <and>
                <not>
                   <reference
                         definitionId="org.ddth.dinoage.core.profile.running">
                   </reference>
                </not>
+               <reference
+                     definitionId="org.ddth.ui.views.profile.selected">
+               </reference>
+               </and>
             </visibleWhen>
          </command>
          <command
@@ -174,10 +179,15 @@
                label="Stop"
                style="push"
                tooltip="Stop">
-            <visibleWhen>
+            <visibleWhen checkEnabled="false">
+               <and>
                <reference
                      definitionId="org.ddth.dinoage.core.profile.running">
                </reference>
+               <reference
+                     definitionId="org.ddth.ui.views.profile.selected">
+               </reference>
+               </and>
             </visibleWhen>
          </command>
          <command
@@ -192,11 +202,16 @@
                commandId="org.ddth.dinoage.command.profile.open"
                style="push">
          </command>
+         <separator
+               name="separator1"
+               visible="true">
+         </separator>
          <command
                commandId="org.ddth.dinoage.handlers.profile.execute"
                icon="icons/execute.gif"
                style="push">
-            <visibleWhen>
+            <visibleWhen
+                  checkEnabled="false">
                <not>
                   <reference
                         definitionId="org.ddth.dinoage.core.profile.running">
@@ -210,20 +225,24 @@
                label="Stop"
                style="push"
                tooltip="Stop">
-            <visibleWhen>
+            <visibleWhen
+                  checkEnabled="false">
                <reference
                      definitionId="org.ddth.dinoage.core.profile.running">
                </reference>
             </visibleWhen>
          </command>
          <separator
-               name="separator"
+               name="separator2"
                visible="true">
          </separator>
          <command
                commandId="org.ddth.dinoage.handlers.profile.remove"
                icon="icons/remove.gif"
                style="push">
+            <visibleWhen
+                  checkEnabled="true">
+            </visibleWhen>
          </command>
       </menuContribution>
    </extension>
@@ -258,9 +277,16 @@
             class="org.ddth.dinoage.eclipse.ui.handlers.RemoveProfileHandler"
             commandId="org.ddth.dinoage.handlers.profile.remove">
          <enabledWhen>
-            <reference
-                  definitionId="org.ddth.ui.views.profile.selected">
-            </reference>
+            <and>
+               <reference
+                     definitionId="org.ddth.ui.views.profile.selected">
+               </reference>
+               <not>
+                  <reference
+                        definitionId="org.ddth.dinoage.core.profile.running">
+                  </reference>
+               </not>
+            </and>
          </enabledWhen>
       </handler>
       <handler
