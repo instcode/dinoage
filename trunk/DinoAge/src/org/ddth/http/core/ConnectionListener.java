@@ -17,26 +17,10 @@ package org.ddth.http.core;
 public interface ConnectionListener {
 
 	/**
-	 * Notify about which request is being made.
+	 * Notify about the status of a request is being made.
 	 * 
 	 * @param event
-	 *            The event, of course :D
+	 *            The connection event
 	 */
-	public void notifyRequesting(ConnectionEvent event);
-
-	/**
-	 * Notify about which response is being processed.
-	 * 
-	 * @param event
-	 *            The event, and this is the second time I have to type it!!
-	 */
-	public void notifyResponding(ConnectionEvent event);
-
-	/**
-	 * Notify about which request has been completed gracefully :-)
-	 * 
-	 * @param event
-	 *            Don't know what it is! :-w
-	 */
-	public void notifyFinished(ConnectionEvent event);
+	public void notifyEvent(ConnectionEvent event);
 }

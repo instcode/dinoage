@@ -9,13 +9,15 @@ package org.ddth.blogging.yahoo.grabber;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.util.Map;
 import java.util.Properties;
 
 import org.ddth.blogging.Blog;
 import org.ddth.blogging.yahoo.YahooBlogAPI;
 import org.ddth.dinoage.core.DataLoadEvent;
-import org.ddth.dinoage.core.ProfileChangeEvent;
 import org.ddth.dinoage.core.DataLoadMonitor;
+import org.ddth.dinoage.core.ProfileChangeEvent;
 import org.ddth.dinoage.core.SessionProfile;
 
 public class YahooProfile extends SessionProfile implements DataLoadMonitor {
@@ -37,7 +39,7 @@ public class YahooProfile extends SessionProfile implements DataLoadMonitor {
 	@Override
 	public void load(File profileFile) throws IOException {
 		super.load(profileFile);
-		persistence = new YahooPersistence(profileFile, this);
+		persistence = new YahooPersistence(profileFile.getParentFile(), this);
 	}
 	
 	@Override
@@ -59,14 +61,19 @@ public class YahooProfile extends SessionProfile implements DataLoadMonitor {
 	}
 	
 	public void saveURL(String url) {
-		if (url == null || !beginningURL.startsWith("http://")) {
-			beginningURL = YahooBlogAPI.YAHOO_360_BLOG_URL + profileId;
-			return;
+		if (url == null || url.isEmpty()) {
+			beginningURL = (YahooBlogAPI.YAHOO_360_BLOG_URL + profileId);
 		}
-		beginningURL = url;
+		else if (url.indexOf(YahooBlogAPI.YAHOO_360_HOST) > 0 && !url.contains("slideshow")) {
+			// Only accept url from Yahoo 360 domain & not the slideshow one
+			beginningURL = url;
+		}
+		if (persistence != null) {
+			persistence.clean(beginningURL);
+		}
 	}
 
-	public void save(YBlogContent blogContent) {
+	public void add(YBlogContent blogContent) {
 		if (persistence.save(blogContent)) {
 			fireProfileChanged(new ProfileChangeEvent(
 				this, blogContent.getBlog(), ProfileChangeEvent.PROFILE_FIRST_LOADED));
@@ -74,16 +81,20 @@ public class YahooProfile extends SessionProfile implements DataLoadMonitor {
 		blog = blogContent.getBlog();
 	}
 
-	public void save(YBlogEntryContent blogEntry) {
+	/**
+	 * This will save the given blog entry to external memory.
+	 * 
+	 * @param blogEntry
+	 */
+	public void add(YBlogEntryContent blogEntry) {
 		if (persistence.save(blogEntry)) {
-			fireProfileChanged(new ProfileChangeEvent(
-				this, blogEntry.getEntry(), ProfileChangeEvent.PROFILE_CHANGED));
-		}
-		if (blog != null) {
-			blog.addEntry(blogEntry.getEntry());
+			if (blog != null && blog.addEntry(blogEntry.getEntry())) {
+				fireProfileChanged(new ProfileChangeEvent(
+						this, blogEntry.getEntry(), ProfileChangeEvent.PROFILE_CHANGED));
+			}
 		}
 	}
-	
+
 	public void load() {
 		if (blog != null) {
 			fireProfileChanged(new ProfileChangeEvent(
@@ -106,8 +117,15 @@ public class YahooProfile extends SessionProfile implements DataLoadMonitor {
 				fireProfileChanged(new ProfileChangeEvent(
 						this, data, ProfileChangeEvent.PROFILE_CHANGED));
 			}
-
 			break;
 		}
+	}
+
+	public File getLocalResource(Map<String, String> parameters) {
+		return persistence.getResource(parameters);
+	}
+
+	public void add(String imageName, InputStream content) {
+		persistence.save(imageName, content);
 	}
 }

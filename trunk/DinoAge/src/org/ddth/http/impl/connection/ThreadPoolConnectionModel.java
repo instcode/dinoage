@@ -119,6 +119,9 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 	}
 
 	public RequestFuture sendRequest(final Request request) {
+		if (!running()) {
+			return null;
+		}
 		final HttpUriRequest httpRequest = createHttpRequest(request);
 		final Future<Response> future = executor.submit(new Callable<Response>() {
 			public Response call() throws Exception {
@@ -150,7 +153,7 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 		HttpEntity entity = null;
 		Response response = null;
 		try {
-			monitor.notifyRequesting(new ConnectionEvent(request));
+			monitor.notifyEvent(new ConnectionEvent(request));
 			//printHeader(httpRequest.getAllHeaders());
 			HttpResponse httpResponse = httpClient.execute(httpRequest);
 			entity = httpResponse.getEntity();
@@ -161,15 +164,14 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 					// Wrap content with GZIP input stream
 					inputStream = new GZIPInputStream(inputStream);
 				}
-				// Concern about the charset is always needed.
-				String charset = entity.getContentType().getValue().split("=")[1];
-				response = new Response(new WebpageContent(inputStream, charset));
-				monitor.notifyResponding(new ConnectionEvent(request, response));
+				response = new Response(new WebpageContent(inputStream, "utf-8"));
+				monitor.notifyEvent(new ConnectionEvent(ConnectionEvent.RESPONSE_RECEIVED, request, response));
 			}
 		}
 		catch (Exception e) {
 			logger.error("Error when processing an http request", e);
 			if (e instanceof SocketException) {
+				// Request again..
 				sendRequest(request);
 			}
 		}
@@ -186,7 +188,7 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 					logger.error("Error when consuming an http stream", e);
 				}
 			}
-			monitor.notifyFinished(new ConnectionEvent(request, response));
+			monitor.notifyEvent(new ConnectionEvent(ConnectionEvent.REQUEST_FINISHED, request, response));
 		}
 		return response;
 	}
@@ -240,7 +242,7 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 
 	private HttpUriRequest createHttpRequest(final Request request) {
 		HttpUriRequest httpRequest = null;
-		if (request.getParameters() != null) {
+		if (request.isPostRequest()) {
 			HttpPost httpPost = new HttpPost(request.getURL());
 			List <NameValuePair> nvps = new ArrayList<NameValuePair>();
 			

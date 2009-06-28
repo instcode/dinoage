@@ -7,6 +7,8 @@
  **************************************************/
 package org.ddth.http.core.connection;
 
+import java.net.URI;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -20,14 +22,33 @@ import java.util.Map;
  * 
  */
 public class Request {
+	private boolean isPostRequest;
 	private String url;
-	private Map<String, String> parameters;
+	private Map<String, String> parameters = new HashMap<String, String>();
 
 	/**
+	 * Create a request from a url with fragment part truncated
+	 * and put it in the parameters map.
+	 * 
 	 * @param url
 	 */
 	public Request(String url) {
-		this.url = url;
+		URI uri = URI.create(url);
+		String query = uri.getQuery();
+		if (query != null) {
+			String[] pairs = query.split("&");
+			for (String pair : pairs) {
+				String[] tokens = pair.split("=");
+				if (tokens.length == 2) {
+					parameters.put(tokens[0], tokens[1]);
+				}
+			}
+		}
+		if (uri.getFragment() != null) {
+			parameters.put("fragment", uri.getFragment());
+		}
+		this.url = uri.getScheme() + ":" + uri.getSchemeSpecificPart();
+		isPostRequest = false;
 	}
 	
 	/**
@@ -45,9 +66,20 @@ public class Request {
 	 */
 	public Request(String url, Map<String, String> parameters) {
 		this(url);
-		this.parameters = parameters;
+		this.parameters.putAll(parameters);
+		this.isPostRequest = true;
 	}
 
+	/**
+	 * Check if this request is a POST request, otherwise,
+	 * it is a GET request. No TRACE, PUT...
+	 * 
+	 * @return
+	 */
+	public boolean isPostRequest() {
+		return isPostRequest;
+	}
+	
 	/**
 	 * Get the request URL.
 	 * 

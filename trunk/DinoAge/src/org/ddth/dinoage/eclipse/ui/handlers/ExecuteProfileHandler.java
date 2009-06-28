@@ -50,7 +50,7 @@ public class ExecuteProfileHandler extends AbstractHandler {
 			}
 		}
 		else {
-			int answer = SWT.YES;
+			int answer = SWT.NO;
 			if (!session.isRestorable()) {
 				File profileFolder = dinoage.getWorkspace().getProfileFolder(
 						profile);

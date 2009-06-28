@@ -7,6 +7,7 @@
  **************************************************/
 package org.ddth.dinoage.data;
 
+import java.io.File;
 import java.util.List;
 
 import org.apache.commons.logging.Log;
@@ -26,8 +27,12 @@ public class DataManager {
 	private static Log logger = LogFactory.getLog(DataManager.class);
 	private DataProvider provider;
 
-	public DataManager(String storagePath) {
-		ConnectionManager manager = new ConnectionManager("org.apache.derby.jdbc.EmbeddedDriver", "jdbc:derby:" + storagePath + ";create=true;", "derby", "", "");
+	public DataManager(File databaseFolder) {
+		boolean creation = !databaseFolder.exists();
+		String connectionURL = "jdbc:derby:" + databaseFolder.getAbsolutePath() + (creation ? ";create=true;" : ";");
+		String scriptResource = creation ? "dinoage_derby.sql" : null;
+		ConnectionManager manager = new ConnectionManager(
+				"org.apache.derby.jdbc.EmbeddedDriver", connectionURL, "", "", scriptResource);
 		provider = new DefaultDataProvider(manager);
 	}
 	

@@ -21,14 +21,15 @@ public abstract class BrowsingSession extends ThreadPoolSession {
 	}
 
 	public void restore() {
-		profile.saveURL(null);
-		requests.clear();
-		start();
+		super.start();
+		queue(new Request(profile.getBeginningURL()));
 	}
 
 	@Override
 	public void start() {
 		super.start();
+		profile.saveURL(null);
+		requests.clear();
 		queue(new Request(profile.getBeginningURL()));
 	}
 
@@ -37,11 +38,11 @@ public abstract class BrowsingSession extends ThreadPoolSession {
 		RequestFuture future = null;
 		String sURL = request.getURL();
 		if (sURL != null && !requests.containsKey(sURL)) {
+			profile.saveURL(request.getURL());
+			workspace.saveProfile(profile);
 			future = super.queue(request);
 			requests.put(sURL, future);
 		}
-		profile.saveURL(request.getURL());
-		workspace.saveProfile(profile);
 		return future;
 	}
 

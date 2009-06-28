@@ -175,7 +175,7 @@
          </command>
          <command
                commandId="org.ddth.dinoage.handlers.profile.execute"
-               icon="icons/update.gif"
+               icon="icons/stop.gif"
                label="Stop"
                style="push"
                tooltip="Stop">
@@ -221,7 +221,7 @@
          </command>
          <command
                commandId="org.ddth.dinoage.handlers.profile.execute"
-               icon="icons/update.gif"
+               icon="icons/stop.gif"
                label="Stop"
                style="push"
                tooltip="Stop">

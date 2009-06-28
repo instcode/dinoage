@@ -67,14 +67,27 @@ public class ContentHandlerDispatcher {
 	 */
 	public Content<?> handle(Request request, Response response) {
 		Content<?> content = null;
+		ContentHandler handler = findHandler(request);
+		if (handler != null) {
+			content = handler.handle(response.getContent());
+		}
+		return content;
+	}
+	
+	/**
+	 * Find a proper handler for this request.
+	 * 
+	 * @param request
+	 * @return
+	 */
+	public ContentHandler findHandler(Request request) {
 		for (ContentHandlerEntry entry : handlers) {
 			Matcher matcher = entry.pattern.matcher(request.getURL());
 			if (matcher.find()) {
-				content = entry.handler.handle(response.getContent());
-				break;
+				return entry.handler;
 			}
 		}
-		return content;
+		return null;
 	}
 	
 	/**

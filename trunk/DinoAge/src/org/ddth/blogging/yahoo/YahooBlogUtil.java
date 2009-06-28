@@ -8,10 +8,12 @@
 package org.ddth.blogging.yahoo;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -47,11 +49,18 @@ public class YahooBlogUtil {
 	 * the constant below only contains a parsing pattern.
 	 */
 	private static final String BLOG_DATE_FORMAT = "EEEE MMMM d, y - HH:mma (z)";
+	private static final String GUESTBOOK_DATE_FORMAT = "EEE MMM dd HH:mma z";
 	
 	/**
 	 * Pattern to extract post-id from tag-error-<b>#post-id</b>
 	 */
 	private static final Pattern PATTERN_TO_EXTRACT_POST_ID = Pattern.compile("tag-error-(\\d+)");
+	
+	/**
+	 * Pattern to extract post-id & id from an action url in slideshow page
+	 * Ex: /blog/popup_slideshow.html?p=859&id=n75YJ78_fL5JcEVFlIE1
+	 */
+	private static final Pattern PATTERN_TO_EXTRACT_POST_ID_AND_ID = Pattern.compile(".*p=(\\d+)&id=(.*)");
 	
 	/**
 	 * Text to determine which link is next navigation
@@ -109,25 +118,53 @@ public class YahooBlogUtil {
 		 */
 		static XPathKey PROFILE_NAME			= new XPathKey("DIV/DIV/H2/SPAN[2]");
 		static XPathKey PROFILE_URL				= new XPathKey("DIV/DIV/P/A/@href");
-		static XPathKey PROFILE_AVATAR		= new XPathKey("//*[@id=\"user-photos-full\"]/@src");
+		static XPathKey PROFILE_AVATAR			= new XPathKey("//*[@id=\"user-photos-full\"]/@src");
+		
+		/**
+		 * Start from beginning
+		 */
+		static XPathKey YMGL_GUESTBOOK			= new XPathKey("//*[@id=\"ymgl-guestbook\"]");		
+		static XPathKey GUESTBOOK_TOP_SPAN		= new XPathKey("/HTML/BODY/DIV[2]/DIV/DIV[2]/SPAN[2]/SPAN");
+		
+		/**
+		 * Start from {@value #GUESTBOOK_TOP_SPAN}
+		 */
+		static XPathKey GUESTBOOK_PREV_URL		= new XPathKey("//*[@id=\"num_prev\"]/@href");
+		static XPathKey GUESTBOOK_RANGE			= new XPathKey("/HTML/BODY/DIV[2]/DIV/DIV[2]/SPAN[2]/SPAN/EM[1]/text()");
+		static XPathKey GUESTBOOK_LIMIT			= new XPathKey("/HTML/BODY/DIV[2]/DIV/DIV[2]/SPAN[2]/SPAN/EM[2]/text()");
+		
+		
+		/**
+		 * Start from {@value #YMGL_GUESTBOOK}
+		 */
+		static XPathKey GUESTBOOK_COMMENTS		= new XPathKey("DIV/DIV[2]");
 		
 		/**
 		 * Start from beginning
 		 */
 		static XPathKey YMGL_BLOG				= new XPathKey("//*[@id=\"ymgl-blog\"]");
-		
+
 		/**
 		 * Start from {@value #YMGL_BLOG}
 		 */
+		static XPathKey BLOG_DESCRIPTION		= new XPathKey("DIV/DIV/P/text()");
 		static XPathKey FIRST_BLOG_ENTRY_URL	= new XPathKey("DIV/DL/DD[1]/DIV[3]/SPAN[2]/A");
 		static XPathKey PREVIOUS_BLOG_ENTRY_URL	= new XPathKey("DIV/DL/DD/DIV[3]/P[2]/SPAN[2]/A/@href");
 		static XPathKey BLOG_ENTRY_TAG_ERROR_ID	= new XPathKey("DIV/DL/DD/DIV[3]/DIV/@id");
 		static XPathKey BLOG_ENTRY_TITLE		= new XPathKey("DIV/DL/DT");
+		static XPathKey BLOG_ENTRY_LR_IMAGE		= new XPathKey("DIV/DL/DD/DIV[1]/IMG/@src");
+		static XPathKey BLOG_ENTRY_POPUP_URL	= new XPathKey("DIV/DL/DD/DIV[1]/A/@href");
 		static XPathKey BLOG_ENTRY_BODY			= new XPathKey("DIV/DL/DD/DIV[2]");
 		static XPathKey BLOG_ENTRY_CREATED_DATE	= new XPathKey("DIV/DL/DD/DIV[3]/P");
 		static XPathKey BLOG_ENTRY_TAGS			= new XPathKey("DIV/DL/DD/DIV[3]/SPAN/SPAN/A/text()");
 		static XPathKey BLOG_ENTRY_COMMENTS		= new XPathKey("//*[@id=\"comments\"]");
 
+		/**
+		 * Start from beginning.
+		 */
+		static XPathKey BLOG_ENTRY_HR_IMAGE		= new XPathKey("/HTML/BODY/DIV[2]/DIV/DIV/DIV/FORM/DIV/DIV/IMG/@src");
+		static XPathKey BLOG_ENTRY_POST_FORM	= new XPathKey("/HTML/BODY/DIV[2]/DIV/DIV/DIV/FORM/@action");
+		
 		/**
 		 * Start from {@value #BLOG_ENTRY_COMMENTS}
 		 */
@@ -158,8 +195,98 @@ public class YahooBlogUtil {
 		
 		return new Author(profileId, profileName, profileURL, avatar);
 	}
+
+	/**
+	 * Parse comments in a guestbook page.
+	 * 
+	 * @param doc
+	 * @return
+	 */
+	public static YahooBlogEntry parseGuestbook(Document doc) {
+		Author author = parseYahooProfile(doc);
+		BlogPost blogPost = new BlogPost();
+		// 0 is a special post id that mark this entry is guestbook.
+		blogPost.setPostId(0);
+		blogPost.setAuthor(author);
+		blogPost.setContent("");
+		blogPost.setTags("");
+		blogPost.setTitle(author.getName() + "'s guestbook");
+		blogPost.setDate(new Date());
+		
+		YahooBlogEntry guestbook = new YahooBlogEntry(blogPost);
+
+		Node span = YahooBlogKey.GUESTBOOK_TOP_SPAN.getNode(doc);
+		String limit = YahooBlogKey.GUESTBOOK_LIMIT.getText(span);
+		String prevURL = YahooBlogKey.GUESTBOOK_PREV_URL.getText(span);
+		
+		if (prevURL.isEmpty()) {
+			int low = Integer.parseInt(limit) - 9;
+			guestbook.setNextURL(YahooBlogAPI.YAHOO_360_GUESTBOOK_URL + author.getUserId() + "?l=" + low + "&u=" + limit + "&mx=" + limit);
+		}
+		else if (prevURL.indexOf("l=1&u=10") == -1) {
+			guestbook.setNextURL(prevURL);
+		}
+		
+		Node node = YahooBlogKey.YMGL_GUESTBOOK.getNode(doc);
+		Node comment = YahooBlogKey.GUESTBOOK_COMMENTS.getNode(node);
+		if (comment != null) {
+			NodeList authors = YahooBlogKey.COMMENTS_AUTHOR.getNodeList(comment);
+			NodeList comments = YahooBlogKey.COMMENTS_COMMENT.getNodeList(comment);
+			
+			String spammer = "";
+			String spamContent = "";
+			long postId = guestbook.getPost().getPostId();
+			try {
+				for (int i = 0; i < comments.getLength(); i++) {
+					Comment blogComment = parseComment(authors.item(i), comments.item(i));
+					blogComment.setPostId(postId);
+					if (spammer.equals(blogComment.getAuthor().getName())) {
+						if (!spamContent.equals(blogComment.getContent())) {
+							guestbook.addComment(blogComment);
+						}
+					}
+					else {
+						spammer = blogComment.getAuthor().getName();
+						guestbook.addComment(blogComment);
+					}
+				}
+			}
+			catch (ParseException e) {
+				logger.debug("Error when parsing guestbook", e);
+			}
+		}
+		return guestbook;
+	}
+
+	private static String constructImagePath(String realPath, String type, String postId) {
+		return realPath + "#" + type + "_" + postId + ".jpg";
+	}
 	
 	/**
+	 * Extract the post-id & blog-id from the action URL, e.g.
+	 * /blog/popup_slideshow.html?p=859&id=n75YJ78_fL5JcEVFlIE1
+	 * and form a image file name. This text will be put to the
+	 * end of the hi resolution image url as a URI fragment.
+	 * E.g.
+	 * http://path/to/the/image.jpg?crumb#hires_895_n75YJ78_fL5JcEVFlIE1.jpg
+	 * 
+	 * @param doc
+	 * @return
+	 */
+	public static String parsePopupSlideshowForHiResImage(Document doc) {
+		String action = YahooBlogKey.BLOG_ENTRY_POST_FORM.getText(doc);
+		String realPath = YahooBlogKey.BLOG_ENTRY_HR_IMAGE.getText(doc);
+		Matcher matcher = PATTERN_TO_EXTRACT_POST_ID_AND_ID.matcher(action);
+		String postId = "error";
+		if (matcher.matches()) {
+			postId = matcher.group(1);
+		}
+		return constructImagePath(realPath, "hires", postId);
+	}
+
+	/**
+	 * Parse basic information from a Yahoo blog page.
+	 * 
 	 * @param doc
 	 * @return
 	 */
@@ -178,9 +305,10 @@ public class YahooBlogUtil {
 				firstEntryURL = node.getAttributes().getNamedItem("href").getNodeValue();
 			}
 		}
-		YahooBlog blog = new YahooBlog();
+		Author author = parseYahooProfile(doc);
+		String description = YahooBlogKey.BLOG_DESCRIPTION.getText(entry);
+		YahooBlog blog = new YahooBlog(author, description);
 		blog.setFirstEntryURL(firstEntryURL);
-		blog.addAuthor(parseYahooProfile(doc));
 		return blog;
 	}
 
@@ -217,7 +345,15 @@ public class YahooBlogUtil {
 			Node entry = YahooBlogKey.YMGL_BLOG.getNode(doc);
 			BlogPost blogPost = parseBlogPost(entry);
 			Author author = parseYahooProfile(doc);
-			blogEntry = new YahooBlogEntry(YahooBlogAPI.YAHOO_360_BLOG_URL + author.getUserId() + "?p=" + blogPost.getPostId(), blogPost);
+			blogPost.setAuthor(author);
+			blogEntry = new YahooBlogEntry(blogPost);
+			blogEntry.setPopupURL(YahooBlogKey.BLOG_ENTRY_POPUP_URL.getText(entry));
+			String imageURL = YahooBlogKey.BLOG_ENTRY_LR_IMAGE.getText(entry);
+			if (!imageURL.isEmpty()) {
+				String imagePath = constructImagePath(
+						imageURL, "lores", String.valueOf(blogPost.getPostId()));
+				blogEntry.setImageURL(imagePath);
+			}
 			
 			String nextURL = null;
 			Node comment = YahooBlogKey.BLOG_ENTRY_COMMENTS.getNode(doc);
@@ -228,9 +364,10 @@ public class YahooBlogUtil {
 				String spammer = "";
 				String spamContent = "";
 				int spamCount = 0;
-
+				long postId = blogEntry.getPost().getPostId();
 				for (int i = 0; i < comments.getLength(); i++) {
 					Comment blogComment = parseComment(authors.item(i), comments.item(i));
+					blogComment.setPostId(postId);
 					if (spammer.equals(blogComment.getAuthor().getName())) {
 						spamCount++;
 						if (!spamContent.equals(blogComment.getContent())) {
@@ -249,6 +386,10 @@ public class YahooBlogUtil {
 			}
 			if (nextURL == null || nextURL.length() == 0) {
 				nextURL = YahooBlogKey.PREVIOUS_BLOG_ENTRY_URL.getText(entry);
+				// No more entry left, starting with guestbook
+				if (nextURL == null || nextURL.length() == 0) {
+					nextURL = YahooBlogAPI.YAHOO_360_GUESTBOOK_URL + author.getUserId();
+				}
 			}
 			blogEntry.setNextURL(nextURL);
 		}
@@ -295,14 +436,21 @@ public class YahooBlogUtil {
 		String author_name = YahooBlogKey.COMMENTS_AUTHOR_NAME.getText(author);
 		String photo = YahooBlogKey.COMMENTS_AUTHOR_PHOTO.getText(author);
 		String author_url = YahooBlogKey.COMMENTS_AUTHOR_URL.getText(author);
+		String userId = YahooBlogAPI.parseProfileId(author_url);
 		String author_photo = "";
 		
 		if (photo != null) {
 			author_photo = photo;
 		}
 
-		return new Comment(new Author("", author_name, author_url, author_photo), text,
-				new SimpleDateFormat(BLOG_DATE_FORMAT).parse(time));
+		Date date = null;
+		try {
+			date = new SimpleDateFormat(BLOG_DATE_FORMAT).parse(time);
+		}
+		catch (ParseException e) {
+			date = new SimpleDateFormat(GUESTBOOK_DATE_FORMAT).parse(time);
+		}
+		return new Comment(new Author(userId, author_name, author_url, author_photo), text, date);
 	}
 	
 	private static String getRawText(Node node) {
@@ -318,8 +466,13 @@ public class YahooBlogUtil {
 	}
 
 	public static void main(String[] args) throws IOException {
+		blogEntry();
+	}
+
+	private static void blogEntry() throws FileNotFoundException {
 		YahooBlogContentHandler contentHandler = new YahooBlogContentHandler();
-		FileInputStream inputStream = new FileInputStream("./workspaces/w1/khanhvan19/entry/entry-44.html");
+		FileInputStream inputStream = new FileInputStream("./workspaces/w1/instcode/entry/entry-2035.html");
+		//FileInputStream inputStream = new FileInputStream("./workspaces/w1/khanhvan19/entry/entry-44.html");
 		WebpageContent webContent = new WebpageContent(inputStream, "utf-8");
 		DomTreeContent content = (DomTreeContent)contentHandler.handle(webContent);
 	
@@ -327,12 +480,15 @@ public class YahooBlogUtil {
 		System.out.println(yahooBlog.getAuthor());
 		System.out.println(yahooBlog.getFirstEntryURL());
 
+		//YahooBlogEntry entry = parseGuestbook(content.getDocument());
 		YahooBlogEntry entry = YahooBlogUtil.parseEntry(content.getDocument());
 		BlogPost post = entry.getPost();
 		System.out.println(
 				"Link: " + entry.getNextURL() +
 				"\nEntry: " + post.getPostId() +
 				"\nBlog: " + post.getTitle() +
+				"\nPopup: " + entry.getPopupURL() +
+				"\nImage: " + entry.getImageURL() +
 				"\nBody: " + post.getContent() +
 				"\nTags: " + post.getTags() +
 				"\nDate: " + post.getDate());

@@ -5,26 +5,41 @@ import org.ddth.blogging.BlogPost;
 
 public class YahooBlogEntry extends Entry {
 	private String nextURL;
-	private String blogId;
+	private String imageURL;
+	private String popupURL;
 	
-	public YahooBlogEntry(String entryURL, BlogPost post) {
+	public YahooBlogEntry(BlogPost post) {
 		super(post);
-		setUrl(entryURL);
+		setEntryId(post.getPostId());
+		if (post.getPostId() == 0) {
+			setUrl(YahooBlogAPI.YAHOO_360_GUESTBOOK_URL + post.getAuthor().getUserId());
+		}
+		else {
+			setUrl(YahooBlogAPI.YAHOO_360_BLOG_URL + post.getAuthor().getUserId() + "?p=" + getEntryId());
+		}
 	}
 
-	public void setBlogId(String blogId) {
-		this.blogId = blogId;
-	}
-	
-	public String getBlogId() {
-		return blogId;
-	}
-	
 	public void setNextURL(String nextURL) {
 		this.nextURL = nextURL;
 	}
 	
 	public String getNextURL() {
 		return nextURL;
+	}
+
+	public void setImageURL(String imageURL) {
+		this.imageURL = imageURL;
+	}
+	
+	public String getImageURL() {
+		return imageURL;
+	}
+	
+	public void setPopupURL(String popupURL) {
+		this.popupURL = popupURL;
+	}
+	
+	public String getPopupURL() {
+		return popupURL;
 	}
 }

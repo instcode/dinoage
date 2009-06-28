@@ -29,7 +29,7 @@ public class Grabber {
 		
 		Session session = new ThreadPoolSession(dispatcher) {
 			@Override
-			protected void content(Content<?> content) {
+			protected void handle(Request request, Content<?> content) {
 				System.out.println("Handle the given content goes here!");
 			}
 

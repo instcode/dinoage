@@ -55,53 +55,58 @@ public class WXR {
 	}
 
 	private static void database() {
-		File file = new File("D:\\Projects\\DinoAge\\workspaces\\");
-		DataManager manager = new DataManager(file.getAbsolutePath() + File.separator + "database");
-		
-		List<Entry> entries = manager.getEntries("http://360.yahoo.com/nullpointer82");
-		for (Entry entry : entries) {
-			System.out.println(entry.getPost().getContent());
-			List<Comment> comments = manager.getComments(entry.getEntryId());
-			System.out.println("Comment:");
-			for (Comment comment : comments) {
-				System.out.println(comment);
-			}
-		}
-		
-		System.exit(0);
-		
+		File file = new File("D:\\Projects\\DinoAge\\workspaces\\w1\\watersnake");
+		File databaseFolder = new File(file, "database");
+
 		Blog blog = new Blog();
-		blog.setBlogId("http://360.yahoo.com/nullpointer82");
+		blog.setBlogId("yqp68HY_fL5vjbhcS9.elKU-");
 		blog.setTitle("instcode's blog");
 		blog.setUrl("http://instcode.wordpress.com");
 		blog.setDescription("Welcome to my blog :D");
 		Author author = new Author("instcode", "instcode", "http://instcode.wordpress.com",
 				"http://en.gravatar.com/userimage/2251513/e5a20d2422b54b45befee4a92ccd4ae5.jpg");
-		manager.createAuthor(author);
 		
-		blog.addAuthor(author);
-		manager.createBlog(blog);
-		
-		author = new Author("hello", "Test", "http://yahoo.com", "http://avatar.com/avatar.png");
-		manager.createAuthor(author);
-		
-		BlogPost blogPost = new BlogPost();
-		blogPost.setAuthor(author);
-		blogPost.setTitle("Đây là tiêu đề");
-		blogPost.setContent("Đừng xa em đêm nay khi má em đã ngủ say");
-		blogPost.setTags("computer, misc, hello, tagne");
-		blogPost.setPostId(12);
-		blogPost.setDate(new Date());
-		Entry entry = new Entry(blogPost);
-		
-		manager.createEntry(blog.getBlogId(), entry);
-		
-		entry.addComment(new Comment(author, "Comment ne 1", new Date(3434343L)));
-		entry.addComment(new Comment(author, "Comment ne 2", new Date(3434343L)));
-		entry.addComment(new Comment(author, "Comment ne 3", new Date(3434343L)));
-		
-		for (Comment comment : entry.getComments()) {
-			manager.createComment(entry.getEntryId(), comment);
+		if (databaseFolder.exists()) {
+			DataManager manager = new DataManager(databaseFolder);
+			List<Entry> entries = manager.getEntries(blog.getBlogId());
+			for (Entry entry : entries) {
+				System.out.println(entry.getPost().getContent());
+				List<Comment> comments = manager.getComments(entry.getEntryId());
+				System.out.println("Comment:");
+				for (Comment comment : comments) {
+					System.out.println(comment);
+				}
+			}
+			return;
+		}
+		else {
+			DataManager manager = new DataManager(databaseFolder);
+			manager.createAuthor(author);
+			
+			blog.addAuthor(author);
+			manager.createBlog(blog);
+			
+			author = new Author("hello", "Test", "http://yahoo.com", "http://avatar.com/avatar.png");
+			manager.createAuthor(author);
+			
+			BlogPost blogPost = new BlogPost();
+			blogPost.setAuthor(author);
+			blogPost.setTitle("Đây là tiêu đề");
+			blogPost.setContent("Đừng xa em đêm nay khi má em đã ngủ say");
+			blogPost.setTags("computer, misc, hello, tagne");
+			blogPost.setPostId(12);
+			blogPost.setDate(new Date());
+			Entry entry = new Entry(blogPost);
+			
+			manager.createEntry(blog.getBlogId(), entry);
+			
+			entry.addComment(new Comment(author, "Comment ne 1", new Date(3434343L)));
+			entry.addComment(new Comment(author, "Comment ne 2", new Date(3434343L)));
+			entry.addComment(new Comment(author, "Comment ne 3", new Date(3434343L)));
+			
+			for (Comment comment : entry.getComments()) {
+				manager.createComment(entry.getEntryId(), comment);
+			}
 		}
 	}
 }

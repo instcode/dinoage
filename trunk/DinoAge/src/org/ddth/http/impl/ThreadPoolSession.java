@@ -23,6 +23,7 @@ import org.ddth.http.core.connection.ConnectionModel;
 import org.ddth.http.core.connection.Request;
 import org.ddth.http.core.connection.RequestFuture;
 import org.ddth.http.core.content.Content;
+import org.ddth.http.core.content.handler.ContentHandler;
 import org.ddth.http.core.content.handler.ContentHandlerDispatcher;
 import org.ddth.http.impl.connection.ThreadPoolConnectionModel;
 
@@ -62,9 +63,9 @@ public abstract class ThreadPoolSession implements ConnectionListener, Session {
 	/**
 	 * A request queue which is used for checking whether a request is on queued
 	 * or not. It also tracks the status of any request made, by keeping a
-	 * {@link RequestFuture} which is associated to that request. This
-	 * queue is also used when we try to stop the session by enforcing all
-	 * the ongoing requests to be cancelled.
+	 * {@link RequestFuture} which is associated to that request. This queue is
+	 * quite useful when we want to stop the current session. Just enforcing all
+	 * the ongoing requests in this queue to be cancelled.
 	 */
 	private Map<String, RequestFuture> queue = new ConcurrentHashMap<String, RequestFuture>();
 	
@@ -74,7 +75,7 @@ public abstract class ThreadPoolSession implements ConnectionListener, Session {
 	private List<ConnectionListener> listeners = new ArrayList<ConnectionListener>();
 	
 	private List<SessionChangeListener> sessionListeners = new ArrayList<SessionChangeListener>(); 
-
+	
 	/**
 	 * Create a new session with the given content handle dispatcher.
 	 * 
@@ -92,7 +93,9 @@ public abstract class ThreadPoolSession implements ConnectionListener, Session {
 		RequestFuture future = queue.get(request.getURL());
 		if (future == null) {
 			future = connectionModel.sendRequest(request);
-			queue.put(request.getURL(), future);
+			if (future != null) {
+				queue.put(request.getURL(), future);
+			}
 		}
 		return future;
 	}
@@ -133,7 +136,7 @@ public abstract class ThreadPoolSession implements ConnectionListener, Session {
 	 * @param listener
 	 * 		The listener to be registered.
 	 */
-	public void registerConnectionListener(ConnectionListener listener) {
+	public void addConnectionListener(ConnectionListener listener) {
 		listeners.add(listener);
 	}
 	
@@ -145,8 +148,12 @@ public abstract class ThreadPoolSession implements ConnectionListener, Session {
 	 * @return
 	 * 		true if the listener is in the list.
 	 */
-	public boolean unregisterConnectionListener(ConnectionListener listener) {
+	public boolean removeConnectionListener(ConnectionListener listener) {
 		return listeners.remove(listener);
+	}
+	
+	public boolean isQueueEmpty() {
+		return queue.isEmpty();
 	}
 	
 	public void start() {
@@ -159,7 +166,7 @@ public abstract class ThreadPoolSession implements ConnectionListener, Session {
 	}
 	
 	public void shutdown() {
-		// Force abort current request
+		// Force aborting current requests
 		for (RequestFuture future : queue.values()) {
 			future.cancel(true);
 		}
@@ -167,36 +174,44 @@ public abstract class ThreadPoolSession implements ConnectionListener, Session {
 		fireSessionChanged(new SessionChangeEvent(this, SessionChangeEvent.SESSION_END));
 	}
 
-	public void notifyRequesting(ConnectionEvent event) {
-		logger.debug("Requesting: " + event.getRequest().getURL() + "...");
+	public void notifyEvent(ConnectionEvent event) {
+		switch (event.getEventType()) {
+		case ConnectionEvent.REQUEST_INITIATED:
+			logger.info("Requesting: " + event.getRequest().getURL() + "...");
+			break;
+			
+		case ConnectionEvent.RESPONSE_RECEIVED:
+			logger.info("Handling: " + event.getRequest().getURL() + "...");
+			Content<?> content = dispatcher.handle(event.getRequest(), event.getResponse());
+			handle(event.getRequest(), content);
+			break;
+			
+		case ConnectionEvent.REQUEST_FINISHED:
+			queue.remove(event.getRequest().getURL());
+			// If queue is empty, means no items need to be retrieved,
+			// shutdown the session.
+			if (isQueueEmpty()) {
+				shutdown();
+			}
+			break;
+		}
+		
+		fireConnectionEvent(event);
+	}
+
+	protected void fireConnectionEvent(ConnectionEvent event) {
 		for (ConnectionListener listener : listeners) {
-			listener.notifyRequesting(event);
+			listener.notifyEvent(event);
 		}
 	}
 
-	public void notifyFinished(ConnectionEvent event) {
-		logger.debug("Requesting: " + event.getRequest().getURL() + "... Done!");
-		queue.remove(event.getRequest().getURL());
-		for (ConnectionListener listener : listeners) {
-			listener.notifyFinished(event);
-		}
-	}
-
-	public void notifyResponding(ConnectionEvent event) {
-		logger.debug("Handling: " + event.getRequest().getURL() + "...");
-		for (ConnectionListener listener : listeners) {
-			listener.notifyResponding(event);
-		}
-		Content<?> content = dispatcher.handle(event.getRequest(), event.getResponse());
-		content(content);
-	}
-	
 	/**
 	 * Handle the final content which was pre-processed via a chain of
 	 * {@link ContentHandler}s.
 	 * 
+	 * @param request The request that produces this content
 	 * @param content
 	 * 		The content to be processed.
 	 */
-	protected abstract void content(Content<?> content);
+	protected abstract void handle(Request request, Content<?> content);
 }

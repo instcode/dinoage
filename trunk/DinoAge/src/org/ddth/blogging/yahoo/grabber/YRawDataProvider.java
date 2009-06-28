@@ -128,8 +128,12 @@ class YRawDataProvider implements DataProvider {
 			public boolean accept(File dir, String name) {
 				String[] tokens = name.split("-");
 				if (tokens.length == 3) {
-					Long postId = new Long(tokens[1]);
-					groupEntries.put(postId, new Object());
+					try {
+						Long postId = new Long(tokens[1]);
+						groupEntries.put(postId, new Object());
+					}
+					catch (NumberFormatException e) {
+					}
 				}
 				// Make sure we don't mess with entry-list.html
 				return name.startsWith(ENTRY_TEXT) && name.indexOf(YahooPersistence.SUFFIX_LIST) == -1;
@@ -146,7 +150,14 @@ class YRawDataProvider implements DataProvider {
 					break;
 				}
 				Document doc = getDocument(file);
-				YahooBlogEntry entry = YahooBlogUtil.parseEntry(doc);
+				YahooBlogEntry entry = null;
+				// Check if this file contains guestbook data
+				if (file.getName().indexOf("-0-") > 0 || file.getName().indexOf("-0.") > 0) {
+					entry = YahooBlogUtil.parseGuestbook(doc);
+				}
+				else {
+					entry = YahooBlogUtil.parseEntry(doc);
+				}
 				Long postId = new Long(entry.getPost().getPostId());
 				Object data = groupEntries.get(postId);
 				if (data instanceof Entry) {
