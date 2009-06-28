@@ -9,15 +9,13 @@ package org.ddth.http.impl.content;
 
 import java.io.InputStream;
 
-import org.ddth.http.core.content.ContentAdapter;
-
 /**
  * Represent a basic webpage content which has an {@link InputStream} and
  * a charset value.
  * 
  * @author khoa.nguyen
  */
-public class WebpageContent extends ContentAdapter<InputStream> {
+public class WebpageContent extends StreamContent {
 
 	private String charset;
 
@@ -30,8 +28,8 @@ public class WebpageContent extends ContentAdapter<InputStream> {
 	 * 		The charset.
 	 */
 	public WebpageContent(InputStream content, String charset) {
+		super(content);
 		this.charset = charset;
-		setContent(content);
 	}
 
 	/**

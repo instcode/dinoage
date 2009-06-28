@@ -10,6 +10,7 @@ package org.ddth.dinoage.data;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
@@ -35,7 +36,7 @@ class DefaultDataProvider implements DataProvider {
 	private static final String CREATE_AUTHOR = "INSERT INTO Author (userId, name, url, email, avatar) VALUES (?,?,?,?,?)";
 	private static final String CREATE_BLOG = "INSERT INTO Blog (blogId, userId, url, title, description) VALUES (?,?,?,?,?)";
 	private static final String CREATE_POST = "INSERT INTO Post (userId, content, creation) VALUES (?,?,?)";
-	private static final String CREATE_ENTRY = "INSERT INTO Entry (blogId, title, postId, tags) VALUES (?,?,?,?)";
+	private static final String CREATE_ENTRY = "INSERT INTO Entry (entryId, blogId, title, postId, tags) VALUES (?,?,?,?,?)";
 	private static final String CREATE_COMMENT = "INSERT INTO Comment (entryId, postId) VALUES (?,?)";
 
 	private static final String GET_AUTHOR = "SELECT name, url, email, avatar FROM Author WHERE userId=?";
@@ -63,8 +64,12 @@ class DefaultDataProvider implements DataProvider {
 			pstmt.setString(5, author.getAvatar());
 			pstmt.execute();
 		} catch (Exception e) {
-			throw new UpdateDataException(e);
-		} finally {
+			// Leave out duplicate key value
+			if (!((SQLException) e).getSQLState().equals("23505")) {
+				throw new UpdateDataException(e);
+			}
+		}
+		finally {
 			manager.close(pstmt);
 		}
 	}
@@ -104,6 +109,7 @@ class DefaultDataProvider implements DataProvider {
 			ResultSet generatedKeys = pstmt.getGeneratedKeys();
 			generatedKeys.next();
 			post.setPostId(generatedKeys.getLong(1));
+			
 		} catch (Exception e) {
 			throw new UpdateDataException(e);
 		} finally {
@@ -120,14 +126,12 @@ class DefaultDataProvider implements DataProvider {
 			con = manager.getConnection();
 			pstmt = con.prepareStatement(CREATE_ENTRY,
 					Statement.RETURN_GENERATED_KEYS);
-			pstmt.setString(1, blogId);
-			pstmt.setString(2, entry.getPost().getTitle());
-			pstmt.setLong(3, entry.getPost().getPostId());
-			pstmt.setString(4, entry.getPost().getTags());
+			pstmt.setLong(1, entry.getEntryId());
+			pstmt.setString(2, blogId);
+			pstmt.setString(3, entry.getPost().getTitle());
+			pstmt.setLong(4, entry.getPost().getPostId());
+			pstmt.setString(5, entry.getPost().getTags());
 			pstmt.execute();
-			ResultSet generatedKeys = pstmt.getGeneratedKeys();
-			generatedKeys.next();
-			entry.setEntryId(generatedKeys.getLong(1));
 		} catch (Exception e) {
 			throw new UpdateDataException(e);
 		} finally {
@@ -149,7 +153,7 @@ class DefaultDataProvider implements DataProvider {
 			pstmt.execute();
 			ResultSet generatedKeys = pstmt.getGeneratedKeys();
 			generatedKeys.next();
-			comment.setPostId(generatedKeys.getLong(1));
+			comment.setCommentId(generatedKeys.getLong(1));
 		} catch (Exception e) {
 			throw new UpdateDataException(e);
 		} finally {

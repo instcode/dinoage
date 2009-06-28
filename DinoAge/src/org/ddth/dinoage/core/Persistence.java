@@ -33,8 +33,12 @@ public class Persistence {
 		this.categories = categories;
 	}
 	
-	protected File getFolder(int index) {
-		return folders[index];
+	protected File getFolder(int category) {
+		return folders[category];
+	}
+	
+	protected File getFile(int category, String filename) {
+		return new File(folders[category], filename);
 	}
 
 	private File generateFile(File directory, String name, String extension) {
@@ -49,9 +53,14 @@ public class Persistence {
 	}
 	
 	public void write(InputStream inputStream, int category, String tail) {
+		File outputFile = generateFile(folders[category], categories[category] + "-" + tail, "html");
+		write(inputStream, outputFile);
+	}
+
+	protected void write(InputStream inputStream, File outputFile) {
+		outputFile.getParentFile().mkdirs();
 		OutputStream outputStream = null;
 		try {
-			File outputFile = generateFile(folders[category], categories[category] + "-" + tail, "html");
 			outputStream = new FileOutputStream(outputFile);
 			byte[] buffer = new byte[4096];
 			int bytesread = 0;

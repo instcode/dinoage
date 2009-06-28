@@ -19,6 +19,7 @@ public class Author {
 		setName(name);
 		setUrl(url);
 		setAvatar(avatar);
+		setEmail("");
 	}
 
 	public String getUserId() {

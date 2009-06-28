@@ -7,6 +7,7 @@
  **************************************************/
 package org.ddth.blogging.yahoo;
 
+import org.ddth.blogging.Author;
 import org.ddth.blogging.Blog;
 
 /**
@@ -17,6 +18,13 @@ public class YahooBlog extends Blog {
 
 	private String firstEntryURL;
 	
+	public YahooBlog(Author author, String description) {
+		addAuthor(author);
+		setBlogId(author.getUserId());
+		setUrl(YahooBlogAPI.YAHOO_360_BLOG_URL + getBlogId());
+		setTitle(author.getName());
+		setDescription(description);
+	}
 	/**
 	 * @return the entryURL
 	 */

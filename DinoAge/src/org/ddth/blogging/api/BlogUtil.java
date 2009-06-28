@@ -7,8 +7,8 @@
  **************************************************/
 package org.ddth.blogging.api;
 
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.time.DateFormatUtils;
@@ -43,7 +43,7 @@ public class BlogUtil {
 	}
 	
 	public static String[] buildTags(Blog blog) {
-		List<Entry> entries = blog.getEntries();
+		Collection<Entry> entries = blog.getEntries();
 		Map<String, String> map = new HashMap<String, String>();
 		for (Entry entry : entries) {
 			String postTags = entry.getPost().getTags();

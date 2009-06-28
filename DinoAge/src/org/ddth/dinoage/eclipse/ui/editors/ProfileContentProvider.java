@@ -27,6 +27,7 @@ public class ProfileContentProvider implements ILazyContentProvider, ProfileChan
 		}
 		switch (event.getType()) {
 		case ProfileChangeEvent.PROFILE_FIRST_LOADED:
+			entries.clear();
 			entries.addAll(((Blog) event.getData()).getEntries());
 			break;
 			

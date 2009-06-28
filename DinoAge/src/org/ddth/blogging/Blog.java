@@ -8,8 +8,11 @@
 package org.ddth.blogging;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class Blog {
 
@@ -18,7 +21,7 @@ public class Blog {
 	private String title;
 	private String url;
 	private String description;
-	private List<Entry> entries = new ArrayList<Entry>();
+	private Map<Long, Entry> entries = new ConcurrentHashMap<Long, Entry>();
 
 	public String getBlogId() {
 		return blogId;
@@ -68,16 +71,26 @@ public class Blog {
 		this.description = description;
 	}
 
-	public List<Entry> getEntries() {
-		return entries;
+	public Collection<Entry> getEntries() {
+		return entries.values();
 	}
 
 	public void setEntries(List<Entry> entries) {
-		this.entries = entries;
+		for (Entry entry : entries) {
+			addEntry(entry);
+		}
 	}
 	
-	public void addEntry(Entry entry) {
-		entries.add(entry);
+	public boolean addEntry(Entry entry) {
+		Long entryId = new Long(entry.getEntryId());
+		Entry existence = entries.get(entryId);
+		if (existence != null) {
+			existence.getComments().addAll(entry.getComments());
+		}
+		else {
+			entries.put(entryId, entry);
+		}
+		return (existence == null);
 	}
 
 	public static final Blog createBlog() {

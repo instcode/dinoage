@@ -27,6 +27,20 @@ import org.ddth.http.core.connection.Response;
  */
 public class ConnectionEvent {
 
+	/**
+	 * The request is being made.
+	 */
+	public static final int REQUEST_INITIATED = 0;
+	/**
+	 * The response has been retrieved.
+	 */
+	public static final int RESPONSE_RECEIVED = 1;
+	/**
+	 * The request is closed.
+	 */
+	public static final int REQUEST_FINISHED = 2;
+	
+	private int eventType;
 	private Request request;
 	private Response response;
 
@@ -38,22 +52,37 @@ public class ConnectionEvent {
 	 * @param response
 	 *            The response that is being processing.
 	 */
-	public ConnectionEvent(Request request, Response response) {
+	public ConnectionEvent(int eventType, Request request, Response response) {
+		this.eventType = eventType;
 		this.request = request;
 		this.response = response;
 	}
 
 	/**
-	 * Easy! Add one more line of comment for increasing the commenting
+	 * The given request has just been made, no response received.<br>
+	 * It's easy! Add one more line of comment for increasing the commenting
 	 * percentage per LOC =)).
 	 * 
 	 * @param request
 	 *            The request that generates this event.
 	 */
 	public ConnectionEvent(Request request) {
-		this(request, null);
+		this(REQUEST_INITIATED, request, null);
 	}
 
+	/**
+	 * Get event type.
+	 * 
+	 * @see
+	 * {@link #REQUEST_INITIATED}<br>
+	 * {@link #RESPONSE_RECEIVED}<br>
+	 * {@link #REQUEST_DONE}<br>
+	 * @return
+	 */
+	public int getEventType() {
+		return eventType;
+	}
+	
 	/**
 	 * Simple get. No set :D
 	 * 

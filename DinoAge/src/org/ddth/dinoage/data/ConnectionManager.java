@@ -23,14 +23,18 @@ import java.sql.Statement;
 public class ConnectionManager {
 	private Connection connection = null;
 
-	public ConnectionManager(String driverClass, String connectionURL, String dbType, String username, String password) {
+	public ConnectionManager(String driverClass, String connectionURL,
+			String username, String password, String scriptResource) {
 		try {
 			Class.forName(driverClass).newInstance();
-			connection = DriverManager.getConnection(connectionURL, username, password);
-			String scriptFile = "dinoage_" + dbType + ".sql";
-			executeSQLScript(connection, ConnectionManager.class.getClassLoader().getResourceAsStream(scriptFile));
+			connection = DriverManager.getConnection(connectionURL, username,
+					password);
+			if (scriptResource != null) {
+				executeSQLScript(ConnectionManager.class.getClassLoader().getResourceAsStream(scriptResource));
+			}
 		}
 		catch (Exception e) {
+			e.printStackTrace();
 		}
 	};
 
@@ -65,8 +69,8 @@ public class ConnectionManager {
 	 * @throws SQLException
 	 *             if an SQLException occurs.
 	 */
-	private void executeSQLScript(Connection con, InputStream resource)
-			throws IOException, SQLException {
+	public void executeSQLScript(InputStream resource) throws IOException,
+			SQLException {
 		BufferedReader in = null;
 		try {
 			in = new BufferedReader(new InputStreamReader(resource));
@@ -90,7 +94,7 @@ public class ConnectionManager {
 				}
 				// Send command to database.
 				if (!done && !command.toString().equals("")) {
-					Statement stmt = con.createStatement();
+					Statement stmt = connection.createStatement();
 					stmt.execute(command.toString());
 					stmt.close();
 				}
