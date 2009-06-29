@@ -42,13 +42,15 @@ public class HTMLNodeBuilder {
 			writer.append(nodeName);
 
 			NamedNodeMap attributes = node.getAttributes();
-			int attrCount = attributes != null ? attributes.getLength() : 0;
-			for (int i = 0; i < attrCount; i++) {
-				Node attribute = attributes.item(i);
-				writer.append(' ');
-				writer.append(attribute.getNodeName());
-				writer.append("=\"" + attribute.getNodeValue());
-				writer.append('"');
+			if (attributes != null) {
+				int attrCount = attributes.getLength();
+				for (int i = 0; i < attrCount; i++) {
+					Node attribute = attributes.item(i);
+					writer.append(' ');
+					writer.append(attribute.getNodeName());
+					writer.append("=\"" + attribute.getNodeValue());
+					writer.append('"');
+				}
 			}
 			NodeList children = node.getChildNodes();
 			if (nodeValue == null && children.getLength() == 0) {
