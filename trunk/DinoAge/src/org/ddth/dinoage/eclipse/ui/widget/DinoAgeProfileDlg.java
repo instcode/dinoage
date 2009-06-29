@@ -61,14 +61,14 @@ public class DinoAgeProfileDlg extends Dialog {
 	public DinoAgeProfileDlg(Shell parent, Workspace workspace) {
 		super(parent, SWT.CENTER);
 		this.workspace = workspace;
-		this.profile = workspace.createEmptyProfile();
 	}
 
 	/**
 	 * Open the dialog
 	 * @return the result
 	 */
-	public int open() {
+	public int edit(Profile profile) {
+		this.profile = profile;
 		shell = new Shell(getParent(), SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL | SWT.CENTER);
 		shell.setText(ResourceManager.getMessage(ResourceManager.KEY_PROFILE_DIALOG_TITLE));
 		shell.setLayout(new FillLayout());
