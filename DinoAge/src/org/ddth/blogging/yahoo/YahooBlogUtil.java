@@ -130,7 +130,6 @@ public class YahooBlogUtil {
 		 * Start from {@value #GUESTBOOK_TOP_SPAN}
 		 */
 		static XPathKey GUESTBOOK_PREV_URL		= new XPathKey("//*[@id=\"num_prev\"]/@href");
-		static XPathKey GUESTBOOK_RANGE			= new XPathKey("/HTML/BODY/DIV[2]/DIV/DIV[2]/SPAN[2]/SPAN/EM[1]/text()");
 		static XPathKey GUESTBOOK_LIMIT			= new XPathKey("/HTML/BODY/DIV[2]/DIV/DIV[2]/SPAN[2]/SPAN/EM[2]/text()");
 		
 		

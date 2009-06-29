@@ -8,23 +8,26 @@ import org.ddth.dinoage.eclipse.ui.widget.DinoAgeProfileDlg;
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.swt.SWT;
 import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.handlers.HandlerUtil;
 
-public class AddProfileHandler extends AbstractHandler {
+public class EditProfileHandler extends AbstractHandler {
 
 	public Object execute(ExecutionEvent event) throws ExecutionException {
 		IWorkbenchWindow workbenchWindow = HandlerUtil.getActiveWorkbenchWindow(event);
-		Workspace workspace = Activator.getDefault().getDinoAge().getWorkspace();
-		DinoAgeProfileDlg dlg = new DinoAgeProfileDlg(workbenchWindow.getShell(), workspace);
-		if (dlg.edit(workspace.createEmptyProfile()) == SWT.OK) {
-			IViewPart view = workbenchWindow.getActivePage().findView(WorkspaceView.ID);
-			if (view != null) {
-				StructuredSelection selection = new StructuredSelection(new ProfileNode(null, dlg.getProfile()));
-				view.getSite().getSelectionProvider().setSelection(selection);
+		IWorkbenchPage activePage = workbenchWindow.getActivePage();
+		IViewPart view = activePage.findView(WorkspaceView.ID);
+		if (view != null) {
+			IStructuredSelection selection = (IStructuredSelection) view.getSite().getSelectionProvider().getSelection();
+			ProfileNode profile = (ProfileNode)selection.getFirstElement();
+			Workspace workspace = Activator.getDefault().getDinoAge().getWorkspace();
+			DinoAgeProfileDlg dlg = new DinoAgeProfileDlg(workbenchWindow.getShell(), workspace);
+			if (dlg.edit(profile.getData()) == SWT.OK) {
+				
 			}
 		}
 		return null;

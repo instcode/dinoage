@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?eclipse version="3.2"?>
+<?eclipse version="3.5"?>
 <plugin>
 
    <extension
@@ -69,27 +69,32 @@
       </category>
       <command
             categoryId="org.ddth.dinoage.commands.category"
-            id="org.ddth.dinoage.handlers.workspace.switch"
+            id="org.ddth.dinoage.command.workspace.switch"
             name="Switch Workspace...">
       </command>
       <command
             categoryId="org.ddth.dinoage.commands.category"
-            id="org.ddth.dinoage.handlers.export"
+            id="org.ddth.dinoage.command.export"
             name="Export...">
       </command>
       <command
             categoryId="org.ddth.dinoage.commands.category"
-            id="org.ddth.dinoage.handlers.profile.add"
+            id="org.ddth.dinoage.command.profile.add"
             name="Add...">
       </command>
       <command
             categoryId="org.ddth.dinoage.commands.category"
-            id="org.ddth.dinoage.handlers.profile.execute"
+            id="org.ddth.dinoage.command.profile.edit"
+            name="Edit...">
+      </command>
+      <command
+            categoryId="org.ddth.dinoage.commands.category"
+            id="org.ddth.dinoage.command.profile.execute"
             name="Execute">
       </command>
       <command
             categoryId="org.ddth.dinoage.commands.category"
-            id="org.ddth.dinoage.handlers.profile.remove"
+            id="org.ddth.dinoage.command.profile.remove"
             name="Remove">
       </command>
       <command
@@ -101,12 +106,12 @@
       <menuContribution
             locationURI="menu:file?before=quit">
          <command
-               commandId="org.ddth.dinoage.handlers.profile.add"
+               commandId="org.ddth.dinoage.command.profile.add"
                icon="icons/add.gif"
                style="push">
          </command>
          <command
-               commandId="org.ddth.dinoage.handlers.workspace.switch"
+               commandId="org.ddth.dinoage.command.workspace.switch"
                icon="icons/switch.gif"
                style="push"
                tooltip="Switch workspace">
@@ -123,7 +128,7 @@
                label="Options"
                mnemonic="M">
             <command
-                  commandId="org.ddth.dinoage.handlers.export"
+                  commandId="org.ddth.dinoage.command.export"
                   icon="icons/export.gif"
                   mnemonic="E"
                   style="push">
@@ -135,13 +140,13 @@
          <toolbar
                id="org.ddth.dinoage.toolbars.main">
             <command
-                  commandId="org.ddth.dinoage.handlers.export"
+                  commandId="org.ddth.dinoage.command.export"
                   icon="icons/export.gif"
                   style="push"
                   tooltip="Hello">
             </command>
             <command
-                  commandId="org.ddth.dinoage.handlers.workspace.switch"
+                  commandId="org.ddth.dinoage.command.workspace.switch"
                   icon="icons/switch.gif"
                   style="push"
                   tooltip="Switch workspace">
@@ -151,12 +156,12 @@
       <menuContribution
             locationURI="toolbar:org.ddth.dinoage.ui.views.workspace?before=additions">
          <command
-               commandId="org.ddth.dinoage.handlers.profile.add"
+               commandId="org.ddth.dinoage.command.profile.add"
                icon="icons/add.gif"
                style="push">
          </command>
          <command
-               commandId="org.ddth.dinoage.handlers.profile.execute"
+               commandId="org.ddth.dinoage.command.profile.execute"
                icon="icons/execute.gif"
                style="push">
             <visibleWhen
@@ -174,7 +179,7 @@
             </visibleWhen>
          </command>
          <command
-               commandId="org.ddth.dinoage.handlers.profile.execute"
+               commandId="org.ddth.dinoage.command.profile.execute"
                icon="icons/stop.gif"
                label="Stop"
                style="push"
@@ -191,7 +196,7 @@
             </visibleWhen>
          </command>
          <command
-               commandId="org.ddth.dinoage.handlers.profile.remove"
+               commandId="org.ddth.dinoage.command.profile.remove"
                icon="icons/remove.gif"
                style="push">
          </command>
@@ -202,12 +207,16 @@
                commandId="org.ddth.dinoage.command.profile.open"
                style="push">
          </command>
+         <command
+               commandId="org.ddth.dinoage.command.profile.edit"
+               style="push">
+         </command>
          <separator
                name="separator1"
                visible="true">
          </separator>
          <command
-               commandId="org.ddth.dinoage.handlers.profile.execute"
+               commandId="org.ddth.dinoage.command.profile.execute"
                icon="icons/execute.gif"
                style="push">
             <visibleWhen
@@ -220,7 +229,7 @@
             </visibleWhen>
          </command>
          <command
-               commandId="org.ddth.dinoage.handlers.profile.execute"
+               commandId="org.ddth.dinoage.command.profile.execute"
                icon="icons/stop.gif"
                label="Stop"
                style="push"
@@ -237,7 +246,7 @@
                visible="true">
          </separator>
          <command
-               commandId="org.ddth.dinoage.handlers.profile.remove"
+               commandId="org.ddth.dinoage.command.profile.remove"
                icon="icons/remove.gif"
                style="push">
             <visibleWhen
@@ -249,11 +258,11 @@
    <extension point="org.eclipse.ui.handlers">
    	   <handler
             class="org.ddth.dinoage.eclipse.ui.handlers.SwitchWorkspaceHandler"
-            commandId="org.ddth.dinoage.handlers.workspace.switch">
+            commandId="org.ddth.dinoage.command.workspace.switch">
       </handler>
       <handler
             class="org.ddth.dinoage.eclipse.ui.handlers.ExportHandler"
-            commandId="org.ddth.dinoage.handlers.export">
+            commandId="org.ddth.dinoage.command.export">
          <enabledWhen>
             <reference
                   definitionId="org.ddth.ui.editors.blogview.active">
@@ -262,7 +271,16 @@
       </handler>
       <handler
             class="org.ddth.dinoage.eclipse.ui.handlers.AddProfileHandler"
-            commandId="org.ddth.dinoage.handlers.profile.add">
+            commandId="org.ddth.dinoage.command.profile.add">
+      </handler>
+      <handler
+            class="org.ddth.dinoage.eclipse.ui.handlers.EditProfileHandler"
+            commandId="org.ddth.dinoage.command.profile.edit">
+         <enabledWhen>
+            <reference
+                  definitionId="org.ddth.ui.views.profile.selected">
+            </reference>
+         </enabledWhen>
       </handler>
       <handler
             class="org.ddth.dinoage.eclipse.ui.handlers.OpenProfileHandler"
@@ -275,7 +293,7 @@
       </handler>
       <handler
             class="org.ddth.dinoage.eclipse.ui.handlers.RemoveProfileHandler"
-            commandId="org.ddth.dinoage.handlers.profile.remove">
+            commandId="org.ddth.dinoage.command.profile.remove">
          <enabledWhen>
             <and>
                <reference
@@ -291,7 +309,7 @@
       </handler>
       <handler
             class="org.ddth.dinoage.eclipse.ui.handlers.ExecuteProfileHandler"
-            commandId="org.ddth.dinoage.handlers.profile.execute">
+            commandId="org.ddth.dinoage.command.profile.execute">
          <enabledWhen>
          <reference
                   definitionId="org.ddth.ui.views.profile.selected">
@@ -301,7 +319,7 @@
    </extension>
    <extension point="org.eclipse.ui.bindings">
       <key
-            commandId="org.ddth.dinoage.handlers.export"
+            commandId="org.ddth.dinoage.command.export"
             contextId="org.eclipse.ui.contexts.window"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"
             sequence="M1+E">
