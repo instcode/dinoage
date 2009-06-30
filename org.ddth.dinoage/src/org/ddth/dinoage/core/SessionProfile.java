@@ -1,13 +1,29 @@
 package org.ddth.dinoage.core;
 
+import java.util.Properties;
+
 
 public abstract class SessionProfile extends Profile {
 
-	public abstract void saveURL(String url);
-
-	public abstract String getBeginningURL();
-
-	public abstract boolean isNewlyCreated();
+	@Override
+	protected void store(Properties properties) {
+	}
 	
-	public abstract void load();
+	@Override
+	protected void load(Properties properties) {
+	}
+	
+	public void saveURL(String url) {
+	}
+	
+	public void load() {
+	}
+	
+	public boolean isNewlyCreated() {
+		return false;
+	}
+	
+	public String getBeginningURL() {
+		return null;
+	}
 }

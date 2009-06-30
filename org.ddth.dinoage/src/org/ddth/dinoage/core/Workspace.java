@@ -63,6 +63,9 @@ public final class Workspace {
 	}
 	
 	public void closeWorkspace() {
+		for (Profile profile : map.values()) {
+			saveProfile(profile);
+		}
 		releaseExclusiveAccess(workspaceFolder);
 	}
 	

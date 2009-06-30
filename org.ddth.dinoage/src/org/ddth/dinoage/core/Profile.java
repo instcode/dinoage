@@ -18,6 +18,7 @@ public abstract class Profile {
 
 	private String profileURL;
 	private String profileName;
+	
 	private List<ProfileChangeListener> listeners = new ArrayList<ProfileChangeListener>();
 
 	public void populate(Profile profile) {
@@ -85,5 +86,25 @@ public abstract class Profile {
 			throw new IllegalArgumentException("ProfileURL cannot be empty!");
 		}
 		this.profileURL = profileURL;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
+	@Override
+	public boolean equals(Object obj) {
+		if (!super.equals(obj)) {
+			Profile profile = (Profile) obj;
+			return profile.hashCode() == hashCode() && profile.getProfileURL().equals(profileURL);
+		}
+		return true;
+	}
+	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#hashCode()
+	 */
+	@Override
+	public int hashCode() {
+		return profileName.toLowerCase().hashCode();
 	}
 }

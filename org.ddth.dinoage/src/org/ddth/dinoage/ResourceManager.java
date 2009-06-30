@@ -65,6 +65,7 @@ public class ResourceManager {
 	public static final String KEY_MESSAGE_SELECT_ALL = "KEY_MESSAGE_SELECT_ALL";
 	public static final String KEY_MESSAGE_SELECT_NONE = "KEY_MESSAGE_SELECT_NONE";
 	public static final String KEY_MESSAGE_INVERT_SELECTION = "KEY_MESSAGE_INVERT_SELECTION";
+	public static final String KEY_LABEL_FIX = "KEY_LABEL_FIX";
 	
 	private static ResourceBundle resources;
 

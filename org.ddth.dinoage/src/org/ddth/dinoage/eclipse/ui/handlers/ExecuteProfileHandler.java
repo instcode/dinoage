@@ -37,7 +37,7 @@ public class ExecuteProfileHandler extends AbstractHandler {
 		ProfileNode node = (ProfileNode) selection.getFirstElement();
 		DinoAge dinoage = Activator.getDefault().getDinoAge();
 		Profile profile = node.getData();
-		BrowsingSession session = dinoage.createSession(profile);
+		BrowsingSession session = dinoage.getSession(profile);
 		session.addSessionChangeListener((SessionChangeListener) view);
 		
 		if (session.isRunning()) {
