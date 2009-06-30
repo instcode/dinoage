@@ -68,9 +68,6 @@ public class YahooProfile extends SessionProfile implements DataLoadMonitor {
 			// Only accept url from Yahoo 360 domain & not the slideshow one
 			beginningURL = url;
 		}
-		if (persistence != null) {
-			persistence.clean(beginningURL);
-		}
 	}
 
 	public void add(YBlogContent blogContent) {

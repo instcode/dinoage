@@ -187,12 +187,15 @@ public class YahooBlogUtil {
 
 	public static Author parseYahooProfile(Document doc) {
 		Node profile = YahooBlogKey.YMGL_PROFILE.getNode(doc);
+		if (profile == null) {
+			return new Author();
+		}
 		String profileName = YahooBlogKey.PROFILE_NAME.getText(profile);
-		String profileURL = YahooBlogKey.PROFILE_URL.getText(profile);
+		String yahooURL = YahooBlogKey.PROFILE_URL.getText(profile);
 		String avatar = YahooBlogKey.PROFILE_AVATAR.getText(profile);
-		String profileId = YahooBlogAPI.parseProfileId(profileURL);
+		String profileId = YahooBlogAPI.parseProfileId(yahooURL);
 		
-		return new Author(profileId, profileName, profileURL, avatar);
+		return new Author(profileId, profileName, yahooURL, avatar);
 	}
 
 	/**

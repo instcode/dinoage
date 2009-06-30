@@ -20,8 +20,6 @@ import org.ddth.blogging.yahoo.YahooBlogEntry;
 import org.ddth.dinoage.core.BrowsingSession;
 import org.ddth.dinoage.core.Profile;
 import org.ddth.dinoage.core.ProfileFactory;
-import org.ddth.dinoage.core.SessionProfile;
-import org.ddth.dinoage.core.Workspace;
 import org.ddth.http.core.connection.Request;
 import org.ddth.http.core.connection.RequestFuture;
 import org.ddth.http.core.content.Content;
@@ -48,11 +46,23 @@ public class YBrowsingSession extends BrowsingSession {
 	}
 	
 	private Log logger = LogFactory.getLog(YBrowsingSession.class);
+	private YahooProfile profile;
 
-	public YBrowsingSession(Profile profile, Workspace workspace) {
-		super((SessionProfile) profile, workspace, YahooBlogAPI.YAHOO_360_CONTENT_DISPATCHER);
+	public YBrowsingSession(YahooProfile profile) {
+		super(YahooBlogAPI.YAHOO_360_CONTENT_DISPATCHER);
+		this.profile = (YahooProfile) profile;
 	}
 
+	@Override
+	protected Request[] getRestorable() {
+		return new Request[] { new Request(profile.getBeginningURL()) };
+	}
+
+	@Override
+	public boolean isRestorable() {
+		return !profile.isNewlyCreated();
+	}
+	
 	/**
 	 * Check if the result of current request is available locally
 	 * 
@@ -72,6 +82,7 @@ public class YBrowsingSession extends BrowsingSession {
 			handle(request, content);
 			return null;
 		}
+		profile.saveURL(request.getURL());
 		return super.queue(request);
 	}
 	
@@ -123,11 +134,11 @@ public class YBrowsingSession extends BrowsingSession {
 			if (popupURL != null && !popupURL.isEmpty()) {
 				Request loresPictureRequest = new Request(entry.getImageURL());
 				if (getLocalResource(loresPictureRequest) == null) {
-					queue(loresPictureRequest);
+					super.queue(loresPictureRequest);
 				}
 				Request hiresPictureRequest = new Request(popupURL);
 				if (getLocalResource(hiresPictureRequest) == null) {
-					queue(hiresPictureRequest);
+					super.queue(hiresPictureRequest);
 				}
 			}
 			nextURL = entry.getNextURL();

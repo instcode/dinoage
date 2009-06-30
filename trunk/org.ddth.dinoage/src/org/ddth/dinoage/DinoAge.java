@@ -15,9 +15,12 @@ import java.util.Map;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.ddth.blogging.yahoo.grabber.YBrowsingSession;
+import org.ddth.blogging.yahoo.grabber.YProfileGrabberSession;
+import org.ddth.blogging.yahoo.grabber.YahooProfile;
 import org.ddth.dinoage.core.BrowsingSession;
 import org.ddth.dinoage.core.Profile;
 import org.ddth.dinoage.core.ProfileFactory;
+import org.ddth.dinoage.core.ProfileGrabberSession;
 import org.ddth.dinoage.core.Workspace;
 import org.ddth.dinoage.core.WorkspaceManager;
 import org.ddth.dinoage.eclipse.ui.widget.ChooseWorkspaceDlg;
@@ -47,16 +50,29 @@ public class DinoAge {
 			session.shutdown();
 		}
 		sessions.clear();
+		workspace.closeWorkspace();
 	}
 	
 	public Workspace getWorkspace() {
 		return workspace;
 	}
 
-	public BrowsingSession createSession(Profile profile) {
+	/**
+	 * @param profile
+	 * @return
+	 */
+	public ProfileGrabberSession createProfileGrabberSession() {
+		return new YProfileGrabberSession();
+	}
+	
+	public BrowsingSession removeSession(Profile profile) {
+		return sessions.remove(profile);
+	}
+	
+	public BrowsingSession getSession(Profile profile) {
 		BrowsingSession session = sessions.get(profile);
 		if (session == null) {
-			session = new YBrowsingSession(profile, workspace);
+			session = new YBrowsingSession((YahooProfile)profile);
 			sessions.put(profile, session);
 		}
 		return session;

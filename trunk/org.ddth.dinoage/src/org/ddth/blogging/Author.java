@@ -14,6 +14,10 @@ public class Author {
 	private String url;
 	private String avatar;
 
+	public Author() {
+		this("", "", "", "");
+	}
+	
 	public Author(String userId, String name, String url, String avatar) {
 		setUserId(userId);
 		setName(name);

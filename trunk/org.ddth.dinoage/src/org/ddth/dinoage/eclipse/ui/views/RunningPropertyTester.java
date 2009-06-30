@@ -28,7 +28,7 @@ public class RunningPropertyTester extends PropertyTester {
 			if (selection.size() == 1 && firstElement.getClass().getCanonicalName().equals(args[1])) {
 				ProfileNode profileNode = (ProfileNode) firstElement;
 				DinoAge dinoAge = Activator.getDefault().getDinoAge();
-				BrowsingSession session = dinoAge.createSession(profileNode.getData());
+				BrowsingSession session = dinoAge.getSession(profileNode.getData());
 				return session.isRunning();
 			}
 		}
