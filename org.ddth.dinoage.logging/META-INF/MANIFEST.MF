@@ -1,0 +1,8 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Logging Configuration
+Bundle-SymbolicName: org.ddth.dinoage.logging
+Bundle-Version: 1.0.0
+Fragment-Host: org.apache.commons.httpcomponent
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-Vendor: DDTH.org
