@@ -7,6 +7,9 @@
  **************************************************/
 package org.ddth.dinoage.eclipse.ui.wizard;
 
+import java.net.URI;
+
+import org.ddth.blogging.api.BlogUtil;
 import org.ddth.dinoage.ResourceManager;
 import org.ddth.dinoage.core.Profile;
 import org.ddth.dinoage.core.ProfileGrabberSession;
@@ -48,11 +51,11 @@ public class ProfileWizardPage extends WizardPage {
 	 * Create the wizard.
 	 */
 	public ProfileWizardPage(Workspace workspace, Profile profile) {
-		super("Profile");
+		super("ProfileWizardPage");
 		this.workspace = workspace;
 		this.profile = profile;
 		setTitle(ResourceManager.getMessage(ResourceManager.KEY_PROFILE_DIALOG_TITLE));
-		setDescription("Create & Edit profile");
+		setDescription(ResourceManager.getMessage(ResourceManager.KEY_PROFILE_WIZARD_DESCRIPTION));
 		createListeners();
 	}
 
@@ -62,82 +65,100 @@ public class ProfileWizardPage extends WizardPage {
 	 */
 	public void createControl(Composite parent) {
 		Composite container = new Composite(parent, SWT.NONE);
+		setControl(container);
 		
-		GridLayout layout = new GridLayout();
-		layout.numColumns = 3;
+		GridLayout layout = new GridLayout(3, false);
 		container.setLayout(layout);
 
-		final Label profileLabel = new Label(container, SWT.NONE);
-		profileLabel.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_PROFILE_NAME));
-		profileLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, true));
-
-		profileNameText = new Text(container, SWT.BORDER);
-		final GridData gd_profileNameText = new GridData(SWT.FILL, SWT.CENTER, true, true, 2, 1);
-		gd_profileNameText.heightHint = 15;
-		gd_profileNameText.widthHint = 300;
-		profileNameText.setLayoutData(gd_profileNameText);
-		profileNameText.addModifyListener(checkModifyListener);
-
 		final Label profileURLLabel = new Label(container, SWT.NONE);
-		profileURLLabel.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, true));
 		profileURLLabel.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_PROFILE_URL));
 
 		profileURLText = new Text(container, SWT.BORDER);
-		final GridData gd_profileURLText = new GridData(SWT.FILL, SWT.CENTER, true, true);
-		gd_profileURLText.heightHint = 15;
-		profileURLText.setLayoutData(gd_profileURLText);
+		profileURLText.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
 		profileURLText.addModifyListener(checkModifyListener);
 
 		fixButton = new Button(container, SWT.NONE);
-		final GridData gd_fixButton = new GridData(SWT.LEFT, SWT.CENTER, false, true);
+		final GridData gd_fixButton = new GridData(SWT.FILL, SWT.CENTER, false, false);
 		gd_fixButton.widthHint = 60;
 		fixButton.setLayoutData(gd_fixButton);
 		fixButton.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_FIX));
 		fixButton.addSelectionListener(selectFixListener);
-		
-		Label label= new Label(container, SWT.LEFT);
-		GridData gd= new GridData();
-		gd.verticalAlignment = SWT.FILL;
-		gd.heightHint= 150;
-		label.setLayoutData(gd);
-		
-		initializeValues();
-		setControl(container);
+
+		final Label profileLabel = new Label(container, SWT.NONE);
+		profileLabel.setText(ResourceManager.getMessage(ResourceManager.KEY_LABEL_PROFILE_NAME));
+		profileLabel.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false));
+
+		profileNameText = new Text(container, SWT.BORDER);
+		final GridData gd_profileNameText = new GridData(SWT.FILL, SWT.CENTER, true, false, 2, 1);
+		gd_profileNameText.widthHint = 300;
+		profileNameText.setLayoutData(gd_profileNameText);
+		profileNameText.addModifyListener(checkModifyListener);
+
+		saveAndUpdate(true);
+		new Label(container, SWT.NONE);
+		new Label(container, SWT.NONE);
+		new Label(container, SWT.NONE);
 	}
 
 	private boolean validate() {
 		String profileName = profileNameText.getText();
 		String profileURL = profileURLText.getText();
-		
+		setDescription(ResourceManager.getMessage(ResourceManager.KEY_PROFILE_WIZARD_DESCRIPTION));
 		if (profileNameText.getEditable()) {
 			Profile profile2 = workspace.getProfile(profileName);
-			if (profile2 != null && profile2.getProfileName().equalsIgnoreCase(profileName)) {
+			if (profile2 != null && !profile2.equals(profile)) {
 				String message = ResourceManager.getMessage(
 						ResourceManager.KEY_MESSAGE_EXISTED_PROFILE, new String[] { profileName }
 				);
 				setErrorMessage(message);
 			}
-		}		
-		return (profileName.trim().length() > 0 && profileURL.trim().length() > 0);
+		}
+		try {
+			URI.create(profileURL);
+			return (profileName.trim().length() > 0);
+		}
+		catch (IllegalArgumentException e) {
+			setErrorMessage(ResourceManager.getMessage(ResourceManager.KEY_PROFILE_WIZARD_INVALID_PROFILE_URL));
+		}
+		return false;
 	}
 
 	protected void createListeners() {
 		checkModifyListener = new ModifyListener() {
 			public void modifyText(ModifyEvent event) {
+				if (event.getSource() == profileURLText) {
+					fixButton.setEnabled(true);
+				}
 				setPageComplete(validate());
 			}
 		};
 		selectFixListener = new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-
+				fixButton.setEnabled(false);
 				final ProfileGrabberSession session = Activator.getDefault().getDinoAge().createProfileGrabberSession();
 				session.addConnectionListener(new ConnectionListener() {
 					@Override
 					public void notifyEvent(ConnectionEvent event) {
-						if (event.getEventType() == ConnectionEvent.REQUEST_FINISHED) {
-							System.out.println(session.getAuthor());
+						if (event.getEventType() != ConnectionEvent.REQUEST_FINISHED) {
+							return;
 						}
+						fixButton.getDisplay().asyncExec(new Runnable() {
+							@Override
+							public void run() {
+								String homepage = session.getAuthor().getUrl();
+								if (!homepage.isEmpty()) {
+									if (profileNameText.getText().isEmpty()) {
+										String profileName = BlogUtil.normalize(session.getAuthor().getName());
+										profileNameText.setText(profileName.toLowerCase());
+									}
+									profileURLText.setText(homepage);
+								}
+								else {
+									setErrorMessage(ResourceManager.getMessage(ResourceManager.KEY_PROFILE_WIZARD_INVALID_PROFILE_URL));
+								}
+							}
+						});
 					}
 				});
 				session.start();
@@ -146,11 +167,16 @@ public class ProfileWizardPage extends WizardPage {
 		};
 	}
 
-	private void initializeValues() {
-		boolean isEditable = (profile.getProfileName() == null);
-		profileNameText.setText((isEditable ? "" : profile.getProfileName()));
-		profileURLText.setText((profile.getProfileURL() == null ? "" : profile.getProfileURL()));
-		
-		profileNameText.setEditable(isEditable);
+	public void saveAndUpdate(boolean isUpdate) {
+		if (isUpdate) {
+			boolean isEditable = (profile.getProfileName() == null);
+			profileNameText.setText((isEditable ? "" : profile.getProfileName()));
+			profileURLText.setText((profile.getProfileURL() == null ? "" : profile.getProfileURL()));
+			profileNameText.setEditable(isEditable);
+		}
+		else {
+			profile.setProfileName(profileNameText.getText());
+			profile.setProfileURL(profileURLText.getText());
+		}
 	}
 }

@@ -34,8 +34,10 @@ public class YahooPersistence extends Persistence {
 	
 	public Blog load(String blogId) {
 		Blog blog = manager.getBlog(blogId);
-		List<Entry> entries = manager.getEntries(blogId);
-		blog.setEntries(entries);
+		if (blog != null) {
+			List<Entry> entries = manager.getEntries(blogId);
+			blog.setEntries(entries);
+		}
 		return blog;
 	}
 

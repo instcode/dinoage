@@ -93,6 +93,10 @@ public class Blog {
 		return (existence == null);
 	}
 
+	public void removeAllEntries() {
+		entries.clear();
+	}
+	
 	public static final Blog createBlog() {
 		Blog blog = new Blog();
 		

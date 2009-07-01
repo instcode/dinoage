@@ -7,13 +7,13 @@
  **************************************************/
 package org.ddth.blogging;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class Entry {
 	private long entryId;
 	private BlogPost post;
-	private List<Comment> comments = new ArrayList<Comment>();
+	private List<Comment> comments = new CopyOnWriteArrayList<Comment>();
 	private String url;
 	
 	public Entry(BlogPost post) {
