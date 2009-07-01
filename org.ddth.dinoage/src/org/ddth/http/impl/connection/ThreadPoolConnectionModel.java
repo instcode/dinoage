@@ -15,7 +15,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -74,18 +73,10 @@ import org.ddth.http.impl.content.WebpageContent;
  * 
  */
 public class ThreadPoolConnectionModel implements ConnectionModel {
-	private static final Properties props = new Properties();
-	private static final String FIREFOX_COOKIES_ENABLE = "firefox.cookies";
+	private static final String FIREFOX_COOKIES_ENABLED = "firefox.cookies";
 	private static final String NUMBER_OF_CONNECTIONS_PER_ROUTE = "connection.route";
 	private static final String CONNECTION_TIME_OUT = "connection.timeout";
 	private static final String NUMBER_OF_CONCURRENT_CONNECTIONS = "connection.concurrent";
-	
-	static {
-		// FIXME Should read from configuration file
-		props.put(NUMBER_OF_CONNECTIONS_PER_ROUTE, Integer.valueOf(4));
-		props.put(NUMBER_OF_CONCURRENT_CONNECTIONS, Integer.valueOf(2));
-		props.put(CONNECTION_TIME_OUT, new Long(1000*10L));
-	}
 	
 	private static final Log logger = LogFactory.getLog(ThreadPoolConnectionModel.class);
 	private HttpClient httpClient;
@@ -104,7 +95,7 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 	}
 
 	public void open() {
-		executor = Executors.newScheduledThreadPool(((Integer)props.get(NUMBER_OF_CONCURRENT_CONNECTIONS)).intValue());
+		executor = Executors.newScheduledThreadPool(Integer.parseInt(System.getProperty(NUMBER_OF_CONCURRENT_CONNECTIONS, "4")));
 	}
 
 	public boolean running() {
@@ -152,6 +143,7 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 	private Response request(final Request request, final HttpUriRequest httpRequest) {
 		HttpEntity entity = null;
 		Response response = null;
+		RequestFuture future = null;
 		try {
 			monitor.notifyEvent(new ConnectionEvent(request));
 			//printHeader(httpRequest.getAllHeaders());
@@ -171,8 +163,8 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 		catch (Exception e) {
 			logger.error("Error when processing an http request", e);
 			if (e instanceof SocketException) {
-				// Request again..
-				sendRequest(request);
+				// If there's request time outRequest again..
+				future = sendRequest(request);
 			}
 		}
 		finally {
@@ -188,7 +180,10 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 					logger.error("Error when consuming an http stream", e);
 				}
 			}
-			monitor.notifyEvent(new ConnectionEvent(ConnectionEvent.REQUEST_FINISHED, request, response));
+			// Check if the request is being sent again
+			if (future == null) {
+				monitor.notifyEvent(new ConnectionEvent(ConnectionEvent.REQUEST_FINISHED, request, response));
+			}
 		}
 		return response;
 	}
@@ -216,15 +211,15 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 		
 		// Support configuring number of concurrent connections so the bandwidth
 		// won't be throttled.
-		ConnManagerParams.setMaxTotalConnections(params, ((Integer)props.get(NUMBER_OF_CONCURRENT_CONNECTIONS)).intValue());
+		ConnManagerParams.setMaxTotalConnections(params, Integer.parseInt(System.getProperty(NUMBER_OF_CONCURRENT_CONNECTIONS, "4")));
 		ConnManagerParams.setMaxConnectionsPerRoute(params, new ConnPerRoute() {
-			private final int connectionCount = ((Integer)props.get(NUMBER_OF_CONNECTIONS_PER_ROUTE)).intValue();
+			private final int connectionCount = Integer.parseInt(System.getProperty(NUMBER_OF_CONNECTIONS_PER_ROUTE, "2"));
 			
 			public int getMaxForRoute(HttpRoute route) {
 				return connectionCount;
 			}
 		});
-		ConnManagerParams.setTimeout(params, ((Long)props.get(CONNECTION_TIME_OUT)).longValue());
+		ConnManagerParams.setTimeout(params, Long.parseLong(System.getProperty(CONNECTION_TIME_OUT, "10000")));
 
 		ClientConnectionManager ccm = new ThreadSafeClientConnManager(params, supportedSchemes);
 		DefaultHttpClient httpClient = new DefaultHttpClient(ccm, params);
@@ -233,7 +228,7 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 		//httpClient.getParams().setParameter(ConnRoutePNames.DEFAULT_PROXY, proxy);
 		httpClient.getParams().setParameter(ClientPNames.COOKIE_POLICY, CookiePolicy.BROWSER_COMPATIBILITY);
 		// Load all cookies from Firefox
-		if ("yes".equals(System.getProperty(FIREFOX_COOKIES_ENABLE, "no"))) {
+		if (Boolean.parseBoolean(System.getProperty(FIREFOX_COOKIES_ENABLED, "true"))) {
 			httpClient.setCookieStore((new CookiesReader()).readBrowserCookies());
 			logger.info("Loaded all cookies from default Firefox profile.");
 		}
