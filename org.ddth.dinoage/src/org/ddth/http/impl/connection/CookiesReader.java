@@ -17,6 +17,7 @@ import org.apache.http.client.CookieStore;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.cookie.BasicClientCookie;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
@@ -83,7 +84,13 @@ public class CookiesReader {
 	 * Read all the cookies which are stored in the session store and store in
 	 * an object that the HttpClient can understand.<br>
 	 * <br>
-	 * 
+	 * Firefox 3.5 stores cookies in 2 types of window json objects:
+	 * <ol>
+	 * <li>windows: Refers to active windows.</li>
+	 * <li>_closedWindows: Refers to closed windows.</li>
+	 * </ol>
+	 * Cookies should be extracted from these objects.
+	 * <br>
 	 * @return A {@link CookieStore} object which contains all cookies from your
 	 *         current browser.
 	 */
@@ -93,16 +100,9 @@ public class CookiesReader {
 		try {
 			reader = new BufferedReader(new FileReader(getSessionStore()));
 			String json = reader.readLine();
-			JSONArray windows = new JSONArray(json).getJSONObject(0).getJSONArray("windows");
-			JSONArray cookies = windows.getJSONObject(0).getJSONArray("cookies");
-			for (int i = 0; i < cookies.length(); i++) {
-				JSONObject session = cookies.getJSONObject(i);
-				String host = session.getString("host");
-				String name = session.getString("name");
-				String value = session.getString("value");
-				String path = session.getString("path");
-				addCookie(host, name, value, path);
-			}
+			JSONObject jsonObject = new JSONArray(json).getJSONObject(0);
+			addCookies(jsonObject, "windows");
+			addCookies(jsonObject, "_closedWindows");
 		}
 		catch (Exception e) {
 			// Something's wrong with the reading, but it's okay :-)
@@ -117,6 +117,23 @@ public class CookiesReader {
 			}
 		}
 		return cookieStore;
+	}
+
+	private void addCookies(JSONObject jsonObject, String window)
+			throws JSONException {
+		JSONArray windows = jsonObject.getJSONArray(window);
+		if (windows == null) {
+			return;
+		}
+		JSONArray cookies = windows.getJSONObject(0).getJSONArray("cookies");
+		for (int i = 0; i < cookies.length(); i++) {
+			JSONObject session = cookies.getJSONObject(i);
+			String host = session.getString("host");
+			String name = session.getString("name");
+			String value = session.getString("value");
+			String path = session.getString("path");
+			addCookie(host, name, value, path);
+		}
 	}
 
 	private void addCookie(String host, String name, String value, String path) {
