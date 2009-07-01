@@ -35,7 +35,9 @@ public class YBrowsingSession extends BrowsingSession {
 	
 	public static class YProfileLoader implements ProfileFactory { 
 		public Profile createProfile() {
-			return new YahooProfile();
+			YahooProfile profile = new YahooProfile();
+			profile.setProfileURL(YahooBlogAPI.YAHOO_360_PROFILE_URL);
+			return profile;
 		}
 		
 		public Profile loadProfile(File profileFile) throws IOException {
@@ -50,17 +52,23 @@ public class YBrowsingSession extends BrowsingSession {
 
 	public YBrowsingSession(YahooProfile profile) {
 		super(YahooBlogAPI.YAHOO_360_CONTENT_DISPATCHER);
-		this.profile = (YahooProfile) profile;
+		this.profile = profile;
 	}
 
 	@Override
 	protected Request[] getRestorable() {
-		return new Request[] { new Request(profile.getBeginningURL()) };
+		return new Request[] { new Request(profile.getRecentURL()) };
 	}
 
 	@Override
 	public boolean isRestorable() {
 		return !profile.isNewlyCreated();
+	}
+	
+	@Override
+	public void start() {
+		super.start();
+		queue(new Request(profile.getStartingURL()));
 	}
 	
 	/**
@@ -70,7 +78,7 @@ public class YBrowsingSession extends BrowsingSession {
 	 * @return
 	 */
 	private File getLocalResource(Request request) {
-		YahooProfile yahooProfile = (YahooProfile) profile;
+		YahooProfile yahooProfile = profile;
 		return yahooProfile.getLocalResource(request.getParameters());
 	}
 	
@@ -82,7 +90,7 @@ public class YBrowsingSession extends BrowsingSession {
 			handle(request, content);
 			return null;
 		}
-		profile.saveURL(request.getURL());
+		profile.saveRequestingURL(request.getURL());
 		return super.queue(request);
 	}
 	
@@ -118,10 +126,9 @@ public class YBrowsingSession extends BrowsingSession {
 	
 	private String processContent(Request request, Content<?> content) {
 		String nextURL = null;
-		YahooProfile yahooProfile = (YahooProfile) profile;			
 		if (content instanceof YBlogContent) {
 			YBlogContent blogContent = (YBlogContent) content;
-			yahooProfile.add(blogContent);
+			profile.add(blogContent);
 			YahooBlog blog = blogContent.getBlog();
 			if (blog != null) {
 				nextURL = blog.getFirstEntryURL();
@@ -142,14 +149,14 @@ public class YBrowsingSession extends BrowsingSession {
 				}
 			}
 			nextURL = entry.getNextURL();
-			yahooProfile.add(blogEntry);
+			profile.add(blogEntry);
 		}
 		else if (content instanceof YEntryImageContent) {
 			nextURL = ((YEntryImageContent) content).getImageURL();
 		}
 		else if (content instanceof StreamContent) {
 			String imageName = request.getParameters().get("fragment");
-			yahooProfile.add(imageName, (InputStream)content.getContent());
+			profile.add(imageName, (InputStream)content.getContent());
 		}
 		return nextURL;
 	}

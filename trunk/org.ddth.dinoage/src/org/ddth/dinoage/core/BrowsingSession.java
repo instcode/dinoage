@@ -16,7 +16,7 @@ public abstract class BrowsingSession extends ThreadPoolSession {
 	}
 
 	public void restore() {
-		super.start();
+		start();
 		if (isRestorable()) {
 			Request[] requests = getRestorable();
 			for (Request request : requests) {
@@ -35,11 +35,16 @@ public abstract class BrowsingSession extends ThreadPoolSession {
 
 	@Override
 	public RequestFuture queue(Request request) {
-		RequestFuture future = null;
+		if (request == null) {
+			throw new IllegalArgumentException("Request is null");
+		}
 		String url = request.getURL();
-		if (url != null && !requests.containsKey(url)) {
+		RequestFuture future = requests.get(url);
+		if (future == null) {
 			future = super.queue(request);
-			requests.put(url, future);
+			if (future != null) {
+				requests.put(url, future);
+			}
 		}
 		return future;
 	}

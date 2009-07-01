@@ -1,8 +1,18 @@
+/****************************************************
+ * $Project: DinoAge                     $
+ * $Date:: Jan 1, 2008 8:23:13 PM                  $
+ * $Revision: $	
+ * $Author:: khoanguyen                           $
+ * $Comment::                                      $
+ **************************************************/
 package org.ddth.dinoage.core;
 
 import java.util.Properties;
 
-
+/**
+ * @author khoa.nguyen
+ *
+ */
 public abstract class SessionProfile extends Profile {
 
 	@Override
@@ -12,18 +22,7 @@ public abstract class SessionProfile extends Profile {
 	@Override
 	protected void load(Properties properties) {
 	}
-	
-	public void saveURL(String url) {
-	}
-	
-	public void load() {
-	}
-	
-	public boolean isNewlyCreated() {
-		return false;
-	}
-	
-	public String getBeginningURL() {
-		return null;
+
+	public void loadResourcesFromCache() {
 	}
 }

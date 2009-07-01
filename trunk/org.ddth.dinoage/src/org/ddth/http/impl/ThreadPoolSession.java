@@ -170,6 +170,7 @@ public abstract class ThreadPoolSession implements ConnectionListener, Session {
 		for (RequestFuture future : queue.values()) {
 			future.cancel(true);
 		}
+		queue.clear();
 		connectionModel.close();
 		fireSessionChanged(new SessionChangeEvent(this, SessionChangeEvent.SESSION_END));
 	}
