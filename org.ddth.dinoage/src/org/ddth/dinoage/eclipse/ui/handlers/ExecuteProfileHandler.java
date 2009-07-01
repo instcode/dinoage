@@ -51,7 +51,7 @@ public class ExecuteProfileHandler extends AbstractHandler {
 		}
 		else {
 			int answer = SWT.NO;
-			if (!session.isRestorable()) {
+			if (session.isRestorable()) {
 				File profileFolder = dinoage.getWorkspace().getProfileFolder(
 						profile);
 				String message = ResourceManager.getMessage(

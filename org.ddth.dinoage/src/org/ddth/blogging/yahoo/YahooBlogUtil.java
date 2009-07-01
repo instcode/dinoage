@@ -117,7 +117,7 @@ public class YahooBlogUtil {
 		 * Start from {@value #YMGL_PROFILE}
 		 */
 		static XPathKey PROFILE_NAME			= new XPathKey("DIV/DIV/H2/SPAN[2]");
-		static XPathKey PROFILE_URL				= new XPathKey("DIV/DIV/P/A/@href");
+		static XPathKey PROFILE_ANY_URL				= new XPathKey("DIV/DIV/P/A/@href");
 		static XPathKey PROFILE_AVATAR			= new XPathKey("//*[@id=\"user-photos-full\"]/@src");
 		
 		/**
@@ -191,11 +191,11 @@ public class YahooBlogUtil {
 			return new Author();
 		}
 		String profileName = YahooBlogKey.PROFILE_NAME.getText(profile);
-		String yahooURL = YahooBlogKey.PROFILE_URL.getText(profile);
+		String yahooURL = YahooBlogKey.PROFILE_ANY_URL.getText(profile);
 		String avatar = YahooBlogKey.PROFILE_AVATAR.getText(profile);
 		String profileId = YahooBlogAPI.parseProfileId(yahooURL);
 		
-		return new Author(profileId, profileName, yahooURL, avatar);
+		return new Author(profileId, profileName, YahooBlogAPI.YAHOO_360_PROFILE_URL + profileId, avatar);
 	}
 
 	/**

@@ -1,5 +1,7 @@
 package org.ddth.dinoage.eclipse.ui.editors;
 
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Vector;
 
@@ -18,6 +20,15 @@ public class ProfileContentProvider implements ILazyContentProvider, ProfileChan
 	private List<Entry> entries = new Vector<Entry>();
 	private Thread loadingThread;
 	
+	private Comparator<Entry> descByDateComparator = new Comparator<Entry>() {
+		@Override
+		public int compare(Entry o1, Entry o2) {
+			long diff = o1.getPost().getDate().getTime() - o2.getPost().getDate().getTime();
+			// Use "lower or equal 0" to make sure the sorting is *stable*
+			return diff <= 0 ? 1 : -1;
+		}
+	};
+	
 	public ProfileContentProvider() {
 	}
 
@@ -29,10 +40,13 @@ public class ProfileContentProvider implements ILazyContentProvider, ProfileChan
 		case ProfileChangeEvent.PROFILE_FIRST_LOADED:
 			entries.clear();
 			entries.addAll(((Blog) event.getData()).getEntries());
+			Collections.sort(entries, descByDateComparator);
 			break;
 			
 		case ProfileChangeEvent.PROFILE_CHANGED:
-			entries.add((Entry) event.getData());
+			Entry entry = (Entry) event.getData();
+			int index = Collections.binarySearch(entries, entry, descByDateComparator);
+			entries.add(-1 - index, entry);
 			break;
 		}
 
@@ -52,10 +66,13 @@ public class ProfileContentProvider implements ILazyContentProvider, ProfileChan
 				if (viewer.getControl().isDisposed()) {
 					return;
 				}
+
 				if (entries.size() != viewer.getTable().getItemCount()) {
 					viewer.setItemCount(entries.size());
 				}
+				viewer.refresh();
 			}
+			
 		});
 	}
 	
@@ -91,7 +108,7 @@ public class ProfileContentProvider implements ILazyContentProvider, ProfileChan
 				// it doesn't block the UI thread.
 				loadingThread = new Thread(new Runnable() {
 					public void run() {
-						((SessionProfile)profile).load();
+						((SessionProfile)profile).loadResourcesFromCache();
 					}
 				});
 				loadingThread.start();

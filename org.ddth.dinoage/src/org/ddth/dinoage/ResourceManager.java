@@ -66,6 +66,20 @@ public class ResourceManager {
 	public static final String KEY_MESSAGE_SELECT_NONE = "KEY_MESSAGE_SELECT_NONE";
 	public static final String KEY_MESSAGE_INVERT_SELECTION = "KEY_MESSAGE_INVERT_SELECTION";
 	public static final String KEY_LABEL_FIX = "KEY_LABEL_FIX";
+	public static final String KEY_LABEL_EXPORT = "KEY_LABEL_EXPORT";
+	public static final String KEY_PROFILE_WIZARD_DESCRIPTION = "KEY_PROFILE_WIZARD_DESCRIPTION";
+	public static final String KEY_PROFILE_WIZARD_INVALID_PROFILE_URL = "KEY_PROFILE_WIZARD_INVALID_PROFILE_URL";
+	public static final String KEY_LABEL_FILE_OUTPUT = "KEY_LABEL_FILE_OUTPUT";
+	public static final String KEY_LABEL_AVATAR = "KEY_LABEL_AVATAR";
+	public static final String KEY_LABEL_HOMEPAGE = "KEY_LABEL_HOMEPAGE";
+	public static final String KEY_LABEL_USERNAME = "KEY_LABEL_USERNAME";
+	public static final String KEY_LABEL_AUTHOR_DESCRIPTION = "KEY_LABEL_AUTHOR_DESCRIPTION";
+	public static final String KEY_LABEL_DESCRIPTION = "KEY_LABEL_DESCRIPTION";
+	public static final String KEY_LABEL_TITLE = "KEY_LABEL_TITLE";
+	public static final String KEY_LABEL_URL = "KEY_LABEL_URL";
+	public static final String KEY_LABEL_BLOG_INFORMATION = "KEY_LABEL_BLOG_INFORMATION";
+	public static final String KEY_LABEL_EXPORT_DESCRIPTION = "KEY_LABEL_EXPORT_DESCRIPTION";
+	public static final String KEY_LABEL_WORDPRESS = "KEY_LABEL_WORDPRESS";
 	
 	private static ResourceBundle resources;
 
