@@ -7,6 +7,7 @@ public class YahooBlogEntry extends Entry {
 	private String nextURL;
 	private String imageURL;
 	private String popupURL;
+	private String[] sessionKeepAliveURLs;
 	
 	public YahooBlogEntry(BlogPost post) {
 		super(post);
@@ -41,5 +42,13 @@ public class YahooBlogEntry extends Entry {
 	
 	public String getPopupURL() {
 		return popupURL;
+	}
+
+	public void setKeepSessionAliveURL(String[] sessionKeepAliveURLs) {
+		this.sessionKeepAliveURLs = sessionKeepAliveURLs;
+	}
+	
+	public String[] getSessionKeepAliveURLs() {
+		return sessionKeepAliveURLs;
 	}
 }
