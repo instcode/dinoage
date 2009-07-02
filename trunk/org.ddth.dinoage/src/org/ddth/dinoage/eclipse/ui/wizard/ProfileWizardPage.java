@@ -103,7 +103,7 @@ public class ProfileWizardPage extends WizardPage {
 	private boolean validate() {
 		String profileName = profileNameText.getText();
 		String profileURL = profileURLText.getText();
-		setDescription(ResourceManager.getMessage(ResourceManager.KEY_PROFILE_WIZARD_DESCRIPTION));
+		setErrorMessage(null);
 		if (profileNameText.getEditable()) {
 			Profile profile2 = workspace.getProfile(profileName);
 			if (profile2 != null && !profile2.equals(profile)) {
@@ -146,6 +146,7 @@ public class ProfileWizardPage extends WizardPage {
 						fixButton.getDisplay().asyncExec(new Runnable() {
 							@Override
 							public void run() {
+								setMessage(null);
 								String homepage = session.getAuthor().getUrl();
 								if (!homepage.isEmpty()) {
 									if (profileNameText.getText().isEmpty()) {
@@ -162,6 +163,8 @@ public class ProfileWizardPage extends WizardPage {
 					}
 				});
 				session.start();
+				setErrorMessage(null);
+				setMessage(ResourceManager.getMessage(ResourceManager.KEY_PROFILE_WIZARD_CHECKING_PROFILE_URL));
 				session.queue(new Request(profileURLText.getText()));
 			}
 		};

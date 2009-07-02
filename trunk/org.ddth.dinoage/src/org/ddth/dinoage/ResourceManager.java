@@ -80,6 +80,7 @@ public class ResourceManager {
 	public static final String KEY_LABEL_BLOG_INFORMATION = "KEY_LABEL_BLOG_INFORMATION";
 	public static final String KEY_LABEL_EXPORT_DESCRIPTION = "KEY_LABEL_EXPORT_DESCRIPTION";
 	public static final String KEY_LABEL_WORDPRESS = "KEY_LABEL_WORDPRESS";
+	public static final String KEY_PROFILE_WIZARD_CHECKING_PROFILE_URL = "KEY_PROFILE_WIZARD_CHECKING_PROFILE_URL";
 	
 	private static ResourceBundle resources;
 
