@@ -48,13 +48,12 @@ public class WXR {
 	}
 
 	public static void main(String[] args) throws Exception {
-		//WXR generator = new WXR(new OutputStreamWriter(new FileOutputStream("wp.xml"), "utf-8"));
-		//WXR generator = new WXR();
-		//generator.export(createBlog());
-		database();
+		export(Blog.createBlog());
+		//export(Blog.createBlog(), new OutputStreamWriter(new FileOutputStream("wp.xml"), "utf-8"));
+		//database();
 	}
 
-	private static void database() {
+	static void database() {
 		File file = new File("D:\\Projects\\DinoAge\\workspaces\\w1\\watersnake");
 		File databaseFolder = new File(file, "database");
 

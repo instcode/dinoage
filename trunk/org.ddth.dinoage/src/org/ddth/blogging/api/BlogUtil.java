@@ -7,7 +7,10 @@
  **************************************************/
 package org.ddth.blogging.api;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -40,6 +43,16 @@ public class BlogUtil {
 			return null;
 		}
 		return postTags.split(", ");
+	}
+	
+	private static Map<String, DateFormat> formatters = new HashMap<String, DateFormat>();
+	public static String format(Date date, String pattern) {
+		DateFormat formatter = formatters.get(pattern);
+		if (formatter == null) {
+			formatter = new SimpleDateFormat(pattern);
+			formatters.put(pattern, formatter);
+		}
+		return formatter.format(date);
 	}
 	
 	public static String[] buildTags(Blog blog) {
