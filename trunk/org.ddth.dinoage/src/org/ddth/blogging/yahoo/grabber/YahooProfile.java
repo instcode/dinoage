@@ -22,7 +22,7 @@ import org.ddth.dinoage.core.SessionProfile;
 
 public class YahooProfile extends SessionProfile implements DataLoadMonitor {
 	
-	private static final String PROFILE_URLS_BEGINNING = "profile.urls.beginning";
+	private static final String PROFILE_RECENT_URLS = "profile.recent.urls";
 	
 	private String profileId;
 	private String recentURL;
@@ -46,12 +46,12 @@ public class YahooProfile extends SessionProfile implements DataLoadMonitor {
 	
 	@Override
 	protected void load(Properties properties) {
-		recentURL = properties.getProperty(PROFILE_URLS_BEGINNING, startingURL);
+		recentURL = properties.getProperty(PROFILE_RECENT_URLS, startingURL);
 	}
 
 	@Override
 	protected void store(Properties properties) {
-		properties.put(PROFILE_URLS_BEGINNING, recentURL);
+		properties.put(PROFILE_RECENT_URLS, recentURL);
 	}
 	
 	public boolean isNewlyCreated() {

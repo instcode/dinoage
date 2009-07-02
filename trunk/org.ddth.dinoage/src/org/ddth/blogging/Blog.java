@@ -120,7 +120,7 @@ public class Blog {
 		Entry blogEntry = new Entry(blogPost);
 		blogEntry.addComment(blogComment);
 		
-		for (int i = 0; i < 100; i++) {
+		for (int i = 0; i < 10; i++) {
 			blog.addEntry(blogEntry);
 		}
 		return blog;

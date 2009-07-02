@@ -16,7 +16,7 @@ public abstract class BrowsingSession extends ThreadPoolSession {
 	}
 
 	public void restore() {
-		start();
+		super.start();
 		if (isRestorable()) {
 			Request[] requests = getRestorable();
 			for (Request request : requests) {
@@ -28,13 +28,16 @@ public abstract class BrowsingSession extends ThreadPoolSession {
 	protected abstract Request[] getRestorable();
 
 	@Override
-	public void start() {
+	public void shutdown() {
+		super.shutdown();
 		requests.clear();
-		super.start();
 	}
-
+	
 	@Override
 	public RequestFuture queue(Request request) {
+		if (!isRunning()) {
+			return null;
+		}
 		if (request == null) {
 			throw new IllegalArgumentException("Request is null");
 		}

@@ -11,7 +11,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import java.util.Date;
 
 import org.apache.http.client.CookieStore;
 import org.apache.http.impl.client.BasicCookieStore;
@@ -140,7 +139,6 @@ public class CookiesReader {
 		BasicClientCookie cookie = new BasicClientCookie(name, value);
 		cookie.setDomain(host);
 		cookie.setPath(path);
-		cookie.setExpiryDate(new Date(System.currentTimeMillis() + 31536000000L));
 		cookieStore.addCookie(cookie);
 	}
 }

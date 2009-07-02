@@ -21,7 +21,19 @@ public class HTMLNodeBuilder {
 		this.writer = writer;
 	}
 
-	public void serialize(Node node) throws IOException {
+	public void serialize(Node node, boolean inclusive) throws IOException {
+		if (inclusive) {
+			serialize(node);
+		}
+		else {
+			NodeList children = node.getChildNodes();
+			for (int i = 0; i < children.getLength(); i++) {
+				serialize(children.item(i));
+			}
+		}
+	}
+	
+	private void serialize(Node node) throws IOException {
 		if (node == null) {
 			return;
 		}

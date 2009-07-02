@@ -84,6 +84,9 @@ public class YBrowsingSession extends BrowsingSession {
 	
 	@Override
 	public RequestFuture queue(Request request) {
+		if (!isRunning()) {
+			return null;
+		}
 		File resource = getLocalResource(request);
 		if (resource != null) {
 			Content<?> content = parseForContent(request, resource);
@@ -100,11 +103,10 @@ public class YBrowsingSession extends BrowsingSession {
 			Request nextRequest = request;
 			Content<?> currContent = content;
 			while (currContent != null) {
-				String nextURL = processContent(nextRequest, currContent);
-				if (nextURL == null || nextURL.isEmpty()) {
+				nextRequest = processContent(nextRequest, currContent);
+				if (nextRequest == null || !isRunning()) {
 					break;
 				}
-				nextRequest = new Request(nextURL);
 				File entryFile = getLocalResource(nextRequest);
 				if (entryFile == null) {
 					queue(nextRequest);
@@ -124,14 +126,14 @@ public class YBrowsingSession extends BrowsingSession {
 		}
 	}
 	
-	private String processContent(Request request, Content<?> content) {
-		String nextURL = null;
+	private Request processContent(Request request, Content<?> content) {
+		Request nextRequest = null;
 		if (content instanceof YBlogContent) {
 			YBlogContent blogContent = (YBlogContent) content;
 			profile.add(blogContent);
 			YahooBlog blog = blogContent.getBlog();
 			if (blog != null) {
-				nextURL = blog.getFirstEntryURL();
+				nextRequest = new Request(blog.getFirstEntryURL());
 			}
 		}
 		else if (content instanceof YBlogEntryContent) {
@@ -148,17 +150,22 @@ public class YBrowsingSession extends BrowsingSession {
 					super.queue(hiresPictureRequest);
 				}
 			}
-			nextURL = entry.getNextURL();
 			profile.add(blogEntry);
+			String nextURL = entry.getNextURL();
+			if (nextURL != null && !nextURL.isEmpty()) {
+				nextRequest = new Request(nextURL);
+			}
 		}
 		else if (content instanceof YEntryImageContent) {
-			nextURL = ((YEntryImageContent) content).getImageURL();
+			nextRequest = new Request(((YEntryImageContent) content).getImageURL());
 		}
 		else if (content instanceof StreamContent) {
 			String imageName = request.getParameters().get("fragment");
-			profile.add(imageName, (InputStream)content.getContent());
+			if (imageName != null && imageName.length() > 0) {
+				profile.add(imageName, (InputStream)content.getContent());
+			}
 		}
-		return nextURL;
+		return nextRequest;
 	}
 	
 	private Content<?> parseForContent(Request request, File cacheFile) {

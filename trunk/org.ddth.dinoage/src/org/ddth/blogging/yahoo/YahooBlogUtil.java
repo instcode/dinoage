@@ -117,7 +117,7 @@ public class YahooBlogUtil {
 		 * Start from {@value #YMGL_PROFILE}
 		 */
 		static XPathKey PROFILE_NAME			= new XPathKey("DIV/DIV/H2/SPAN[2]");
-		static XPathKey PROFILE_ANY_URL				= new XPathKey("DIV/DIV/P/A/@href");
+		static XPathKey PROFILE_ANY_URL			= new XPathKey("DIV/DIV/P/A/@href");
 		static XPathKey PROFILE_AVATAR			= new XPathKey("//*[@id=\"user-photos-full\"]/@src");
 		
 		/**
@@ -125,13 +125,13 @@ public class YahooBlogUtil {
 		 */
 		static XPathKey YMGL_GUESTBOOK			= new XPathKey("//*[@id=\"ymgl-guestbook\"]");		
 		static XPathKey GUESTBOOK_TOP_SPAN		= new XPathKey("/HTML/BODY/DIV[2]/DIV/DIV[2]/SPAN[2]/SPAN");
+		static XPathKey GUESTBOOK_REDIRECT		= new XPathKey("/HTML/BODY/DIV/DIV/DIV/DIV/DIV/FIELDSET/FORM/INPUT[3]/@value");
 		
 		/**
 		 * Start from {@value #GUESTBOOK_TOP_SPAN}
 		 */
 		static XPathKey GUESTBOOK_PREV_URL		= new XPathKey("//*[@id=\"num_prev\"]/@href");
 		static XPathKey GUESTBOOK_LIMIT			= new XPathKey("/HTML/BODY/DIV[2]/DIV/DIV[2]/SPAN[2]/SPAN/EM[2]/text()");
-		
 		
 		/**
 		 * Start from {@value #YMGL_GUESTBOOK}
@@ -205,6 +205,7 @@ public class YahooBlogUtil {
 	 * @return
 	 */
 	public static YahooBlogEntry parseGuestbook(Document doc) {
+
 		Author author = parseYahooProfile(doc);
 		BlogPost blogPost = new BlogPost();
 		// 0 is a special post id that mark this entry is guestbook.
@@ -216,7 +217,14 @@ public class YahooBlogUtil {
 		blogPost.setDate(new Date());
 		
 		YahooBlogEntry guestbook = new YahooBlogEntry(blogPost);
-
+		String redirectURL = YahooBlogKey.GUESTBOOK_REDIRECT.getText(doc);
+		
+		if (!redirectURL.isEmpty()) {
+			logger.debug("Session is protected. Retrieve...");
+			guestbook.setNextURL(redirectURL);
+			return guestbook;
+		}
+		
 		Node span = YahooBlogKey.GUESTBOOK_TOP_SPAN.getNode(doc);
 		String limit = YahooBlogKey.GUESTBOOK_LIMIT.getText(span);
 		String prevURL = YahooBlogKey.GUESTBOOK_PREV_URL.getText(span);
@@ -459,7 +467,7 @@ public class YahooBlogUtil {
 		StringWriter writer = new StringWriter();
 		HTMLNodeBuilder builder = new HTMLNodeBuilder(writer);
 		try {
-			builder.serialize(node);
+			builder.serialize(node, false);
 		}
 		catch (IOException e) {
 			logger.debug("Error", e);
@@ -473,8 +481,7 @@ public class YahooBlogUtil {
 
 	private static void blogEntry() throws FileNotFoundException {
 		YahooBlogContentHandler contentHandler = new YahooBlogContentHandler();
-		FileInputStream inputStream = new FileInputStream("./workspaces/w1/instcode/entry/entry-2035.html");
-		//FileInputStream inputStream = new FileInputStream("./workspaces/w1/khanhvan19/entry/entry-44.html");
+		FileInputStream inputStream = new FileInputStream("D:/Temp/Workspaces/w1/instcode/entry/entry-2035.html");
 		WebpageContent webContent = new WebpageContent(inputStream, "utf-8");
 		DomTreeContent content = (DomTreeContent)contentHandler.handle(webContent);
 	

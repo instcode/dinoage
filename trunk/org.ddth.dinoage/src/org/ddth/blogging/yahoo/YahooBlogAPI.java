@@ -31,7 +31,9 @@ public class YahooBlogAPI extends BasicBlogAPI {
 		YAHOO_360_CONTENT_DISPATCHER.registerHandler("http://.*/blog-.*\\?.*p=(\\d+).*", new YBlogEntryContentHandler());
 		YAHOO_360_CONTENT_DISPATCHER.registerHandler("http://.*/blog-[^?]*", new YEntryListContentHandler());
 		YAHOO_360_CONTENT_DISPATCHER.registerHandler("http://.*/blog/slideshow.html.*", new YEntryImageContentHandler());
-		YAHOO_360_CONTENT_DISPATCHER.registerHandler("http://.*yahoofs[.]com/blog/.*jpg.*", new DefaultHandler());
+		YAHOO_360_CONTENT_DISPATCHER.registerHandler("http://.*[.]yahoofs[.].*/blog/.*jpg.*", new DefaultHandler());
+		YAHOO_360_CONTENT_DISPATCHER.registerHandler("http://.*[.]yahoo[.].*/b[\\?]P.*", new DefaultHandler());
+		
 		
 		YAHOO_360_PROFILE_CONTENT_DISPATCHER.registerHandler("http://.*", new YProfilePageContentHandler());
 	}
