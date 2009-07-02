@@ -41,8 +41,8 @@
 	<item>
 		<title>$post.title</title>
 		<link>$postLink</link>
-		<pubDate>$post.date</pubDate>
-		<dc:creator><![CDATA[$post.author.name]]></dc:creator>
+		<pubDate>$util.format($post.date, "EEE, dd MMM yyyy - HH:mm:ss Z")</pubDate>
+		<dc:creator><![CDATA[$blog.author.name]]></dc:creator>
 		<category><![CDATA[Uncategorized]]></category>
 		<category domain="category" nicename="uncategorized"><![CDATA[Uncategorized]]></category>
 #set ($tags = $util.getTags($post))
@@ -50,13 +50,13 @@
 		<category domain="tag"><![CDATA[$tag]]></category>
 		<category domain="tag" nicename="$tag"><![CDATA[$tag]]></category>
 #end
-		<guid isPermaLink="false">$blog.url?p=$post.postId</guid>
+		<guid isPermaLink="false">$blog.url/?p=$post.postId</guid>
 		<description></description>
 		<content:encoded><![CDATA[$post.content]]></content:encoded>
 		<excerpt:encoded><![CDATA[]]></excerpt:encoded>
 		<wp:post_id>$post.postId</wp:post_id>
-		<wp:post_date>$post.date</wp:post_date>
-		<wp:post_date_gmt>$post.date</wp:post_date_gmt>
+		<wp:post_date>$util.format($post.date, "yyyy-MM-dd HH:mm:ss Z")</wp:post_date>
+		<wp:post_date_gmt>$util.format($post.date, "yyyy-MM-dd HH:mm:ss Z")</wp:post_date_gmt>
 		<wp:comment_status>open</wp:comment_status>
 		<wp:ping_status>open</wp:ping_status>
 		<wp:post_name>$postName</wp:post_name>
@@ -80,8 +80,8 @@
 			<wp:comment_author_email>$!comment.author.email</wp:comment_author_email>
 			<wp:comment_author_url>$!comment.author.url</wp:comment_author_url>
 			<wp:comment_author_IP>$!comment.author.ip</wp:comment_author_IP>
-			<wp:comment_date>$comment.date</wp:comment_date>
-			<wp:comment_date_gmt>$comment.date</wp:comment_date_gmt>
+			<wp:comment_date>$util.format($comment.date, "yyyy-MM-dd HH:mm:ss")</wp:comment_date>
+			<wp:comment_date_gmt>$util.format($comment.date, "yyyy-MM-dd HH:mm:ss")</wp:comment_date_gmt>
 			<wp:comment_content><![CDATA[$comment.content]]></wp:comment_content>
 			<wp:comment_approved>1</wp:comment_approved>
 			<wp:comment_type></wp:comment_type>
