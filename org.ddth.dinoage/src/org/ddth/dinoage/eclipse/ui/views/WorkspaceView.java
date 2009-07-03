@@ -17,6 +17,7 @@ import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.PlatformUI;
@@ -115,8 +116,12 @@ public class WorkspaceView extends ViewPart implements SessionChangeListener {
 	public void sessionChanged(SessionChangeEvent event) {
 		// This method might be invoked in a worker thread, to eliminate
 		// illegal thread access, the invocation of evaluation service 
-		// should asynchronously run within UI thread. 
-		getSite().getShell().getDisplay().asyncExec(new Runnable() {
+		// should asynchronously run within UI thread.
+		Shell shell = getSite().getShell();
+		if (shell == null || shell.isDisposed()) {
+			return;
+		}
+		shell.getDisplay().asyncExec(new Runnable() {
 			public void run() {
 				IEvaluationService service = (IEvaluationService) getSite().getService(
 						IEvaluationService.class);
