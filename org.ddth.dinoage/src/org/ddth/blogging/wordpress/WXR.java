@@ -40,7 +40,8 @@ public class WXR {
 		ve.init();
 		InputStreamReader reader = new InputStreamReader(WXR.class.getResourceAsStream("wordpress.xml"));
 		VelocityContext context = new VelocityContext();
-
+		
+		BlogUtil.rebuild(blog);
 		context.put("util", new BlogUtil());
 		context.put("blog", blog);
 		ve.evaluate(context, writer, "wordpress.xml", reader);
