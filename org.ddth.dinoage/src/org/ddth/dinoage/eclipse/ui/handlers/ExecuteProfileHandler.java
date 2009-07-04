@@ -5,6 +5,7 @@ import java.io.File;
 import org.ddth.dinoage.DinoAge;
 import org.ddth.dinoage.ResourceManager;
 import org.ddth.dinoage.core.BrowsingSession;
+import org.ddth.dinoage.core.ConsoleLogger;
 import org.ddth.dinoage.core.Profile;
 import org.ddth.dinoage.eclipse.Activator;
 import org.ddth.dinoage.eclipse.ui.UniversalUtil;
@@ -20,6 +21,10 @@ import org.eclipse.swt.SWT;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.console.ConsolePlugin;
+import org.eclipse.ui.console.IConsole;
+import org.eclipse.ui.console.MessageConsole;
+import org.eclipse.ui.console.MessageConsoleStream;
 import org.eclipse.ui.handlers.HandlerUtil;
 
 public class ExecuteProfileHandler extends AbstractHandler {
@@ -37,6 +42,7 @@ public class ExecuteProfileHandler extends AbstractHandler {
 		ProfileNode node = (ProfileNode) selection.getFirstElement();
 		DinoAge dinoage = Activator.getDefault().getDinoAge();
 		Profile profile = node.getData();
+
 		BrowsingSession session = dinoage.getSession(profile);
 		session.addSessionChangeListener((SessionChangeListener) view);
 		
@@ -47,6 +53,7 @@ public class ExecuteProfileHandler extends AbstractHandler {
 							new Object[] {profile.getProfileName()}))) {
 				session.shutdown();
 				session.removeSessionChangeListener((SessionChangeListener) view);
+				dinoage.getWorkspace().saveProfile(profile);
 			}
 		}
 		else {
@@ -64,13 +71,52 @@ public class ExecuteProfileHandler extends AbstractHandler {
 						workbenchWindow.getShell().getText(),
 						message);
 			}
+
+			IConsole console = getConsole(profile, session);
+
 			if (answer == SWT.YES) {
 				session.restore();
 			}
 			else if (answer == SWT.NO) {
 				session.start();
 			}
+			
+			if (answer != SWT.CANCEL) {
+				ConsolePlugin.getDefault().getConsoleManager().showConsoleView(console);
+			}
 		}
 		return null;
+	}
+
+	/**
+	 * Try to get the existing console. If it's not found, a new message console
+	 * will be created and attaches to the given session.
+	 * 
+	 * @param profile
+	 * @param session
+	 * @return
+	 */
+	private IConsole getConsole(Profile profile, BrowsingSession session) {
+		IConsole console = null;
+		IConsole[] consoles = ConsolePlugin.getDefault().getConsoleManager().getConsoles();
+		for (IConsole con : consoles) {
+			if (con.getName() == profile.getProfileName()) {
+				console = con;
+				break;
+			}
+		}
+		if (console == null) {
+			console = new MessageConsole(profile.getProfileName(), null);
+			final MessageConsoleStream consoleStream = ((MessageConsole)console).newMessageStream();
+			ConsoleLogger logger = new ConsoleLogger() {
+				@Override
+				public void println(String message) {
+					consoleStream.println(message);
+				}
+			};
+			session.attach(logger);
+			ConsolePlugin.getDefault().getConsoleManager().addConsoles(new IConsole[] { console });
+		}
+		return console;
 	}
 }
