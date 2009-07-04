@@ -58,7 +58,7 @@ public abstract class ThreadPoolSession implements ConnectionListener, Session {
 	 * The internal dispatcher which dispatches the content to a proper
 	 * {@link ContentHandler}.
 	 */
-	private ContentHandlerDispatcher dispatcher;
+	protected ContentHandlerDispatcher dispatcher;
 	
 	/**
 	 * A request queue which is used for checking whether a request is on queued
@@ -152,11 +152,14 @@ public abstract class ThreadPoolSession implements ConnectionListener, Session {
 		return listeners.remove(listener);
 	}
 	
-	public boolean isQueueEmpty() {
+	protected boolean canFinish() {
 		return queue.isEmpty();
 	}
-	
+
 	public void start() {
+		if (isRunning()) {
+			throw new IllegalStateException("Plz stop this session before starting...");
+		}
 		connectionModel.open();
 		fireSessionChanged(new SessionChangeEvent(this, SessionChangeEvent.SESSION_START));
 	}
@@ -182,16 +185,18 @@ public abstract class ThreadPoolSession implements ConnectionListener, Session {
 			break;
 			
 		case ConnectionEvent.RESPONSE_RECEIVED:
+			// The request is done, the url is no longer needed 
+			// in queue.
+			queue.remove(event.getRequest().getURL());
 			logger.info("Handling: " + event.getRequest().getURL() + "...");
 			Content<?> content = dispatcher.handle(event.getRequest(), event.getResponse());
 			handle(event.getRequest(), content);
 			break;
 			
 		case ConnectionEvent.REQUEST_FINISHED:
-			queue.remove(event.getRequest().getURL());
 			// If queue is empty, means no items need to be retrieved,
 			// shutdown the session.
-			if (isQueueEmpty()) {
+			if (canFinish() && isRunning()) {
 				shutdown();
 			}
 			break;

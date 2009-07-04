@@ -44,11 +44,8 @@ public class Request {
 				}
 			}
 		}
-		if (uri.getFragment() != null) {
-			parameters.put("fragment", uri.getFragment());
-		}
-		this.url = uri.getScheme() + ":" + uri.getSchemeSpecificPart();
-		isPostRequest = false;
+		this.url = url;
+		this.isPostRequest = false;
 	}
 	
 	/**
