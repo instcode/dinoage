@@ -16,7 +16,7 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
 
 	private StatusLineContributionItem statusItem;
 	private IWorkbenchAction exitAction;
-	private IWorkbenchAction preferencesAction;
+	//private IWorkbenchAction preferencesAction;
 	private IWorkbenchAction aboutAction;
 
 	public ApplicationActionBarAdvisor(IActionBarConfigurer configurer) {
@@ -38,8 +38,8 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
 		aboutAction = ActionFactory.ABOUT.create(window);
 		register(aboutAction);
 		
-		preferencesAction = ActionFactory.PREFERENCES.create(window);
-		register(preferencesAction);
+		//preferencesAction = ActionFactory.PREFERENCES.create(window);
+		//register(preferencesAction);
 	}
 
 	protected void fillMenuBar(IMenuManager menuBar) {
@@ -54,7 +54,7 @@ public class ApplicationActionBarAdvisor extends ActionBarAdvisor {
 		menuBar.add(helpMenu);
 
 		// File
-		fileMenu.add(preferencesAction);
+		//fileMenu.add(preferencesAction);
 		fileMenu.add(exitAction);
 
 		// Help

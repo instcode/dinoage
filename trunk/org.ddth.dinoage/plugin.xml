@@ -101,6 +101,10 @@
             id="org.ddth.dinoage.command.profile.open"
             name="Open">
       </command>
+      <command
+            id="org.ddth.dinoage.command.console.show"
+            name="Console">
+      </command>
    </extension>
    <extension point="org.eclipse.ui.menus">
       <menuContribution
@@ -143,13 +147,19 @@
                   commandId="org.ddth.dinoage.command.export"
                   icon="icons/export.gif"
                   style="push"
-                  tooltip="Hello">
+                  tooltip="Export">
             </command>
             <command
                   commandId="org.ddth.dinoage.command.workspace.switch"
                   icon="icons/switch.gif"
                   style="push"
                   tooltip="Switch workspace">
+            </command>
+            <command
+                  commandId="org.ddth.dinoage.command.console.show"
+                  icon="icons/console_view.gif"
+                  style="push"
+                  tooltip="Show Console View">
             </command>
          </toolbar>
       </menuContribution>
@@ -315,6 +325,10 @@
                   definitionId="org.ddth.ui.views.profile.selected">
             </reference>
          </enabledWhen>
+      </handler>
+      <handler
+            class="org.ddth.dinoage.eclipse.ui.handlers.ShowConsoleHandler"
+            commandId="org.ddth.dinoage.command.console.show">
       </handler>
    </extension>
    <extension point="org.eclipse.ui.bindings">
