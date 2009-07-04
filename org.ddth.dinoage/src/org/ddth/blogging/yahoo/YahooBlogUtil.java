@@ -213,14 +213,14 @@ public class YahooBlogUtil {
 		blogPost.setAuthor(author);
 		blogPost.setContent("");
 		blogPost.setTags("");
-		blogPost.setTitle(author.getName() + "'s guestbook");
+		blogPost.setTitle("Guestbook");
 		blogPost.setDate(new Date());
 		
 		YahooBlogEntry guestbook = new YahooBlogEntry(blogPost);
 		String redirectURL = YahooBlogKey.GUESTBOOK_REDIRECT.getText(doc);
 		
 		if (!redirectURL.isEmpty()) {
-			logger.debug("Session is protected. Retrieve...");
+			logger.debug("Session is protected.");
 			guestbook.setNextURL(redirectURL);
 			return guestbook;
 		}
@@ -268,10 +268,6 @@ public class YahooBlogUtil {
 		return guestbook;
 	}
 
-	private static String constructImagePath(String realPath, String type, String postId) {
-		return realPath + "#" + type + "_" + postId + ".jpg";
-	}
-	
 	/**
 	 * Extract the post-id & blog-id from the action URL, e.g.
 	 * /blog/popup_slideshow.html?p=859&id=n75YJ78_fL5JcEVFlIE1
@@ -283,15 +279,15 @@ public class YahooBlogUtil {
 	 * @param doc
 	 * @return
 	 */
-	public static String parsePopupSlideshowForHiResImage(Document doc) {
+	public static String[] parsePopupSlideshowForHiResImage(Document doc) {
 		String action = YahooBlogKey.BLOG_ENTRY_POST_FORM.getText(doc);
-		String realPath = YahooBlogKey.BLOG_ENTRY_HR_IMAGE.getText(doc);
+		String imageURL = YahooBlogKey.BLOG_ENTRY_HR_IMAGE.getText(doc);
 		Matcher matcher = PATTERN_TO_EXTRACT_POST_ID_AND_ID.matcher(action);
 		String postId = "error";
 		if (matcher.matches()) {
 			postId = matcher.group(1);
 		}
-		return constructImagePath(realPath, "hires", postId);
+		return new String[] {imageURL, postId};
 	}
 
 	/**
@@ -359,11 +355,7 @@ public class YahooBlogUtil {
 			blogEntry = new YahooBlogEntry(blogPost);
 			blogEntry.setPopupURL(YahooBlogKey.BLOG_ENTRY_POPUP_URL.getText(entry));
 			String imageURL = YahooBlogKey.BLOG_ENTRY_LR_IMAGE.getText(entry);
-			if (!imageURL.isEmpty()) {
-				String imagePath = constructImagePath(
-						imageURL, "lores", String.valueOf(blogPost.getPostId()));
-				blogEntry.setImageURL(imagePath);
-			}
+			blogEntry.setImageURL(imageURL);
 			
 			String nextURL = null;
 			Node comment = YahooBlogKey.BLOG_ENTRY_COMMENTS.getNode(doc);

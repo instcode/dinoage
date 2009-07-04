@@ -25,7 +25,8 @@ public class ProfileLabelProvider extends CellLabelProvider {
 
 	public enum BlogEntryColumn {
 		CHECK("", 5),
-		ENTRY("Entry", 70),
+		ENTRY("Entry", 60),
+		COMMENT("Comment", 10),
 		DATE("Date", 25);
 
 		private String name;
@@ -73,6 +74,9 @@ public class ProfileLabelProvider extends CellLabelProvider {
 		}
 		else if (columnIndex == BlogEntryColumn.ENTRY.index()) {
 			cell.setText(entry.getPost().getTitle());
+		}
+		else if (columnIndex == BlogEntryColumn.COMMENT.index()) {
+			cell.setText(String.valueOf(entry.getComments().size()));
 		}
 		else if (columnIndex == BlogEntryColumn.DATE.index()) {
 			cell.setText(ENTRY_DATE_FORMAT.format(entry.getPost().getDate()));

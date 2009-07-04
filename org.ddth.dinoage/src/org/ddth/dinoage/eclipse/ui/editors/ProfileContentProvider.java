@@ -48,6 +48,9 @@ public class ProfileContentProvider implements ILazyContentProvider, ProfileChan
 			int index = Collections.binarySearch(entries, entry, descByDateComparator);
 			entries.add(-1 - index, entry);
 			break;
+		
+		case ProfileChangeEvent.PROFILE_DELTA_CHANGED:
+			break;
 		}
 
 		// Because #profileChanged might be invoked from another
@@ -108,7 +111,7 @@ public class ProfileContentProvider implements ILazyContentProvider, ProfileChan
 				// it doesn't block the UI thread.
 				loadingThread = new Thread(new Runnable() {
 					public void run() {
-						((SessionProfile)profile).loadResourcesFromCache();
+						((SessionProfile)profile).loadProfileFromStorage();
 					}
 				});
 				loadingThread.start();

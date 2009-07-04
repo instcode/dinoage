@@ -19,6 +19,7 @@ public class YahooBlogAPI extends BasicBlogAPI {
 	public static final String YAHOO_360_HOST = "360.yahoo.com";
 	public static final String YAHOO_360_PROFILE_URL = "http://360.yahoo.com/profile-";
 	public static final String YAHOO_360_GUESTBOOK_URL = "http://360.yahoo.com/guestbook-";
+	public static final String YAHOO_360_FRIEND_URL = "http://360.yahoo.com/friends-";;
 	public static final String YAHOO_360_BLOG_URL = "http://blog.360.yahoo.com/blog-";
 	
 	private static final Pattern PATTERN_TO_EXTRACT_PROFILE_ID = Pattern.compile(
@@ -26,6 +27,7 @@ public class YahooBlogAPI extends BasicBlogAPI {
 	
 	public static final ContentHandlerDispatcher YAHOO_360_CONTENT_DISPATCHER = new ContentHandlerDispatcher();
 	public static final ContentHandlerDispatcher YAHOO_360_PROFILE_CONTENT_DISPATCHER = new ContentHandlerDispatcher();
+
 	static {
 		YAHOO_360_CONTENT_DISPATCHER.registerHandler("http://.*/guestbook-.*", new YGuestbookContentHandler());
 		YAHOO_360_CONTENT_DISPATCHER.registerHandler("http://.*/blog-.*\\?.*p=(\\d+).*", new YBlogEntryContentHandler());
@@ -33,7 +35,6 @@ public class YahooBlogAPI extends BasicBlogAPI {
 		YAHOO_360_CONTENT_DISPATCHER.registerHandler("http://.*/blog/slideshow.html.*", new YEntryImageContentHandler());
 		YAHOO_360_CONTENT_DISPATCHER.registerHandler("http://.*[.]yahoofs[.].*/blog/.*jpg.*", new DefaultHandler());
 		YAHOO_360_CONTENT_DISPATCHER.registerHandler("http://.*[.]yahoo[.].*/b[\\?]P.*", new DefaultHandler());
-		
 		
 		YAHOO_360_PROFILE_CONTENT_DISPATCHER.registerHandler("http://.*", new YProfilePageContentHandler());
 	}

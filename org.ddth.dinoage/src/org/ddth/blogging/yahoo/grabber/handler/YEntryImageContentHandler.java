@@ -20,8 +20,8 @@ public class YEntryImageContentHandler extends WebpageContentHandler {
 	public Content<?> handle(Content<?> content) {
 		DomTreeContent domTreeContent = (DomTreeContent) super.handle(content);
 		Document doc = domTreeContent.getDocument();
-		String hiresImageURL = YahooBlogUtil.parsePopupSlideshowForHiResImage(doc);
-		YEntryImageContent entryImageContent = new YEntryImageContent(domTreeContent, hiresImageURL);
+		String[] tokens = YahooBlogUtil.parsePopupSlideshowForHiResImage(doc);
+		YEntryImageContent entryImageContent = new YEntryImageContent(domTreeContent, tokens[0], tokens[1]);
 		return entryImageContent;
 	}
 }
