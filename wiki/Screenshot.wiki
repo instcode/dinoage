@@ -11,6 +11,8 @@
 [http://img36.imageshack.us/img36/1168/profilefixed.png]
   * Downloading...
 [http://img7.imageshack.us/img7/706/runningp.png]
+  * Show popup menu
+[http://img268.imageshack.us/img268/2506/popup.png]
   * Show blog entry
 [http://img36.imageshack.us/img36/4769/blogview.png]
   * Select blog entry to export
