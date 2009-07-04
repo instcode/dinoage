@@ -22,7 +22,16 @@ public class Blog {
 	private String url;
 	private String description;
 	private Map<Long, Entry> entries = new ConcurrentHashMap<Long, Entry>();
+	private String[] tags;
 
+	public String[] getTags() {
+		return tags;
+	}
+	
+	public void setTags(String[] tags) {
+		this.tags = tags;
+	}
+	
 	public String getBlogId() {
 		return blogId;
 	}
