@@ -24,8 +24,6 @@ import org.ddth.blogging.yahoo.YahooBlog;
 import org.ddth.blogging.yahoo.YahooBlogEntry;
 import org.ddth.blogging.yahoo.YahooBlogUtil;
 import org.ddth.blogging.yahoo.grabber.handler.YahooBlogContentHandler;
-import org.ddth.dinoage.core.DataLoadEvent;
-import org.ddth.dinoage.core.DataLoadMonitor;
 import org.ddth.dinoage.data.DataProvider;
 import org.ddth.dinoage.data.exception.QueryDataException;
 import org.ddth.dinoage.data.exception.UpdateDataException;
@@ -39,14 +37,12 @@ import org.w3c.dom.Document;
  */
 class YRawDataProvider implements DataProvider {
 	
-	private File profileFolder;
-	private DataLoadMonitor monitor;
-	private static final String ENTRY_TEXT = YahooPersistence.CATEGORIES[YahooPersistence.BLOG_ENTRY];
-	private static final String ENTRY_LIST = ENTRY_TEXT + File.separator + ENTRY_TEXT + "-" + YahooPersistence.SUFFIX_LIST + ".html";
+	private YahooProfile profile;
+	private static final String ENTRY = YahooPersistence.ENTRY;
+	private static final String ENTRY_LIST = ENTRY + "-" + YahooPersistence.SUFFIX_LIST + ".html";
 	
-	public YRawDataProvider(File profileFolder, DataLoadMonitor monitor) {
-		this.profileFolder = profileFolder;
-		this.monitor = monitor;
+	public YRawDataProvider(YahooProfile profile) {
+		this.profile = profile;
 	}
 	
 	public void createAuthor(Author author) throws UpdateDataException {
@@ -85,12 +81,11 @@ class YRawDataProvider implements DataProvider {
 
 	public Author getAuthor(String userId) throws QueryDataException {
 		try {
-			Document doc = getDocument(new File(profileFolder, ENTRY_LIST));
+			Document doc = getDocument(new File(profile.getBlogFolder(), ENTRY_LIST));
 			Author author = YahooBlogUtil.parseYahooProfile(doc);
 			if (!userId.equals(author.getUserId())) {
 				throw new QueryDataException("This provider only supports querying the author of a blog.");
 			}
-			monitor.loaded(new DataLoadEvent(author, DataLoadEvent.STEP_LOADED));
 			return author;
 		}
 		catch (IOException e) {
@@ -100,11 +95,10 @@ class YRawDataProvider implements DataProvider {
 
 	public Blog getBlog(String blogId) throws QueryDataException {
 		try {
-			Document doc = getDocument(new File(profileFolder, ENTRY_LIST));
+			Document doc = getDocument(new File(profile.getBlogFolder(), ENTRY_LIST));
 			YahooBlog blog = YahooBlogUtil.parseYahooBlog(doc);
-			monitor.loaded(new DataLoadEvent(blog, DataLoadEvent.STEP_LOADED));
+			profile.add(blog);
 			return blog;
-			
 		}
 		catch (IOException e) {
 			throw new QueryDataException("Error", e);
@@ -116,16 +110,28 @@ class YRawDataProvider implements DataProvider {
 	}
 
 	public List<Entry> getEntries(String blogId) throws QueryDataException {
-		File entryFolder = new File(profileFolder, ENTRY_TEXT);
+		File blogFolder = profile.getBlogFolder();
 		// A blog entry which has more than 50 comments will have several
 		// entry files. They were named as "entry-<post-id>-<index>.html".
 		// In order to parse the post & comments for this entry, we use a
 		// map to group all entry files which have the same post-id and
 		// store the parsed entry for later usage.
 		final Map<Long, Object> groupEntries = new HashMap<Long, Object>();
-		
-		File[] files = entryFolder.listFiles(new FilenameFilter() {
+
+		File[] files = blogFolder.listFiles(new FilenameFilter() {
 			public boolean accept(File dir, String name) {
+				// Inline parsing for guestbook
+				if (name.startsWith(YahooPersistence.GUESTBOOK)) {
+					Document doc = null;
+					try {
+						doc = getDocument(new File(dir, name));
+						YahooBlogEntry entry = YahooBlogUtil.parseGuestbook(doc);
+						profile.add(entry);
+					}
+					catch (IOException e) {
+					}
+					return false;
+				}
 				String[] tokens = name.split("-");
 				if (tokens.length == 3) {
 					try {
@@ -136,7 +142,7 @@ class YRawDataProvider implements DataProvider {
 					}
 				}
 				// Make sure we don't mess with entry-list.html
-				return name.startsWith(ENTRY_TEXT) && name.indexOf(YahooPersistence.SUFFIX_LIST) == -1;
+				return name.startsWith(ENTRY) && name.indexOf(YahooPersistence.SUFFIX_LIST) == -1;
 			}
 		});
 		List<Entry> entries = new ArrayList<Entry>();
@@ -145,19 +151,13 @@ class YRawDataProvider implements DataProvider {
 				if (Thread.currentThread().isInterrupted()) {
 					// This task consumes time and it's normally executed
 					// in a thread. To be nice to the caller, it should
-					// check for interrupted flag every step to make a
+					// check for interrupted flag every step to make
 					// decision on whether continue running or not.
 					break;
 				}
 				Document doc = getDocument(file);
 				YahooBlogEntry entry = null;
-				// Check if this file contains guestbook data
-				if (file.getName().indexOf("-0-") > 0 || file.getName().indexOf("-0.") > 0) {
-					entry = YahooBlogUtil.parseGuestbook(doc);
-				}
-				else {
-					entry = YahooBlogUtil.parseEntry(doc);
-				}
+				entry = YahooBlogUtil.parseEntry(doc);
 				Long postId = new Long(entry.getPost().getPostId());
 				Object data = groupEntries.get(postId);
 				if (data instanceof Entry) {
@@ -171,7 +171,7 @@ class YRawDataProvider implements DataProvider {
 						groupEntries.put(postId, entry);
 					}
 					entries.add(entry);
-					monitor.loaded(new DataLoadEvent(entry, DataLoadEvent.STEP_LOADED));
+					profile.add(entry);
 				}
 			}
 			return entries;

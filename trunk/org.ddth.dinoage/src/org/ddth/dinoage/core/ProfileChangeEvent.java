@@ -15,6 +15,7 @@ public class ProfileChangeEvent {
 	
 	public static final int PROFILE_CHANGED = 1;
 	public static final int PROFILE_FIRST_LOADED = 2;
+	public static final int PROFILE_DELTA_CHANGED = 3;
 	
 	private Profile profile;
 	private Object data;

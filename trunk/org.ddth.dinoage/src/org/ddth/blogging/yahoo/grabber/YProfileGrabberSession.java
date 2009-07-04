@@ -22,14 +22,4 @@ public class YProfileGrabberSession extends ProfileGrabberSession {
 	protected void handle(Request request, Content<?> content) {
 		author = ((YAuthorContent)content).getAuthor();
 	}
-
-	@Override
-	protected Request[] getRestorable() {
-		return null;
-	}
-
-	@Override
-	public boolean isRestorable() {
-		return false;
-	}
 }

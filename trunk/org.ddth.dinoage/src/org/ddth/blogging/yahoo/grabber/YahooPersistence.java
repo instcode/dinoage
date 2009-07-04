@@ -9,100 +9,95 @@ package org.ddth.blogging.yahoo.grabber;
 
 import java.io.File;
 import java.io.InputStream;
-import java.util.List;
 import java.util.Map;
 
-import org.ddth.blogging.Blog;
-import org.ddth.blogging.Entry;
-import org.ddth.blogging.yahoo.YahooBlogEntry;
-import org.ddth.dinoage.core.DataLoadMonitor;
+import org.ddth.dinoage.core.LocalStorage;
 import org.ddth.dinoage.core.Persistence;
-import org.ddth.dinoage.data.DataManager;
+import org.ddth.http.core.connection.Request;
+import org.ddth.http.core.content.Content;
 
-public class YahooPersistence extends Persistence {
+public class YahooPersistence extends Persistence implements LocalStorage {
 	public static final String SUFFIX_LIST = "list";
-	public static final String[] CATEGORIES = {"entry"};
-	public static final String DATABASE = "database";
-	public static final int BLOG_ENTRY = 0;
+	public static final String BLOG = "blog";
+	public static final String ENTRY = "entry";
+	public static final String GUESTBOOK = "guestbook";
+	private static final String PROFILE = "profile";
+	private static final String FRIENDS = "friends";
 	
-	private DataManager manager;
+	private YahooProfile profile;
 	
-	public YahooPersistence(File profileFolder, DataLoadMonitor monitor) {
-		super(profileFolder, CATEGORIES);
-		manager = new DataManager(new YRawDataProvider(profileFolder, monitor));
+	public YahooPersistence(YahooProfile profile) {
+		this.profile = profile;
 	}
-	
-	public Blog load(String blogId) {
-		Blog blog = manager.getBlog(blogId);
-		if (blog != null) {
-			List<Entry> entries = manager.getEntries(blogId);
-			blog.setEntries(entries);
+
+	@Override
+	public void cacheResource(Request request, Content<?> content) {
+		if (!request.getParameters().containsKey(LocalStorage.NO_CACHING_ATTR)) {
+			write((InputStream)content.getContent(), getResource(request));
 		}
-		return blog;
 	}
 
-	public boolean save(YBlogContent blogContent) {
-		write(blogContent.getContent().getContent(), BLOG_ENTRY, SUFFIX_LIST);
-		return true;
-	}
-
-	public boolean save(YBlogEntryContent blogEntry) {
-		YahooBlogEntry entry = blogEntry.getEntry();
-		write(blogEntry.getContent().getContent(), BLOG_ENTRY,
-				String.valueOf(entry.getPost().getPostId()));
-		return true;
-	}
-
-	public void save(String imageName, InputStream inputStream) {
-		write(inputStream, new File(getFolder(BLOG_ENTRY), imageName));
-	}
-
-	public File getResource(Map<String, String> parameters) {
-		String postId = parameters.get("p");
-		String blogId = parameters.get("id");
-		String low = parameters.get("l");
-		String max = parameters.get("mx");
-		String fragment = parameters.get("fragment");
-
-		File resource = null;
-		if (blogId != null && postId != null) {
-			resource = getFile(BLOG_ENTRY, "hires_" + postId + ".jpg");
+	@Override
+	public File getLocalResource(Request request) {
+		if (request.getParameters().containsKey(LocalStorage.RESOURCE_EXPIRED_ATTR)) {
+			return null;
 		}
-		else if (fragment != null && fragment.startsWith("lores_")) {
-			resource = getFile(BLOG_ENTRY, fragment);
+		File resource = getResource(request);
+		return resource.exists() ? resource : null;
+	}
+	
+	private File getResource(Request request) {
+		String resource = null;
+		if (request.getURL().startsWith(profile.getProfileURL())) {
+			resource = PROFILE + ".html";
+		}
+		else if (request.getURL().equals(profile.getBlogURL())) {
+			resource = ENTRY + "-" + SUFFIX_LIST + ".html";
+		}
+		else if (request.getURL().equals(profile.getGuestbookURL())) {
+			resource = GUESTBOOK + "-" + SUFFIX_LIST + ".html";
+		}
+		else if (request.getURL().equals(profile.getFriendsURL())) {
+			resource = FRIENDS + "-" + SUFFIX_LIST + ".html";
 		}
 		else {
-			int index = 0;
-			String entryId = postId;
-			// Multi-pages detection
+			Map<String, String> parameters = request.getParameters();
+			resource = getResource(parameters);
+		}
+		return new File(profile.getFolder(), BLOG + File.separatorChar + resource);
+	}
+
+	private String getResource(Map<String, String> parameters) {
+		String resource;
+		String postId = parameters.get("p");
+		String low = parameters.get("l");
+		String max = parameters.get("mx");
+		String popupPath = parameters.get("__popup_path__");
+		String imagePath = parameters.get("__image_path__");
+
+		if (popupPath != null) {
+			resource = popupPath;
+		}
+		else if (imagePath != null) {
+			resource = imagePath;
+		}
+		else {
+			// Assume single blog page...
+			resource = ENTRY + "-" + postId + ".html";
+			// Check if it's actually in multi-pages
 			if (low != null) {
 				if (postId == null) {
 					// 10 guestbook comments per page
-					index = (Integer.parseInt(max) - Integer.parseInt(low) + 1) / 10;
-					entryId = "0";
+					int index = (Integer.parseInt(max) - Integer.parseInt(low) + 1) / 10;
+					resource = GUESTBOOK + "-" + String.valueOf(index) + ".html";
 				}
 				else {
 					// 50 entry comments per page
-					index = Integer.parseInt(low) / 50;
+					int index = Integer.parseInt(low) / 50;
+					resource = ENTRY + "-" + postId + "-" + String.valueOf(index) + ".html";
 				}
 			}
-			
-			String tail = (index == 0) ? "" : "-" + String.valueOf(index);
-			String filename = CATEGORIES[BLOG_ENTRY] + "-" + entryId + tail + ".html";
-			resource = getFile(BLOG_ENTRY, filename);
 		}
-
-		return resource.exists() ? resource : null;
-	}
-
-	public void clean(String beginningURL) {
-		if (beginningURL.lastIndexOf('?') == -1) {
-			if (beginningURL.indexOf("/guestbook-") > 0) {
-				getFile(BLOG_ENTRY, "entry-0.html").delete();
-			}
-			else if (beginningURL.indexOf("/blog-") > 0) {
-				getFile(BLOG_ENTRY, "entry-list.html").delete();
-			}
-		}
+		return resource;
 	}
 }
