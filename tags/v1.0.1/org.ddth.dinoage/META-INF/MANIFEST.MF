@@ -1,0 +1,16 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: DinoAge Plug-in
+Bundle-SymbolicName: org.ddth.dinoage;singleton:=true
+Bundle-Version: 1.0.1.vqualifier
+Bundle-Activator: org.ddth.dinoage.eclipse.Activator
+Bundle-Vendor: DDTH.org
+Require-Bundle: org.apache.commons.httpcomponent,
+ org.ddth.dinoage.dependencies,
+ org.eclipse.core.runtime,
+ org.eclipse.ui,
+ org.eclipse.core.expressions,
+ org.eclipse.ui.console
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy
+Bundle-ClassPath: .
