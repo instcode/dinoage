@@ -15,9 +15,9 @@ import org.ddth.http.core.content.ContentAdapter;
  * 
  * @author khoa.nguyen
  */
-public class StreamContent extends ContentAdapter<InputStream> {
+public class InputStreamContent extends ContentAdapter<InputStream> {
 
-	public StreamContent(InputStream content) {
+	public InputStreamContent(InputStream content) {
 		setContent(content);
 	}
 }

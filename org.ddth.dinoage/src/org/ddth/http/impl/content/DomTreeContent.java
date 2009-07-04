@@ -9,7 +9,6 @@ package org.ddth.http.impl.content;
 
 import java.io.InputStream;
 
-import org.ddth.http.core.content.ContentAdapter;
 import org.w3c.dom.Document;
 
 /**
@@ -23,7 +22,7 @@ import org.w3c.dom.Document;
  * @author khoa.nguyen
  * 
  */
-public class DomTreeContent extends ContentAdapter<InputStream> {
+public class DomTreeContent extends InputStreamContent {
 
 	/**
 	 * I don't know :((
@@ -37,7 +36,7 @@ public class DomTreeContent extends ContentAdapter<InputStream> {
 	 * 		The document root of the DOM tree. 
 	 */
 	public DomTreeContent(InputStream inputStream, Document doc) {
-		setContent(inputStream);
+		super(inputStream);
 		document = doc;
 	}
 	

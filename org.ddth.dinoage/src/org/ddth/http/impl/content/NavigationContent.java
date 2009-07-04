@@ -7,7 +7,6 @@
  **************************************************/
 package org.ddth.http.impl.content;
 
-import org.ddth.http.core.content.ContentAdapter;
 
 /**
  * This type of content is used to store all the navigation links in a webpage.
@@ -18,7 +17,7 @@ import org.ddth.http.core.content.ContentAdapter;
  * @author khoa.nguyen
  * 
  */
-public class NavigationContent extends ContentAdapter<DomTreeContent> {
+public class NavigationContent extends DomTreeContent {
 
 	/**
 	 * List of all urls in the content.
@@ -32,8 +31,8 @@ public class NavigationContent extends ContentAdapter<DomTreeContent> {
 	 *            The urls that can be used to travel next...
 	 */
 	public NavigationContent(DomTreeContent content, String[] urls) {
+		super(content.getContent(), content.getDocument());
 		this.urls = urls;
-		this.setContent(content);
 	}
 
 	/**

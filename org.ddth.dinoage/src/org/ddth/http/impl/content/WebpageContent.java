@@ -15,7 +15,7 @@ import java.io.InputStream;
  * 
  * @author khoa.nguyen
  */
-public class WebpageContent extends StreamContent {
+public class WebpageContent extends InputStreamContent {
 
 	private String charset;
 

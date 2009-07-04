@@ -23,6 +23,6 @@ public abstract class SessionProfile extends Profile {
 	protected void load(Properties properties) {
 	}
 
-	public void loadResourcesFromCache() {
+	public void loadProfileFromStorage() {
 	}
 }

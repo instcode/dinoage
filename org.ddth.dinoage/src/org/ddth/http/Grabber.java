@@ -32,19 +32,13 @@ public class Grabber {
 			protected void handle(Request request, Content<?> content) {
 				System.out.println("Handle the given content goes here!");
 			}
-
-			public boolean isRestorable() {
-				return false;
-			}
-
-			public void restore() {
-			}
 		};
 		session.start();
 		
 		session.queue(new Request("http://instcode.wordpress.com"));
 		session.queue(new Request("http://instcode.blogspot.com"));
 		session.queue(new Request("http://360.yahoo.com/nullpointer82"));
+		session.queue(new Request("http://www.facebook.com/instcode"));
 		
 		session.shutdown();
 	}

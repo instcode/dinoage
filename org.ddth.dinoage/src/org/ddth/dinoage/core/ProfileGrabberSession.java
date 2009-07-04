@@ -9,12 +9,13 @@ package org.ddth.dinoage.core;
 
 import org.ddth.blogging.Author;
 import org.ddth.http.core.content.handler.ContentHandlerDispatcher;
+import org.ddth.http.impl.ThreadPoolSession;
 
 /**
  * @author khoanguyen
  *
  */
-public abstract class ProfileGrabberSession extends BrowsingSession {
+public abstract class ProfileGrabberSession extends ThreadPoolSession {
 
 	public ProfileGrabberSession(ContentHandlerDispatcher dispatcher) {
 		super(dispatcher);

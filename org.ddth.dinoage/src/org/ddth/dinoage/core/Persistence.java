@@ -16,48 +16,11 @@ import java.io.OutputStream;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.ddth.http.impl.connection.ThreadPoolConnectionModel;
 
 public class Persistence {
-	private static final Log logger = LogFactory.getLog(ThreadPoolConnectionModel.class);
+	private static final Log logger = LogFactory.getLog(Persistence.class);
 	
-	private File[] folders;
-	private String[] categories;
-	
-	public Persistence(File profileFolder, String[] categories) {
-		folders = new File[categories.length];
-		for (int i = 0; i < categories.length; i++) {
-			folders[i] = new File(profileFolder, categories[i]);
-			folders[i].mkdirs();
-		}
-		this.categories = categories;
-	}
-	
-	protected File getFolder(int category) {
-		return folders[category];
-	}
-	
-	protected File getFile(int category, String filename) {
-		return new File(folders[category], filename);
-	}
-
-	private File generateFile(File directory, String name, String extension) {
-		File outputFile = null;
-		int index = 1;
-		outputFile = new File(directory, name + "." + extension);
-		while (outputFile.exists()) {
-			outputFile = new File(directory, name + "-" + index + "." + extension);
-			index++;
-		}
-		return outputFile;
-	}
-	
-	public void write(InputStream inputStream, int category, String tail) {
-		File outputFile = generateFile(folders[category], categories[category] + "-" + tail, "html");
-		write(inputStream, outputFile);
-	}
-
-	protected void write(InputStream inputStream, File outputFile) {
+	public void write(InputStream inputStream, File outputFile) {
 		outputFile.getParentFile().mkdirs();
 		OutputStream outputStream = null;
 		try {
@@ -81,7 +44,6 @@ public class Persistence {
 					outputStream.close();
 				}
 				catch (IOException e) {
-					logger.error("Error", e);
 				}
 			}
 		}
@@ -97,7 +59,8 @@ public class Persistence {
 				if (bytesread > 0) {
 					savedBytes.write(buffer, 0, bytesread);
 				}
-			} while (bytesread > 0);
+			}
+			while (bytesread > 0);
 		}
 		catch (IOException e) {
 			logger.error("Error", e);
