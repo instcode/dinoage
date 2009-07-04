@@ -1,0 +1,21 @@
+#labels Featured
+== Screenshot ==
+
+  * Workspace choosing dialog
+[http://img11.imageshack.us/img11/3223/workspace.png]
+  * Starting screen
+[http://img7.imageshack.us/img7/1064/startingn.png]
+  * Profile dialog
+[http://img7.imageshack.us/img7/2032/profilemrj.png]
+  * Fixed profile dialog
+[http://img36.imageshack.us/img36/1168/profilefixed.png]
+  * Downloading...
+[http://img7.imageshack.us/img7/706/runningp.png]
+  * Show blog entry
+[http://img36.imageshack.us/img36/4769/blogview.png]
+  * Select blog entry to export
+[http://img7.imageshack.us/img7/9541/selectiony.png]
+  * Export to Wordpress dialog
+[http://img200.imageshack.us/img200/7210/exportb.png]
+
+:-)
