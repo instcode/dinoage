@@ -53,7 +53,7 @@
          </property>
          <property
                name="aboutText"
-               value="DinoAge - A Blog Backup &amp; Migration Tool&#x0D;&#x0A;Website: http://dinoage.googlecode.com&#x0D;&#x0A;&#x0D;&#x0A;Author                instcode&#x0D;&#x0A;Contact              instcode@gmail.com&#x0D;&#x0A;Homepage        http://instcode.wordpress.com">
+               value="DinoAge - A Blog Backup &amp; Migration Tool&#x0A;Website: http://dinoage.googlecode.com&#x0A;&#x0A;Author: instcode&#x0A;Contact: instcode@gmail.com&#x0A;Homepage: http://instcode.wordpress.com">
          </property>
       </product>
    </extension>
