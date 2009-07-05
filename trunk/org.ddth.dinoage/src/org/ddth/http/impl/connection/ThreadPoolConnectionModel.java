@@ -10,7 +10,6 @@ package org.ddth.http.impl.connection;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -36,6 +35,7 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.params.CookiePolicy;
 import org.apache.http.conn.ClientConnectionManager;
+import org.apache.http.conn.ConnectTimeoutException;
 import org.apache.http.conn.params.ConnManagerParams;
 import org.apache.http.conn.params.ConnPerRoute;
 import org.apache.http.conn.routing.HttpRoute;
@@ -162,8 +162,10 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 		}
 		catch (Exception e) {
 			logger.error("Error when processing an http request", e);
-			if (e instanceof SocketException) {
-				// If there's request time outRequest again..
+			if (e instanceof ConnectTimeoutException) {
+				// If there's something wrong with current request
+				// which is related to IO (time out, socket error).
+				// Request again...
 				future = sendRequest(request);
 			}
 		}
@@ -180,8 +182,10 @@ public class ThreadPoolConnectionModel implements ConnectionModel {
 					logger.error("Error when consuming an http stream", e);
 				}
 			}
-			// Check if the request is being sent again
+			// Don't fire a finished event if the request
+			// is being sent again
 			if (future == null) {
+				// The request was completed successfully.
 				monitor.notifyEvent(new ConnectionEvent(ConnectionEvent.REQUEST_FINISHED, request, response));
 			}
 		}
