@@ -51,9 +51,9 @@ public class CookiesReader {
 		if (os.indexOf("win") >= 0) {
 			profilesFolder = new File(System.getenv("APPDATA") + "\\Mozilla\\Firefox\\Profiles");
 		} else if (os.indexOf("mac") >= 0) {
-			profilesFolder = new File("~/Library/Application Support/Firefox/Profiles");
+			profilesFolder = new File(System.getenv("HOME") + "/Library/Application Support/Firefox/Profiles");
 		} else if (os.indexOf("nix") >= 0 || os.indexOf("nux") >= 0) {
-			profilesFolder = new File("~/.mozilla/firefox");
+			profilesFolder = new File(System.getenv("HOME") + "/.mozilla/firefox");
 		}
 
 		File sessionFile = null;
