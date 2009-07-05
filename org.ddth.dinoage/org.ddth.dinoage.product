@@ -23,7 +23,7 @@ Homepage: http://instcode.wordpress.com
 
    <windowImages/>
 
-   <launcher>
+   <launcher name="DinoAge">
       <solaris/>
       <win useIco="false">
          <bmp/>
