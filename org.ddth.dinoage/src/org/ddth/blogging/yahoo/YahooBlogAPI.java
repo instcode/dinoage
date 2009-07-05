@@ -23,17 +23,18 @@ public class YahooBlogAPI extends BasicBlogAPI {
 	public static final String YAHOO_360_BLOG_URL = "http://blog.360.yahoo.com/blog-";
 	
 	private static final Pattern PATTERN_TO_EXTRACT_PROFILE_ID = Pattern.compile(
-			".*360.yahoo.com/(profile|guestbook|blog|feeds|friends)-([^\\?]*).*");
+			".*360.yahoo.*/(profile|guestbook|blog|feeds|friends)-([^\\?]*).*");
 	
 	public static final ContentHandlerDispatcher YAHOO_360_CONTENT_DISPATCHER = new ContentHandlerDispatcher();
 	public static final ContentHandlerDispatcher YAHOO_360_PROFILE_CONTENT_DISPATCHER = new ContentHandlerDispatcher();
 
 	static {
-		YAHOO_360_CONTENT_DISPATCHER.registerHandler("http://.*/guestbook-.*", new YGuestbookContentHandler());
-		YAHOO_360_CONTENT_DISPATCHER.registerHandler("http://.*/blog-.*\\?.*p=(\\d+).*", new YBlogEntryContentHandler());
-		YAHOO_360_CONTENT_DISPATCHER.registerHandler("http://.*/blog-[^?]*", new YEntryListContentHandler());
-		YAHOO_360_CONTENT_DISPATCHER.registerHandler("http://.*/blog/slideshow.html.*", new YEntryImageContentHandler());
-		YAHOO_360_CONTENT_DISPATCHER.registerHandler("http://.*[.]yahoofs[.].*/blog/.*jpg.*", new DefaultHandler());
+		YAHOO_360_CONTENT_DISPATCHER.registerHandler("http://.*360.yahoo.*/guestbook-.*", new YGuestbookContentHandler());
+		YAHOO_360_CONTENT_DISPATCHER.registerHandler("http://.*360.yahoo.*/blog-.*\\?.*p=(\\d+).*", new YBlogEntryContentHandler());
+		YAHOO_360_CONTENT_DISPATCHER.registerHandler("http://.*360.yahoo.*/blog-[^?]*", new YEntryListContentHandler());
+		YAHOO_360_CONTENT_DISPATCHER.registerHandler("http://.*360.yahoo.*/blog/slideshow.html.*", new YEntryImageContentHandler());
+		YAHOO_360_CONTENT_DISPATCHER.registerHandler("http://.*360.yahoo.*/(profile|friends)-.*", new DefaultHandler());
+		YAHOO_360_CONTENT_DISPATCHER.registerHandler("http://.*[.]yahoofs[.].*.jpg.*", new DefaultHandler());
 		YAHOO_360_CONTENT_DISPATCHER.registerHandler("http://.*[.]yahoo[.].*/b[\\?]P.*", new DefaultHandler());
 		
 		YAHOO_360_PROFILE_CONTENT_DISPATCHER.registerHandler("http://.*", new YProfilePageContentHandler());

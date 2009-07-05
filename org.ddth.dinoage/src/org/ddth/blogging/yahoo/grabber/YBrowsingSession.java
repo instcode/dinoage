@@ -51,6 +51,8 @@ public class YBrowsingSession extends BrowsingSession {
 		super.start();
 		consoleLogger.println("Session started.");
 		queue(new Request(profile.getBlogURL()));
+		queue(new Request(profile.getProfileURL()));
+		queue(new Request(profile.getFriendsURL()));
 	}
 
 	protected void process(Content<?> content) {
@@ -60,6 +62,9 @@ public class YBrowsingSession extends BrowsingSession {
 			YahooBlog blog = blogContent.getBlog();
 			profile.add(blog);
 			if (blog != null) {
+				Request avatarRequest = new Request(blog.getAuthor().getAvatar());
+				avatarRequest.getParameters().put("__image_path__", "avatar.jpg");
+				queue(avatarRequest);
 				requestURL = blog.getFirstEntryURL();
 			}
 		}

@@ -23,7 +23,6 @@ Homepage: http://instcode.wordpress.com
 
    <windowImages/>
 
-
    <launcher>
       <solaris/>
       <win useIco="false">
@@ -31,10 +30,8 @@ Homepage: http://instcode.wordpress.com
       </win>
    </launcher>
 
-
    <vm>
    </vm>
-
 
    <plugins>
       <plugin id="com.ibm.icu"/>
