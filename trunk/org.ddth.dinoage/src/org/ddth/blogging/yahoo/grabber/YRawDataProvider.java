@@ -98,6 +98,7 @@ class YRawDataProvider implements DataProvider {
 			Document doc = getDocument(new File(profile.getBlogFolder(), ENTRY_LIST));
 			YahooBlog blog = YahooBlogUtil.parseYahooBlog(doc);
 			profile.add(blog);
+			getEntries(blogId);
 			return blog;
 		}
 		catch (IOException e) {
@@ -116,10 +117,18 @@ class YRawDataProvider implements DataProvider {
 		// In order to parse the post & comments for this entry, we use a
 		// map to group all entry files which have the same post-id and
 		// store the parsed entry for later usage.
+		// 
+		// Another problem is, this task consumes time and it's normally
+		// executed in a thread. To be nice to the caller, it should check
+		// for interrupted flag every step to make decision on whether
+		// continue running or not.
 		final Map<Long, Object> groupEntries = new HashMap<Long, Object>();
 
 		File[] files = blogFolder.listFiles(new FilenameFilter() {
 			public boolean accept(File dir, String name) {
+				if (Thread.currentThread().isInterrupted()) {
+					return false;
+				}
 				// Inline parsing for guestbook
 				if (name.startsWith(YahooPersistence.GUESTBOOK)) {
 					Document doc = null;
@@ -149,10 +158,6 @@ class YRawDataProvider implements DataProvider {
 		try {
 			for (File file : files) {
 				if (Thread.currentThread().isInterrupted()) {
-					// This task consumes time and it's normally executed
-					// in a thread. To be nice to the caller, it should
-					// check for interrupted flag every step to make
-					// decision on whether continue running or not.
 					break;
 				}
 				Document doc = getDocument(file);

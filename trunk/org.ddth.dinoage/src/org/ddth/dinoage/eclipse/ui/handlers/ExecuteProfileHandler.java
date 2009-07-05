@@ -73,7 +73,19 @@ public class ExecuteProfileHandler extends AbstractHandler {
 			}
 
 			IConsole console = getConsole(profile, session);
-
+			final MessageConsoleStream consoleStream = ((MessageConsole)console).newMessageStream();
+			ConsoleLogger logger = new ConsoleLogger() {
+				@Override
+				public void println(String message) {
+					// Make sure premature close of display
+					// won't break the whole system.
+					if (!ConsolePlugin.getStandardDisplay().isDisposed()) {
+						consoleStream.println(message);
+					}
+				}
+			};
+			session.attach(logger);
+			
 			if (answer == SWT.YES) {
 				session.restore();
 			}
@@ -107,14 +119,6 @@ public class ExecuteProfileHandler extends AbstractHandler {
 		}
 		if (console == null) {
 			console = new MessageConsole(profile.getProfileName(), null);
-			final MessageConsoleStream consoleStream = ((MessageConsole)console).newMessageStream();
-			ConsoleLogger logger = new ConsoleLogger() {
-				@Override
-				public void println(String message) {
-					consoleStream.println(message);
-				}
-			};
-			session.attach(logger);
 			ConsolePlugin.getDefault().getConsoleManager().addConsoles(new IConsole[] { console });
 		}
 		return console;

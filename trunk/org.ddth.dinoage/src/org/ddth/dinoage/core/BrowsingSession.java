@@ -126,6 +126,8 @@ public abstract class BrowsingSession extends ThreadPoolSession {
 	@Override
 	public void shutdown() {
 		consoleLogger.println("Session stopped.");
+		// Unattach logger
+		consoleLogger = null;
 		super.shutdown();
 	}
 	
