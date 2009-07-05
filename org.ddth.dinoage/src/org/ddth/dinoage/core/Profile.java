@@ -5,8 +5,6 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Properties;
 
 import org.ddth.dinoage.ResourceManager;
@@ -16,10 +14,10 @@ public abstract class Profile {
 	private static final String PROFILE_NAME = "profile.name";
 	private static final String PROFILE_URL = "profile.url";
 
+	
+	private File folder;
 	private String profileURL;
 	private String profileName;
-	
-	private List<ProfileChangeListener> listeners = new ArrayList<ProfileChangeListener>();
 
 	public void populate(Profile profile) {
 		setProfileName(profile.getProfileName());
@@ -29,27 +27,18 @@ public abstract class Profile {
 	protected abstract void load(Properties properties);
 	protected abstract void store(Properties properties);
 
-	public void addProfileChangeListener(ProfileChangeListener listener) {
-		listeners.add(listener);
-	}
-	
-	public boolean removeProfileChangeListener(ProfileChangeListener listener) {
-		return listeners.remove(listener);
-	}
-	
-	protected void fireProfileChanged(ProfileChangeEvent event) {
-		for (ProfileChangeListener listener : listeners) {
-			listener.profileChanged(event);
-		}
-	}
-	
 	public void load(File profileFile) throws IOException {
+		this.folder = profileFile.getParentFile();
 		Properties properties = new Properties();
 		properties.load(new FileInputStream(profileFile));
 		
 		setProfileName(properties.getProperty(PROFILE_NAME, ""));
 		setProfileURL(properties.getProperty(PROFILE_URL, ""));
 		load(properties);
+	}
+
+	public File getFolder() {
+		return folder;
 	}
 
 	public OutputStream store(File profileFile) throws IOException {
@@ -93,11 +82,10 @@ public abstract class Profile {
 	 */
 	@Override
 	public boolean equals(Object obj) {
-		if (!super.equals(obj)) {
-			Profile profile = (Profile) obj;
-			return profile.hashCode() == hashCode() && profile.getProfileURL().equals(profileURL);
+		if ((obj != null) && (obj instanceof Profile)) {
+		    return folder.equals(((Profile)obj).folder);
 		}
-		return true;
+		return false;
 	}
 	
 	/* (non-Javadoc)
@@ -105,6 +93,6 @@ public abstract class Profile {
 	 */
 	@Override
 	public int hashCode() {
-		return profileName.toLowerCase().hashCode();
+		return folder.hashCode();
 	}
 }

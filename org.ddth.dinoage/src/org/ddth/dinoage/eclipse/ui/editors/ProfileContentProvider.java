@@ -18,7 +18,6 @@ import org.eclipse.jface.viewers.Viewer;
 public class ProfileContentProvider implements ILazyContentProvider, ProfileChangeListener {
 	private TableViewer viewer;
 	private List<Entry> entries = new Vector<Entry>();
-	private Thread loadingThread;
 	
 	private Comparator<Entry> descByDateComparator = new Comparator<Entry>() {
 		@Override
@@ -93,28 +92,15 @@ public class ProfileContentProvider implements ILazyContentProvider, ProfileChan
 		if (newInput != oldInput) {
 			entries.clear();
 			this.viewer.setItemCount(0);
-			// Brutally stop the loading thread =))
-			if (loadingThread != null && loadingThread.isAlive()) {
-				loadingThread.interrupt();
-				loadingThread = null;
-			}
 			if (oldInput instanceof ProfileEditorInput) {
 				ProfileEditorInput input = (ProfileEditorInput)oldInput;
-				Profile profile = (Profile) input.getAdapter(Profile.class);
+				SessionProfile profile = (SessionProfile) input.getAdapter(Profile.class);
 				profile.removeProfileChangeListener(this);
 			}
 			if (newInput instanceof ProfileEditorInput) {
 				ProfileEditorInput input = (ProfileEditorInput)newInput;
-				final Profile profile = (Profile) input.getAdapter(Profile.class);
+				SessionProfile profile = (SessionProfile) input.getAdapter(Profile.class);
 				profile.addProfileChangeListener(this);
-				// Place the loading profile in a thread to ensure
-				// it doesn't block the UI thread.
-				loadingThread = new Thread(new Runnable() {
-					public void run() {
-						((SessionProfile)profile).loadProfileFromStorage();
-					}
-				});
-				loadingThread.start();
 			}
 		}
 	}

@@ -2,6 +2,9 @@ package org.ddth.dinoage.core;
 
 
 /**
+ * Provider a simple interface which connects to
+ * an external logger.  
+ * 
  * @author khoa.nguyen
  *
  */

@@ -25,8 +25,7 @@ import org.ddth.http.core.connection.Request;
 public class YahooProfile extends SessionProfile implements RequestStorage {
 	
 	private static final String PROFILE_RECENT_URLS = "profile.recent.urls";
-	
-	private File folder;	
+
 	private YahooPersistence persistence;
 	private DataManager manager;
 	
@@ -38,6 +37,8 @@ public class YahooProfile extends SessionProfile implements RequestStorage {
 	private String guestbookURL;
 	private String friendsURL;
 
+	private Thread loadingThread;
+	
 	public YahooProfile() {
 	}
 
@@ -56,19 +57,14 @@ public class YahooProfile extends SessionProfile implements RequestStorage {
 	public String getFriendsURL() {
 		return friendsURL;
 	}
-
-	public File getFolder() {
-		return folder;
-	}
 	
 	public File getBlogFolder() {
-		return new File(folder, YahooPersistence.BLOG);
+		return new File(getFolder(), YahooPersistence.BLOG);
 	}
 	
 	@Override
 	public void load(File profileFile) throws IOException {
 		super.load(profileFile);
-		this.folder = profileFile.getParentFile();
 		this.persistence = new YahooPersistence(this);
 		this.manager = new DataManager(new YRawDataProvider(this));
 	}
@@ -101,12 +97,14 @@ public class YahooProfile extends SessionProfile implements RequestStorage {
 	}
 
 	public void add(YahooBlog blog) {
+		checkModifying();
+		this.blog = blog;
 		fireProfileChanged(
 				new ProfileChangeEvent(this, blog, ProfileChangeEvent.PROFILE_FIRST_LOADED));
-		this.blog = blog;
 	}
 
 	public void add(YahooBlogEntry entry) {
+		checkModifying();
 		if (blog != null) {
 			int type = ProfileChangeEvent.PROFILE_DELTA_CHANGED;
 			if (blog.addEntry(entry)) {
@@ -116,15 +114,50 @@ public class YahooProfile extends SessionProfile implements RequestStorage {
 		}
 	}
 
-	public void loadProfileFromStorage() {
+	private void checkModifying() {
+		if (!Thread.currentThread().equals(loadingThread)) {
+			stopLoading();			
+		}
+	}
+
+	private void stopLoading() {
+		// Brutally stop the loading thread =))
+		if (loadingThread != null && loadingThread.isAlive()) {
+			loadingThread.interrupt();
+			synchronized (this) {
+				while (loadingThread != null) {
+					try {
+						wait();
+					}
+					catch (InterruptedException e) {
+					}
+				}
+			}
+		}
+	}
+	
+	protected void stopAll() {
+		stopLoading();
+	}
+	
+	protected void loadAll() {
 		if (blog != null) {
 			fireProfileChanged(new ProfileChangeEvent(
 					this, blog, ProfileChangeEvent.PROFILE_FIRST_LOADED));
+			return;
 		}
-		else {
-			blog = manager.getBlog(profileId);
-			manager.getEntries(profileId);
-		}
+		// Place the loading profile in a thread to ensure
+		// it doesn't block calling thread.
+		loadingThread = new Thread(new Runnable() {
+			public void run() {
+				manager.getBlog(profileId);
+				loadingThread = null;
+				synchronized (YahooProfile.this) {
+					YahooProfile.this.notifyAll();
+				}
+			}
+		});
+		loadingThread.start();
 	}
 
 	@Override
