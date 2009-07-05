@@ -185,15 +185,17 @@ public abstract class ThreadPoolSession implements ConnectionListener, Session {
 			break;
 			
 		case ConnectionEvent.RESPONSE_RECEIVED:
-			// The request is done, the url is no longer needed 
-			// in queue.
-			queue.remove(event.getRequest().getURL());
 			logger.info("Handling: " + event.getRequest().getURL() + "...");
 			Content<?> content = dispatcher.handle(event.getRequest(), event.getResponse());
 			handle(event.getRequest(), content);
 			break;
 			
 		case ConnectionEvent.REQUEST_FINISHED:
+			// The request is done, the url is no longer needed 
+			// in queue. This must be called after calling handle,
+			// otherwise a REQUEST_FINISHED event might stop
+			// the processing.
+			queue.remove(event.getRequest().getURL());
 			// If queue is empty, means no items need to be retrieved,
 			// shutdown the session.
 			if (canFinish() && isRunning()) {
