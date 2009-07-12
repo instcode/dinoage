@@ -42,14 +42,22 @@ public class YahooBlogUtil {
 	private static Log logger = LogFactory.getLog(YBrowsingSession.class);
 
 	/**
-	 * This can parse date time similar to the following
-	 * sample: Monday December 24, 2007 - 11:36pm (ICT)
-	 * <br>
+	 * This can parse date time in the following ordered samples: 
+	 * <ul>
+	 * <li>Monday December 24, 2007 - 11:36pm (ICT)</li>
+	 * <li>Saturday 30 May 2009 - 05:39AM (CST)</li>
+	 * <li>Thu Jul 09 02:23am ICT</li>
+	 * <li>Sun 14 Jun 08:16AM ICT</li>
+	 * </ul>
 	 * Because {@link SimpleDateFormat} is not thread-safe,
-	 * the constant below only contains a parsing pattern.
+	 * the constant below only contains a parsing pattern. 
 	 */
-	private static final String BLOG_DATE_FORMAT = "EEEE MMMM d, y - HH:mma (z)";
-	private static final String GUESTBOOK_DATE_FORMAT = "EEE MMM dd HH:mma z";
+	private static final String[] DATE_FORMATS = {
+		"EEEE MMMM d, y - HH:mma (z)",
+		"EEEE d MMMM y - HH:mma (z)",
+		"EEE MMM dd HH:mma z",
+		"EEE dd MMM HH:mma z"
+	};
 	
 	/**
 	 * Pattern to extract post-id from tag-error-<b>#post-id</b>
@@ -246,23 +254,18 @@ public class YahooBlogUtil {
 			String spammer = "";
 			String spamContent = "";
 			long postId = guestbook.getPost().getPostId();
-			try {
-				for (int i = 0; i < comments.getLength(); i++) {
-					Comment blogComment = parseComment(authors.item(i), comments.item(i));
-					blogComment.setPostId(postId);
-					if (spammer.equals(blogComment.getAuthor().getName())) {
-						if (!spamContent.equals(blogComment.getContent())) {
-							guestbook.addComment(blogComment);
-						}
-					}
-					else {
-						spammer = blogComment.getAuthor().getName();
+			for (int i = 0; i < comments.getLength(); i++) {
+				Comment blogComment = parseComment(authors.item(i), comments.item(i));
+				blogComment.setPostId(postId);
+				if (spammer.equals(blogComment.getAuthor().getName())) {
+					if (!spamContent.equals(blogComment.getContent())) {
 						guestbook.addComment(blogComment);
 					}
 				}
-			}
-			catch (ParseException e) {
-				logger.debug("Error when parsing guestbook", e);
+				else {
+					spammer = blogComment.getAuthor().getName();
+					guestbook.addComment(blogComment);
+				}
 			}
 		}
 		return guestbook;
@@ -347,61 +350,57 @@ public class YahooBlogUtil {
 	 */
 	public static YahooBlogEntry parseEntry(Document doc) {
 		YahooBlogEntry blogEntry = null;
-		try {
-			Node entry = YahooBlogKey.YMGL_BLOG.getNode(doc);
-			BlogPost blogPost = parseBlogPost(entry);
-			Author author = parseYahooProfile(doc);
-			blogPost.setAuthor(author);
-			blogEntry = new YahooBlogEntry(blogPost);
-			blogEntry.setPopupURL(YahooBlogKey.BLOG_ENTRY_POPUP_URL.getText(entry));
-			String imageURL = YahooBlogKey.BLOG_ENTRY_LR_IMAGE.getText(entry);
-			blogEntry.setImageURL(imageURL);
+
+		Node entry = YahooBlogKey.YMGL_BLOG.getNode(doc);
+		BlogPost blogPost = parseBlogPost(entry);
+		Author author = parseYahooProfile(doc);
+		blogPost.setAuthor(author);
+		blogEntry = new YahooBlogEntry(blogPost);
+		blogEntry.setPopupURL(YahooBlogKey.BLOG_ENTRY_POPUP_URL.getText(entry));
+		String imageURL = YahooBlogKey.BLOG_ENTRY_LR_IMAGE.getText(entry);
+		blogEntry.setImageURL(imageURL);
+		
+		String nextURL = null;
+		Node comment = YahooBlogKey.BLOG_ENTRY_COMMENTS.getNode(doc);
+		if (comment != null) {
+			NodeList authors = YahooBlogKey.COMMENTS_AUTHOR.getNodeList(comment);
+			NodeList comments = YahooBlogKey.COMMENTS_COMMENT.getNodeList(comment);
 			
-			String nextURL = null;
-			Node comment = YahooBlogKey.BLOG_ENTRY_COMMENTS.getNode(doc);
-			if (comment != null) {
-				NodeList authors = YahooBlogKey.COMMENTS_AUTHOR.getNodeList(comment);
-				NodeList comments = YahooBlogKey.COMMENTS_COMMENT.getNodeList(comment);
-				
-				String spammer = "";
-				String spamContent = "";
-				int spamCount = 0;
-				long postId = blogEntry.getPost().getPostId();
-				for (int i = 0; i < comments.getLength(); i++) {
-					Comment blogComment = parseComment(authors.item(i), comments.item(i));
-					blogComment.setPostId(postId);
-					if (spammer.equals(blogComment.getAuthor().getName())) {
-						spamCount++;
-						if (!spamContent.equals(blogComment.getContent())) {
-							blogEntry.addComment(blogComment);
-						}
-					}
-					else {
-						spammer = blogComment.getAuthor().getName();
-						spamCount = 0;
+			String spammer = "";
+			String spamContent = "";
+			int spamCount = 0;
+			long postId = blogEntry.getPost().getPostId();
+			for (int i = 0; i < comments.getLength(); i++) {
+				Comment blogComment = parseComment(authors.item(i), comments.item(i));
+				blogComment.setPostId(postId);
+				if (spammer.equals(blogComment.getAuthor().getName())) {
+					spamCount++;
+					if (!spamContent.equals(blogComment.getContent())) {
 						blogEntry.addComment(blogComment);
 					}
 				}
-				if (spamCount < comments.getLength() - 1) {
-					nextURL = YahooBlogKey.BLOG_ENTRY_NEXT_PAGE.getText(entry);
+				else {
+					spammer = blogComment.getAuthor().getName();
+					spamCount = 0;
+					blogEntry.addComment(blogComment);
 				}
 			}
+			if (spamCount < comments.getLength() - 1) {
+				nextURL = YahooBlogKey.BLOG_ENTRY_NEXT_PAGE.getText(entry);
+			}
+		}
+		if (nextURL == null || nextURL.length() == 0) {
+			nextURL = YahooBlogKey.PREVIOUS_BLOG_ENTRY_URL.getText(entry);
+			// No more entry left, starting with guestbook
 			if (nextURL == null || nextURL.length() == 0) {
-				nextURL = YahooBlogKey.PREVIOUS_BLOG_ENTRY_URL.getText(entry);
-				// No more entry left, starting with guestbook
-				if (nextURL == null || nextURL.length() == 0) {
-					nextURL = YahooBlogAPI.YAHOO_360_GUESTBOOK_URL + author.getUserId();
-				}
+				nextURL = YahooBlogAPI.YAHOO_360_GUESTBOOK_URL + author.getUserId();
 			}
-			blogEntry.setNextURL(nextURL);
 		}
-		catch (ParseException e) {
-			logger.debug("Error", e);
-		}
+		blogEntry.setNextURL(nextURL);
 		return blogEntry;
 	}
 
-	private static BlogPost parseBlogPost(Node ymglBlog) throws ParseException {
+	private static BlogPost parseBlogPost(Node ymglBlog) {
 		BlogPost blogPost = new BlogPost();
 
 		String entryTag = YahooBlogKey.BLOG_ENTRY_TAG_ERROR_ID.getText(ymglBlog);
@@ -427,11 +426,25 @@ public class YahooBlogUtil {
 		blogPost.setTitle(title);
 		blogPost.setTags(buffer.toString());
 		blogPost.setContent(getRawText(body));
-		blogPost.setDate(new SimpleDateFormat(BLOG_DATE_FORMAT).parse(date));
+		blogPost.setDate(parseDate(date));
 		return blogPost;
 	}
-
-	private static Comment parseComment(Node author, Node comment) throws ParseException {
+	
+	private static Date parseDate(String time) {
+		Date date = new Date();
+		for (String format : DATE_FORMATS) {
+			try {
+				date = new SimpleDateFormat(format).parse(time);
+			}
+			catch (ParseException e) {
+				continue;
+			}
+			break;
+		}
+		return date;
+	}
+	
+	private static Comment parseComment(Node author, Node comment) {
 		String text = YahooBlogKey.COMMENTS_COMMENT_TEXT.getText(comment);
 		String time = YahooBlogKey.COMMENTS_COMMENT_DATE.getText(comment);
 
@@ -445,13 +458,7 @@ public class YahooBlogUtil {
 			author_photo = photo;
 		}
 
-		Date date = null;
-		try {
-			date = new SimpleDateFormat(BLOG_DATE_FORMAT).parse(time);
-		}
-		catch (ParseException e) {
-			date = new SimpleDateFormat(GUESTBOOK_DATE_FORMAT).parse(time);
-		}
+		Date date = parseDate(time);
 		return new Comment(new Author(userId, author_name, author_url, author_photo), text, date);
 	}
 	
