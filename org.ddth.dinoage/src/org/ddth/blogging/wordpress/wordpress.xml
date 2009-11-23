@@ -21,13 +21,11 @@
 		<wp:cat_name><![CDATA[Uncategorized]]></wp:cat_name>
 	</wp:category>
 #foreach($tag in $blog.tags)
-	<wp:tag>
-		<wp:tag_slug>$tag</wp:tag_slug>
-		<wp:tag_name><![CDATA[$tag]]></wp:tag_name>
-	</wp:tag>
+	<wp:tag><wp:tag_slug>$tag</wp:tag_slug><wp:tag_name><![CDATA[$tag]]></wp:tag_name></wp:tag>
 #end
 #foreach($author in $blog.authors)
-	<image><url>$author.avatar</url>
+	<image>
+		<url>$author.avatar</url>
 		<title>$author.name</title>
 		<link>$author.url</link>
 	</image>

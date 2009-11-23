@@ -63,6 +63,9 @@ public class HTMLNodeBuilder {
 					writer.append("=\"" + attribute.getNodeValue());
 					writer.append('"');
 				}
+				if ("img".equalsIgnoreCase(nodeName)) {
+					writer.append(" alt=\"\"");
+				}
 			}
 			NodeList children = node.getChildNodes();
 			if (nodeValue == null && children.getLength() == 0) {

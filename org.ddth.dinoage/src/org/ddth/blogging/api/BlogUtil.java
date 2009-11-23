@@ -56,6 +56,10 @@ public class BlogUtil {
 		return formatter.format(date);
 	}
 	
+	public static String[] getTags(BlogPost post) {
+		return post.getTags().split(", ");
+	}
+	
 	/**
 	 * Rebuild all entries, comments of the given blog. All authors of
 	 * entries will be replaced with the blog author. All comments if
