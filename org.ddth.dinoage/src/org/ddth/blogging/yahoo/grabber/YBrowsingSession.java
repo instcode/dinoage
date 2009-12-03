@@ -14,6 +14,7 @@ import org.ddth.blogging.yahoo.YahooBlog;
 import org.ddth.blogging.yahoo.YahooBlogAPI;
 import org.ddth.blogging.yahoo.YahooBlogEntry;
 import org.ddth.dinoage.core.BrowsingSession;
+import org.ddth.dinoage.core.LocalStorage;
 import org.ddth.dinoage.core.Profile;
 import org.ddth.dinoage.core.ProfileFactory;
 import org.ddth.http.core.connection.Request;
@@ -88,12 +89,14 @@ public class YBrowsingSession extends BrowsingSession {
 			// will be supposed of being a valid cache and prohibit the
 			// browsing session from retrieving the expected content.
 			if (entry.getEntryId() == 0 && entry.getComments().size() == 0) {
-				profile.getLocalStorage().getLocalResource(new Request(entry.getNextURL())).delete();
+				Request request = new Request(entry.getNextURL());
+				request.getParameters().put(LocalStorage.RESOURCE_EXPIRED_ATTR, "");
+				queue(request);
 			}
 			else {
 				profile.add(entry);
+				requestURL = entry.getNextURL();
 			}
-			requestURL = entry.getNextURL();
 		}
 		else if (content instanceof YEntryImageContent) {
 			YEntryImageContent entryImageContent = (YEntryImageContent) content;
